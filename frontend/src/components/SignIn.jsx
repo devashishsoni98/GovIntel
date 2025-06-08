@@ -1,10 +1,17 @@
-import { useState } from "react"
-import { Shield, Mail, Lock, User, Eye, EyeOff, ArrowRight, Building, Phone } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
+import { Shield, Mail, Lock, User, Eye, EyeOff, ArrowRight, Building, Phone, Users } from "lucide-react"
+import { loginUser, registerUser, clearError, USER_ROLES } from "../redux/slices/authSlice"
 
 const NAVBAR_HEIGHT_MOBILE = 56 // px
 const NAVBAR_HEIGHT_DESKTOP = 72 // px
 
 const SignIn = () => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth)
+
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -16,7 +23,20 @@ const SignIn = () => {
     confirmPassword: "",
     department: "",
     phone: "",
+    role: USER_ROLES.CITIZEN, // Default role
   })
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard")
+    }
+  }, [isAuthenticated, navigate])
+
+  // Clear error when component mounts or form switches
+  useEffect(() => {
+    dispatch(clearError())
+  }, [dispatch, isLogin])
 
   const handleInputChange = (e) => {
     setFormData({
@@ -25,16 +45,66 @@ const SignIn = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Handle form submission logic here
-    console.log("Form submitted:", formData)
+    dispatch(clearError())
+
+    if (isLogin) {
+      // Login
+      const result = await dispatch(
+        loginUser({
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
+      )
+
+      if (loginUser.fulfilled.match(result)) {
+        navigate("/dashboard")
+      }
+    } else {
+      // Registration
+      if (formData.password !== formData.confirmPassword) {
+        // Handle password mismatch
+        return
+      }
+
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        ...(formData.role === USER_ROLES.OFFICER && {
+          department: formData.department,
+          phone: formData.phone,
+        }),
+        ...(formData.role === USER_ROLES.CITIZEN && {
+          phone: formData.phone,
+        }),
+      }
+
+      const result = await dispatch(registerUser(userData))
+
+      if (registerUser.fulfilled.match(result)) {
+        navigate("/dashboard")
+      }
+    }
   }
 
   const toggleForm = () => {
     setIsAnimating(true)
     setTimeout(() => {
       setIsLogin(!isLogin)
+      // Reset form data when switching
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        department: "",
+        phone: "",
+        role: USER_ROLES.CITIZEN,
+      })
       setTimeout(() => {
         setIsAnimating(false)
       }, 50)
@@ -45,6 +115,19 @@ const SignIn = () => {
   const formClasses = `transition-all duration-500 ease-in-out ${
     isAnimating ? "opacity-0 transform translate-y-4" : "opacity-100 transform translate-y-0"
   }`
+
+  const getRoleDisplayName = (role) => {
+    switch (role) {
+      case USER_ROLES.CITIZEN:
+        return "Citizen"
+      case USER_ROLES.OFFICER:
+        return "Government Officer"
+      case USER_ROLES.ADMIN:
+        return "Administrator"
+      default:
+        return "Citizen"
+    }
+  }
 
   return (
     <div
@@ -119,9 +202,39 @@ const SignIn = () => {
               </button>
             </div>
 
+            {/* Error Display */}
+            {error && (
+              <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
             {/* Form */}
             <div className={formClasses}>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Role Selection */}
+                <div>
+                  <label htmlFor="role" className="block text-sm font-medium text-slate-300 mb-2">
+                    I am a
+                  </label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <select
+                      id="role"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+                      required
+                    >
+                      <option value={USER_ROLES.CITIZEN}>Citizen</option>
+                      <option value={USER_ROLES.OFFICER}>Government Officer</option>
+                      {/* Only show Admin option during login, not registration */}
+                      {isLogin && <option value={USER_ROLES.ADMIN}>Administrator</option>}
+                    </select>
+                  </div>
+                </div>
+
                 {/* Name Field (Sign Up Only) */}
                 {!isLogin && (
                   <div>
@@ -144,8 +257,8 @@ const SignIn = () => {
                   </div>
                 )}
 
-                {/* Department Field (Sign Up Only) */}
-                {!isLogin && (
+                {/* Department Field (Sign Up Only - Officers) */}
+                {!isLogin && formData.role === USER_ROLES.OFFICER && (
                   <div>
                     <label htmlFor="department" className="block text-sm font-medium text-slate-300 mb-2">
                       Department
@@ -158,7 +271,7 @@ const SignIn = () => {
                         value={formData.department}
                         onChange={handleInputChange}
                         className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
-                        required={!isLogin}
+                        required={!isLogin && formData.role === USER_ROLES.OFFICER}
                       >
                         <option value="">Select your department</option>
                         <option value="municipal">Municipal Corporation</option>
@@ -173,8 +286,8 @@ const SignIn = () => {
                   </div>
                 )}
 
-                {/* Phone Field (Sign Up Only) */}
-                {!isLogin && (
+                {/* Phone Field (Sign Up Only - Citizens and Officers) */}
+                {!isLogin && (formData.role === USER_ROLES.CITIZEN || formData.role === USER_ROLES.OFFICER) && (
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-slate-300 mb-2">
                       Phone Number
@@ -189,7 +302,9 @@ const SignIn = () => {
                         onChange={handleInputChange}
                         className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
                         placeholder="Enter your phone number"
-                        required={!isLogin}
+                        required={
+                          !isLogin && (formData.role === USER_ROLES.CITIZEN || formData.role === USER_ROLES.OFFICER)
+                        }
                       />
                     </div>
                   </div>
@@ -305,10 +420,17 @@ const SignIn = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="group w-full bg-gradient-to-r from-purple-500 to-blue-500 py-3 px-4 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 flex items-center justify-center"
+                  disabled={loading}
+                  className="group w-full bg-gradient-to-r from-purple-500 to-blue-500 py-3 px-4 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {isLogin ? "Sign In" : "Create Account"}
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  {loading ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>
+                      {isLogin ? "Sign In" : "Create Account"}
+                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
                 </button>
               </form>
             </div>

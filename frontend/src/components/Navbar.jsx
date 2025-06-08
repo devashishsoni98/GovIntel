@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
 import {
   Shield,
   Menu,
@@ -16,9 +17,18 @@ import {
   Phone,
   Building,
   Database,
+  Users,
+  BarChart3,
+  MessageSquare,
 } from "lucide-react"
+import { logoutUser, selectUser, selectIsAuthenticated, USER_ROLES } from "../redux/slices/authSlice"
 
 const Navbar = () => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const user = useSelector(selectUser)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -56,56 +66,133 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
 
-  // Navigation options
-  const navigationItems = [
-    {
-      name: "Dashboard",
-      href: "/dashboard",
-      icon: <Shield className="w-4 h-4" />,
-    },
-    {
-      name: "Reports",
-      href: "#",
-      icon: <FileText className="w-4 h-4" />,
-      dropdown: [
-        { name: "Monthly Reports", href: "/reports/monthly", icon: <Calendar className="w-4 h-4" /> },
-        { name: "Department Reports", href: "/reports/departments", icon: <Building className="w-4 h-4" /> },
-        { name: "Custom Reports", href: "/reports/custom", icon: <Settings className="w-4 h-4" /> },
-        { name: "Export Data", href: "/reports/export", icon: <Database className="w-4 h-4" /> },
-      ],
-    },
-    {
-      name: "Sign In",
-      href: "/signin",
-      icon: <LogOut className="w-4 h-4" />,
-    },
-  ]
+  const handleLogout = async () => {
+    await dispatch(logoutUser())
+    navigate("/signin")
+  }
+
+  const getRoleDisplayName = (role) => {
+    switch (role) {
+      case USER_ROLES.CITIZEN:
+        return "Citizen"
+      case USER_ROLES.OFFICER:
+        return "Government Officer"
+      case USER_ROLES.ADMIN:
+        return "Administrator"
+      default:
+        return "User"
+    }
+  }
+
+  const getRoleBasedNavigation = () => {
+    const baseItems = [
+      {
+        name: "Dashboard",
+        href: "/dashboard",
+        icon: <Shield className="w-4 h-4" />,
+      },
+    ]
+
+    if (user?.role === USER_ROLES.CITIZEN) {
+      return [
+        ...baseItems,
+        {
+          name: "My Grievances",
+          href: "/my-grievances",
+          icon: <MessageSquare className="w-4 h-4" />,
+        },
+        {
+          name: "Submit Complaint",
+          href: "/submit-complaint",
+          icon: <FileText className="w-4 h-4" />,
+        },
+      ]
+    }
+
+    if (user?.role === USER_ROLES.OFFICER) {
+      return [
+        ...baseItems,
+        {
+          name: "Assigned Cases",
+          href: "/assigned-cases",
+          icon: <FileText className="w-4 h-4" />,
+        },
+        {
+          name: "Reports",
+          href: "#",
+          icon: <BarChart3 className="w-4 h-4" />,
+          dropdown: [
+            { name: "Department Reports", href: "/reports/department", icon: <Building className="w-4 h-4" /> },
+            { name: "Monthly Reports", href: "/reports/monthly", icon: <Calendar className="w-4 h-4" /> },
+            { name: "Performance Reports", href: "/reports/performance", icon: <BarChart3 className="w-4 h-4" /> },
+          ],
+        },
+      ]
+    }
+
+    if (user?.role === USER_ROLES.ADMIN) {
+      return [
+        ...baseItems,
+        {
+          name: "User Management",
+          href: "/user-management",
+          icon: <Users className="w-4 h-4" />,
+        },
+        {
+          name: "Reports",
+          href: "#",
+          icon: <BarChart3 className="w-4 h-4" />,
+          dropdown: [
+            { name: "System Reports", href: "/reports/system", icon: <Database className="w-4 h-4" /> },
+            { name: "Department Reports", href: "/reports/departments", icon: <Building className="w-4 h-4" /> },
+            { name: "Monthly Reports", href: "/reports/monthly", icon: <Calendar className="w-4 h-4" /> },
+            { name: "Custom Reports", href: "/reports/custom", icon: <Settings className="w-4 h-4" /> },
+            { name: "Export Data", href: "/reports/export", icon: <Database className="w-4 h-4" /> },
+          ],
+        },
+        {
+          name: "Analytics",
+          href: "/analytics",
+          icon: <BarChart3 className="w-4 h-4" />,
+        },
+      ]
+    }
+
+    return baseItems
+  }
+
+  // Navigation items based on authentication and role
+  const navigationItems = isAuthenticated
+    ? getRoleBasedNavigation()
+    : [
+        {
+          name: "Sign In",
+          href: "/signin",
+          icon: <LogOut className="w-4 h-4" />,
+        },
+      ]
 
   const userMenuItems = [
     { name: "Profile", href: "/profile", icon: <User className="w-4 h-4" /> },
     { name: "Settings", href: "/settings", icon: <Settings className="w-4 h-4" /> },
     { name: "Help Center", href: "/help", icon: <HelpCircle className="w-4 h-4" /> },
     { name: "Contact Support", href: "/contact", icon: <Phone className="w-4 h-4" /> },
-    { name: "Sign Out", href: "/signin", icon: <LogOut className="w-4 h-4" /> },
   ]
 
   return (
     <>
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-slate-900/80 backdrop-blur-lg border-b border-slate-700/50 shadow-2xl"
-            : "bg-transparent"
+          isScrolled ? "bg-slate-900/80 backdrop-blur-lg border-b border-slate-700/50 shadow-2xl" : "bg-transparent"
         }`}
       >
         <div className="max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
           <div className="flex justify-between items-center py-2 sm:py-3 md:py-4 gap-x-2">
-            {/* Logo (text only on xl and above) */}
+            {/* Logo */}
             <Link to="/" className="flex items-center gap-x-2 group cursor-pointer min-w-0">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              {/* Only show text on xl and up */}
               <span className="hidden xl:inline text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent truncate">
                 GovIntel
               </span>
@@ -168,80 +255,88 @@ const Navbar = () => {
             </div>
 
             {/* Right Side Items (only ≥xl: 1280px) */}
-            <div className="hidden xl:flex items-center gap-x-3 2xl:gap-x-4 min-w-0">
-              {/* Search Bar */}
-              <div className="relative min-w-0">
-                <div
-                  className={`flex items-center bg-slate-700/50 border border-slate-600/50 rounded-xl transition-all duration-300 ${
-                    isSearchFocused ? "ring-2 ring-purple-500/50 border-purple-500/50 w-56 xl:w-80" : "w-40 xl:w-64"
-                  }`}
-                >
-                  <Search className="w-5 h-5 text-slate-400 ml-3" />
-                  <input
-                    type="text"
-                    placeholder="Search grievances, reports..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setIsSearchFocused(true)}
-                    onBlur={() => setIsSearchFocused(false)}
-                    className="w-full px-2 py-2 bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm"
-                  />
-                </div>
-              </div>
-
-              {/* Notifications */}
-              <button className="relative p-2 text-slate-400 hover:text-white transition-colors duration-300 hover:bg-slate-700/50 rounded-lg">
-                <Bell className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </button>
-
-              {/* User Profile Dropdown */}
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => toggleDropdown("user")}
-                  className="flex items-center gap-x-2 p-2 text-slate-300 hover:text-white transition-colors duration-300 hover:bg-slate-700/50 rounded-lg"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-300 ${
-                      activeDropdown === "user" ? "rotate-180" : ""
+            {isAuthenticated && (
+              <div className="hidden xl:flex items-center gap-x-3 2xl:gap-x-4 min-w-0">
+                {/* Search Bar */}
+                <div className="relative min-w-0">
+                  <div
+                    className={`flex items-center bg-slate-700/50 border border-slate-600/50 rounded-xl transition-all duration-300 ${
+                      isSearchFocused ? "ring-2 ring-purple-500/50 border-purple-500/50 w-56 xl:w-80" : "w-40 xl:w-64"
                     }`}
-                  />
+                  >
+                    <Search className="w-5 h-5 text-slate-400 ml-3" />
+                    <input
+                      type="text"
+                      placeholder="Search grievances, reports..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => setIsSearchFocused(true)}
+                      onBlur={() => setIsSearchFocused(false)}
+                      className="w-full px-2 py-2 bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Notifications */}
+                <button className="relative p-2 text-slate-400 hover:text-white transition-colors duration-300 hover:bg-slate-700/50 rounded-lg">
+                  <Bell className="w-6 h-6" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                 </button>
 
-                {/* User Dropdown Menu */}
-                <div
-                  className={`absolute top-full right-0 mt-2 w-56 bg-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl transition-all duration-300 z-50 ${
-                    activeDropdown === "user"
-                      ? "opacity-100 visible transform translate-y-0"
-                      : "opacity-0 invisible transform -translate-y-2"
-                  }`}
-                >
-                  <div className="py-2">
-                    <div className="px-4 py-2 border-b border-slate-700/50">
-                      <p className="text-white font-medium text-sm">John Doe</p>
-                      <p className="text-slate-400 text-xs">Municipal Administrator</p>
+                {/* User Profile Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => toggleDropdown("user")}
+                    className="flex items-center gap-x-2 p-2 text-slate-300 hover:text-white transition-colors duration-300 hover:bg-slate-700/50 rounded-lg"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-white" />
                     </div>
-                    {userMenuItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        className={`flex items-center gap-x-3 px-4 py-2 transition-all duration-200 text-sm ${
-                          item.name === "Sign Out"
-                            ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-                        }`}
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform duration-300 ${
+                        activeDropdown === "user" ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {/* User Dropdown Menu */}
+                  <div
+                    className={`absolute top-full right-0 mt-2 w-56 bg-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl transition-all duration-300 z-50 ${
+                      activeDropdown === "user"
+                        ? "opacity-100 visible transform translate-y-0"
+                        : "opacity-0 invisible transform -translate-y-2"
+                    }`}
+                  >
+                    <div className="py-2">
+                      <div className="px-4 py-2 border-b border-slate-700/50">
+                        <p className="text-white font-medium text-sm">{user?.name || "User"}</p>
+                        <p className="text-slate-400 text-xs">{getRoleDisplayName(user?.role)}</p>
+                        {user?.department && (
+                          <p className="text-slate-400 text-xs capitalize">{user.department} Department</p>
+                        )}
+                      </div>
+                      {userMenuItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className="flex items-center gap-x-3 px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 text-sm"
+                        >
+                          {item.icon}
+                          <span>{item.name}</span>
+                        </Link>
+                      ))}
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-x-3 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 text-sm"
                       >
-                        {item.icon}
-                        <span>{item.name}</span>
-                      </Link>
-                    ))}
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Hamburger Menu (≤lg: 1024px and below) */}
             <div className="flex xl:hidden items-center">
@@ -257,7 +352,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay (z-[100] to be above everything) */}
+      {/* Mobile Menu Overlay */}
       <div
         className={`fixed inset-0 z-[100] xl:hidden transition-all duration-500 ${
           isMobileMenuOpen ? "visible" : "invisible"
@@ -270,6 +365,7 @@ const Navbar = () => {
           }`}
           onClick={toggleMobileMenu}
         ></div>
+
         {/* Mobile Menu Panel */}
         <div
           className={`absolute top-0 left-0 h-full w-72 max-w-[90vw] bg-slate-900/95 backdrop-blur-xl border-r border-slate-700/50 shadow-2xl transform transition-transform duration-500 ease-in-out ${
@@ -279,11 +375,7 @@ const Navbar = () => {
           <div className="flex flex-col h-full">
             {/* Mobile Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
-              <Link
-                to="/"
-                className="flex items-center gap-x-2 min-w-0"
-                onClick={toggleMobileMenu}
-              >
+              <Link to="/" className="flex items-center gap-x-2 min-w-0" onClick={toggleMobileMenu}>
                 <div className="w-7 h-7 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
@@ -301,16 +393,18 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Search */}
-            <div className="p-3 border-b border-slate-700/50">
-              <div className="flex items-center bg-slate-700/50 border border-slate-600/50 rounded-xl">
-                <Search className="w-5 h-5 text-slate-400 ml-2" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="w-full px-2 py-2 bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm"
-                />
+            {isAuthenticated && (
+              <div className="p-3 border-b border-slate-700/50">
+                <div className="flex items-center bg-slate-700/50 border border-slate-600/50 rounded-xl">
+                  <Search className="w-5 h-5 text-slate-400 ml-2" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-full px-2 py-2 bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Mobile Navigation */}
             <div className="flex-1 overflow-y-auto py-2">
@@ -337,9 +431,6 @@ const Navbar = () => {
                         className={`pl-10 pr-2 transition-all duration-300 overflow-hidden ${
                           activeDropdown === `mobile-${item.name}` ? "max-h-96 py-1" : "max-h-0 py-0"
                         }`}
-                        style={{
-                          transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)",
-                        }}
                       >
                         {item.dropdown.map((dropdownItem) => (
                           <Link
@@ -368,32 +459,40 @@ const Navbar = () => {
               ))}
 
               {/* User Menu in Mobile */}
-              <div className="mt-4 border-t border-slate-700/50">
-                <div className="flex items-center gap-x-2 px-5 py-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
+              {isAuthenticated && (
+                <div className="mt-4 border-t border-slate-700/50">
+                  <div className="flex items-center gap-x-2 px-5 py-4">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white font-medium text-sm">{user?.name || "User"}</p>
+                      <p className="text-slate-400 text-xs">{getRoleDisplayName(user?.role)}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-white font-medium text-sm">John Doe</p>
-                    <p className="text-slate-400 text-xs">Municipal Administrator</p>
-                  </div>
-                </div>
-                {userMenuItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`flex items-center gap-x-3 px-5 py-3 transition-all duration-200 text-base ${
-                      item.name === "Sign Out"
-                        ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                        : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-                    }`}
-                    onClick={toggleMobileMenu}
+                  {userMenuItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className="flex items-center gap-x-3 px-5 py-3 text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 text-base"
+                      onClick={toggleMobileMenu}
+                    >
+                      {item.icon}
+                      <span>{item.name}</span>
+                    </Link>
+                  ))}
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      toggleMobileMenu()
+                    }}
+                    className="w-full flex items-center gap-x-3 px-5 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 text-base"
                   >
-                    {item.icon}
-                    <span>{item.name}</span>
-                  </Link>
-                ))}
-              </div>
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
