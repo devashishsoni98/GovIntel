@@ -1,8 +1,18 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { Shield, Mail, Lock, User, Eye, EyeOff, ArrowRight, Building, Phone, Users } from "lucide-react"
-import { loginUser, registerUser, clearError, USER_ROLES } from "../redux/slices/authSlice"
+import {
+  loginUser,
+  registerUser,
+  clearError,
+  USER_ROLES,
+  selectAuthLoading,
+  selectAuthError,
+  selectIsAuthenticated,
+} from "../redux/slices/authSlice"
 
 const NAVBAR_HEIGHT_MOBILE = 56 // px
 const NAVBAR_HEIGHT_DESKTOP = 72 // px
@@ -10,7 +20,9 @@ const NAVBAR_HEIGHT_DESKTOP = 72 // px
 const SignIn = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth)
+  const loading = useSelector(selectAuthLoading)
+  const error = useSelector(selectAuthError)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
 
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
