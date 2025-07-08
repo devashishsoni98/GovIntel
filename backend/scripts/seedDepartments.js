@@ -11,7 +11,7 @@ const departments = [
     categories: ["infrastructure", "sanitation", "water_supply", "electricity", "other"],
     contactInfo: {
       email: "municipal@city.gov",
-      phone: "1234567899",
+      phone: "+91-11-12345678",
       address: {
         street: "City Hall, Main Street",
         city: "New Delhi",
@@ -32,7 +32,7 @@ const departments = [
     categories: ["healthcare"],
     contactInfo: {
       email: "health@city.gov",
-      phone: "1234567899",
+      phone: "+91-11-12345679",
       address: {
         street: "Health Secretariat, Medical Complex",
         city: "New Delhi",
@@ -53,7 +53,7 @@ const departments = [
     categories: ["education"],
     contactInfo: {
       email: "education@city.gov",
-      phone: "1234567899",
+      phone: "+91-11-12345680",
       address: {
         street: "Education Bhawan, Academic Road",
         city: "New Delhi",
@@ -74,7 +74,7 @@ const departments = [
     categories: ["transportation"],
     contactInfo: {
       email: "transport@city.gov",
-      phone: "1234567899",
+      phone: "+91-11-12345681",
       address: {
         street: "Transport Bhawan, Highway Circle",
         city: "New Delhi",
@@ -95,7 +95,7 @@ const departments = [
     categories: ["police"],
     contactInfo: {
       email: "police@city.gov",
-      phone: "1234567899",
+      phone: "+91-11-100",
       address: {
         street: "Police Headquarters, Central District",
         city: "New Delhi",
@@ -116,7 +116,7 @@ const departments = [
     categories: ["revenue"],
     contactInfo: {
       email: "revenue@city.gov",
-      phone: "1234567899",
+      phone: "+91-11-12345682",
       address: {
         street: "Revenue Secretariat, Finance Complex",
         city: "New Delhi",
