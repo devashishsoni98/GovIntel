@@ -36,7 +36,7 @@ const AdminDashboard = () => {
       setError("")
 
       // Fetch grievance analytics
-      const analyticsResponse = await fetch("/api/grievances/analytics/dashboard", {
+      const analyticsResponse = await fetch("/api/analytics/dashboard", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -51,43 +51,22 @@ const AdminDashboard = () => {
             ...prev,
             ...analyticsData.data.summary,
           }))
-          // Fix: Use categoryStats instead of categoryDistribution
+          
+          // Set department and category stats
           setDepartmentStats(analyticsData.data.categoryStats || [])
+          
+          // Set user stats if available
+          if (analyticsData.data.userStats) {
+            setStats((prev) => ({
+              ...prev,
+              totalUsers: analyticsData.data.userStats.total || 0,
+              totalOfficers: analyticsData.data.userStats.officers || 0,
+              totalCitizens: analyticsData.data.userStats.citizens || 0,
+            }))
+          }
         }
       } else {
         console.error("Analytics API error:", analyticsResponse.status)
-      }
-
-      // Fetch user stats (this endpoint might not exist, so we'll handle the error)
-      try {
-        const usersResponse = await fetch("/api/users/stats", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json()
-          if (usersData.success && usersData.data) {
-            setStats((prev) => ({
-              ...prev,
-              totalUsers: usersData.data.totalUsers || 0,
-              totalOfficers: usersData.data.totalOfficers || 0,
-              totalCitizens: usersData.data.totalCitizens || 0,
-            }))
-          }
-        } else {
-          console.log("User stats API not available, using default values")
-          // Set some default values if the endpoint doesn't exist
-          setStats((prev) => ({
-            ...prev,
-            totalUsers: 0,
-            totalOfficers: 0,
-            totalCitizens: 0,
-          }))
-        }
-      } catch (userStatsError) {
-        console.log("User stats endpoint not available:", userStatsError)
       }
 
       // Fetch recent grievances for activity
@@ -101,7 +80,6 @@ const AdminDashboard = () => {
         const grievancesData = await grievancesResponse.json()
         console.log("Admin Grievances data:", grievancesData)
 
-        // Fix: Access grievancesData.data directly
         if (grievancesData.success && grievancesData.data) {
           setRecentActivity(Array.isArray(grievancesData.data) ? grievancesData.data : [])
         }

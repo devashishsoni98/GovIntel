@@ -4,6 +4,8 @@ const path = require("path");
 const fs = require("fs");
 const Grievance = require("../models/Grievance");
 const auth = require("../middleware/auth");
+const AIAnalysisEngine = require("../utils/aiAnalysis");
+const SmartRoutingEngine = require("../utils/smartRouting");
 
 const router = express.Router();
 
@@ -271,8 +273,51 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
     const grievance = new Grievance(grievanceData);
     await grievance.save();
 
+    // Perform AI analysis and smart routing
+    try {
+      // AI Analysis
+      const analysisResult = await AIAnalysisEngine.analyzeGrievance(
+        grievance.title,
+        grievance.description,
+        grievance.category
+      );
+
+      // Update grievance with AI analysis
+      grievance.aiAnalysis = {
+        sentiment: analysisResult.sentiment,
+        urgencyScore: analysisResult.urgencyScore,
+        keywords: analysisResult.keywords,
+        suggestedDepartment: analysisResult.suggestedDepartment,
+        confidence: analysisResult.confidence
+      };
+
+      // Update priority based on AI urgency analysis
+      if (analysisResult.urgencyLevel === 'urgent' && grievance.priority !== 'urgent') {
+        grievance.priority = 'urgent';
+      } else if (analysisResult.urgencyLevel === 'high' && grievance.priority === 'medium') {
+        grievance.priority = 'high';
+      }
+
+      await grievance.save();
+
+      // Smart routing - auto-assign to best officer
+      const routingResult = await SmartRoutingEngine.autoAssignGrievance(grievance._id);
+      
+      if (routingResult.success) {
+        console.log("Auto-assignment successful:", routingResult.routing.assignedOfficer.name);
+      } else {
+        console.log("Auto-assignment failed:", routingResult.error);
+      }
+
+    } catch (aiError) {
+      console.error("AI/Routing error (non-blocking):", aiError);
+      // Continue without AI analysis if it fails
+    }
     // Populate the citizen field for response
-    await grievance.populate("citizen", "name email");
+    await grievance.populate([
+      { path: "citizen", select: "name email" },
+      { path: "assignedOfficer", select: "name email department" }
+    ]);
 
     res.status(201).json({
       success: true,
@@ -294,6 +339,143 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
     res.status(400).json({
       success: false,
       message: error.message || "Failed to create grievance",
+    });
+  }
+});
+
+// @route   POST /api/grievances/:id/analyze
+// @desc    Re-run AI analysis on a grievance
+// @access  Private (Officer/Admin)
+router.post("/:id/analyze", auth, async (req, res) => {
+  try {
+    if (req.user.role === "citizen") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Only officers and admins can trigger analysis."
+      });
+    }
+
+    const result = await AIAnalysisEngine.updateGrievanceWithAnalysis(req.params.id);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: "AI analysis completed successfully",
+        data: {
+          grievance: result.grievance,
+          analysis: result.analysis
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error("Manual AI analysis error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to perform AI analysis"
+    });
+  }
+});
+
+// @route   POST /api/grievances/:id/reassign
+// @desc    Reassign grievance to different officer
+// @access  Private (Admin only)
+router.post("/:id/reassign", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin privileges required."
+      });
+    }
+
+    const { officerId } = req.body;
+    
+    if (!officerId) {
+      return res.status(400).json({
+        success: false,
+        message: "Officer ID is required"
+      });
+    }
+
+    const result = await SmartRoutingEngine.reassignGrievance(
+      req.params.id,
+      officerId,
+      req.user.id
+    );
+
+    if (result.success) {
+      await result.grievance.populate([
+        { path: "citizen", select: "name email" },
+        { path: "assignedOfficer", select: "name email department" }
+      ]);
+
+      res.json({
+        success: true,
+        message: result.message,
+        data: result.grievance
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error("Reassign grievance error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to reassign grievance"
+    });
+  }
+});
+
+// @route   POST /api/grievances/:id/auto-assign
+// @desc    Trigger auto-assignment for unassigned grievance
+// @access  Private (Officer/Admin)
+router.post("/:id/auto-assign", auth, async (req, res) => {
+  try {
+    if (req.user.role === "citizen") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied"
+      });
+    }
+
+    const result = await SmartRoutingEngine.autoAssignGrievance(req.params.id);
+    
+    if (result.success) {
+      await result.grievance.populate([
+        { path: "citizen", select: "name email" },
+        { path: "assignedOfficer", select: "name email department" }
+      ]);
+
+      res.json({
+        success: true,
+        message: "Auto-assignment completed successfully",
+        data: {
+          grievance: result.grievance,
+          routing: result.routing
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error("Auto-assign error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to auto-assign grievance"
     });
   }
 });
@@ -340,8 +522,8 @@ router.get("/", auth, async (req, res) => {
 
     // Get grievances with pagination
     const grievances = await Grievance.find(filter)
-      .populate("citizen", "name email")
-      .populate("assignedOfficer", "name email")
+      .populate("citizen", "name email phone")
+      .populate("assignedOfficer", "name email department")
       .sort({ [sortBy]: sortOrder === "desc" ? -1 : 1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -374,8 +556,9 @@ router.get("/", auth, async (req, res) => {
 router.get("/:id", auth, async (req, res) => {
   try {
     const grievance = await Grievance.findById(req.params.id)
-      .populate("citizen", "name email")
-      .populate("assignedOfficer", "name email");
+      .populate("citizen", "name email phone")
+      .populate("assignedOfficer", "name email department")
+      .populate("updates.updatedBy", "name email");
 
     if (!grievance) {
       return res.status(404).json({
@@ -469,8 +652,11 @@ router.patch("/:id/status", auth, async (req, res) => {
 
     await grievance.save();
 
-    await grievance.populate("citizen", "name email");
-    await grievance.populate("assignedOfficer", "name email");
+    await grievance.populate([
+      { path: "citizen", select: "name email" },
+      { path: "assignedOfficer", select: "name email department" },
+      { path: "updates.updatedBy", select: "name email" }
+    ]);
 
     res.json({
       success: true,

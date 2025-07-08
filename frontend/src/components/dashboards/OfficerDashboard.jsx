@@ -33,7 +33,7 @@ const OfficerDashboard = () => {
       setError("")
 
       // Fetch analytics
-      const analyticsResponse = await fetch("/api/grievances/analytics/dashboard", {
+      const analyticsResponse = await fetch("/api/analytics/dashboard", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
