@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard"
 import SubmitComplaint from "./pages/SubmitComplaint"
 import MyGrievances from "./pages/MyGrievances"
 import Analytics from "./pages/Analytics"
+import GrievanceDetail from "./pages/GrievanceDetail"
 
 // Make sure to import your CSS file that includes Tailwind
 import "./index.css"
@@ -54,6 +55,16 @@ function AppContent() {
               element={
                 <ProtectedRoute allowedRoles={[USER_ROLES.CITIZEN]}>
                   <SubmitComplaint />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Grievance Detail Route (All authenticated users) */}
+            <Route
+              path="/grievance/:id"
+              element={
+                <ProtectedRoute>
+                  <GrievanceDetail />
                 </ProtectedRoute>
               }
             />
