@@ -287,7 +287,7 @@ const startServer = async () => {
       console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`)
       console.log("=".repeat(50))
       console.log("🔐 Test Accounts:")
-      console.log("   Admin: admin@gmail.com / 12345")
+      console.log("   Admin: admin@gmail.com / 123456")
       console.log("   Citizen: citizen@example.com / password123")
       console.log("   Officer: officer@municipal.gov / password123")
       console.log("=".repeat(50))
