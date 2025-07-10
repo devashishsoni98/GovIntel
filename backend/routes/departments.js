@@ -6,6 +6,28 @@ const auth = require("../middleware/auth")
 
 const router = express.Router()
 
+// @route   GET /api/departments/active
+// @desc    Get all active departments for officer registration
+// @access  Public
+router.get("/active", async (req, res) => {
+  try {
+    const departments = await Department.find({ isActive: true })
+      .select("name code description")
+      .sort({ name: 1 })
+
+    res.json({
+      success: true,
+      data: departments
+    })
+  } catch (error) {
+    console.error("Get active departments error:", error)
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch departments"
+    })
+  }
+})
+
 // @route   GET /api/departments
 // @desc    Get all departments
 // @access  Public

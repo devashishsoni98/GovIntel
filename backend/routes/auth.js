@@ -17,9 +17,47 @@ const generateToken = (userId) => {
 // @access  Public
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role, phone, department, address } = req.body
+    const { name, email, password, role, phone, department, address, officerPasscode } = req.body
 
     console.log("Registration attempt:", { name, email, role, phone, department })
+
+    // Validate officer passcode if role is officer
+    if (role === "officer") {
+      if (!officerPasscode) {
+        return res.status(400).json({
+          success: false,
+          message: "Officer passcode is required for officer registration",
+        })
+      }
+
+      if (officerPasscode !== "123456") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid officer passcode. Please contact your administrator.",
+        })
+      }
+
+      if (!department) {
+        return res.status(400).json({
+          success: false,
+          message: "Department selection is required for officer registration",
+        })
+      }
+
+      // Verify department exists and is active
+      const Department = require("../models/Department")
+      const departmentDoc = await Department.findOne({ 
+        $or: [{ code: department }, { _id: department }],
+        isActive: true 
+      })
+
+      if (!departmentDoc) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected department is not valid or inactive",
+        })
+      }
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email })
@@ -50,6 +88,15 @@ router.post("/register", async (req, res) => {
     })
 
     await user.save()
+
+    // If officer, add to department's officers array
+    if (role === "officer" && department) {
+      const Department = require("../models/Department")
+      await Department.findOneAndUpdate(
+        { $or: [{ code: department }, { _id: department }] },
+        { $addToSet: { officers: user._id } }
+      )
+    }
 
     // Generate token
     const token = generateToken(user._id)

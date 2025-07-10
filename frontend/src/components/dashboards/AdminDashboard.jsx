@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import { Users, FileText, Building, Clock, CheckCircle, BarChart3, Calendar, Shield } from "lucide-react"
+import { Users, FileText, Building, Clock, CheckCircle, BarChart3, Calendar, Shield, Trash2, Eye } from "lucide-react"
 import { selectUser } from "../../redux/slices/authSlice"
+import DeleteConfirmationModal from "../DeleteConfirmationModal"
 
 const AdminDashboard = () => {
   const user = useSelector(selectUser)
@@ -25,6 +26,10 @@ const AdminDashboard = () => {
   const [recentActivity, setRecentActivity] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [selectedGrievances, setSelectedGrievances] = useState([])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletingGrievance, setDeletingGrievance] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchDashboardData()
@@ -91,6 +96,93 @@ const AdminDashboard = () => {
       setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSelectGrievance = (grievanceId) => {
+    setSelectedGrievances(prev => 
+      prev.includes(grievanceId) 
+        ? prev.filter(id => id !== grievanceId)
+        : [...prev, grievanceId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    if (selectedGrievances.length === recentActivity.length) {
+      setSelectedGrievances([])
+    } else {
+      setSelectedGrievances(recentActivity.map(g => g._id))
+    }
+  }
+
+  const handleDeleteSingle = (grievance) => {
+    setDeletingGrievance(grievance)
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteBulk = () => {
+    if (selectedGrievances.length > 0) {
+      setDeletingGrievance(null)
+      setShowDeleteModal(true)
+    }
+  }
+
+  const confirmDelete = async () => {
+    try {
+      setIsDeleting(true)
+      
+      if (deletingGrievance) {
+        // Single delete
+        const response = await fetch(`/api/admin/grievances/${deletingGrievance._id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            reason: "Admin deletion from dashboard"
+          })
+        })
+
+        if (response.ok) {
+          setRecentActivity(prev => prev.filter(g => g._id !== deletingGrievance._id))
+          setStats(prev => ({ ...prev, total: prev.total - 1 }))
+        } else {
+          const errorData = await response.json()
+          setError(errorData.message || "Failed to delete grievance")
+        }
+      } else {
+        // Bulk delete
+        const response = await fetch("/api/admin/grievances/bulk", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            grievanceIds: selectedGrievances,
+            reason: "Bulk admin deletion from dashboard"
+          })
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setRecentActivity(prev => prev.filter(g => !selectedGrievances.includes(g._id)))
+          setSelectedGrievances([])
+          setStats(prev => ({ ...prev, total: prev.total - data.deletedCount }))
+        } else {
+          const errorData = await response.json()
+          setError(errorData.message || "Failed to delete grievances")
+        }
+      }
+
+      setShowDeleteModal(false)
+      setDeletingGrievance(null)
+    } catch (error) {
+      console.error("Delete error:", error)
+      setError("Network error during deletion")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -225,9 +317,20 @@ const AdminDashboard = () => {
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">Recent Activity</h2>
-                <Link to="/analytics" className="text-purple-400 hover:text-purple-300 text-sm font-medium">
-                  View Analytics
-                </Link>
+                <div className="flex items-center gap-3">
+                  {selectedGrievances.length > 0 && (
+                    <button
+                      onClick={handleDeleteBulk}
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-all text-sm"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete ({selectedGrievances.length})
+                    </button>
+                  )}
+                  <Link to="/analytics" className="text-purple-400 hover:text-purple-300 text-sm font-medium">
+                    View Analytics
+                  </Link>
+                </div>
               </div>
 
               {!recentActivity || recentActivity.length === 0 ? (
@@ -237,9 +340,30 @@ const AdminDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Select All Checkbox */}
+                  <div className="flex items-center gap-3 pb-2 border-b border-slate-700/50">
+                    <input
+                      type="checkbox"
+                      checked={selectedGrievances.length === recentActivity.length && recentActivity.length > 0}
+                      onChange={handleSelectAll}
+                      className="w-4 h-4 text-purple-500 bg-slate-700 border-slate-600 rounded focus:ring-purple-500 focus:ring-2"
+                    />
+                    <span className="text-slate-400 text-sm">
+                      Select All ({selectedGrievances.length}/{recentActivity.length})
+                    </span>
+                  </div>
+
                   {recentActivity.map((grievance) => (
                     <div key={grievance._id} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        {/* Selection Checkbox */}
+                        <input
+                          type="checkbox"
+                          checked={selectedGrievances.includes(grievance._id)}
+                          onChange={() => handleSelectGrievance(grievance._id)}
+                          className="w-4 h-4 text-purple-500 bg-slate-700 border-slate-600 rounded focus:ring-purple-500 focus:ring-2 mt-1"
+                        />
+                        
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-white font-medium">{grievance.title}</h3>
@@ -261,12 +385,24 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                         </div>
-                        <Link
-                          to={`/grievance/${grievance._id}`}
-                          className="text-purple-400 hover:text-purple-300 text-sm font-medium ml-4"
-                        >
-                          View Details
-                        </Link>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/grievance/${grievance._id}`}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all text-sm"
+                          >
+                            <Eye className="w-3 h-3" />
+                            View
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteSingle(grievance)}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-all text-sm"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -354,6 +490,25 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setDeletingGrievance(null)
+          }}
+          onConfirm={confirmDelete}
+          title={deletingGrievance ? "Delete Grievance" : "Delete Multiple Grievances"}
+          message={deletingGrievance 
+            ? "This grievance will be permanently deleted from the system."
+            : `${selectedGrievances.length} grievances will be permanently deleted.`
+          }
+          grievance={deletingGrievance}
+          isBulk={!deletingGrievance}
+          selectedCount={selectedGrievances.length}
+          isLoading={isDeleting}
+        />
       </div>
     </div>
   )

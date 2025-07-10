@@ -28,6 +28,8 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [departments, setDepartments] = useState([])
+  const [loadingDepartments, setLoadingDepartments] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,6 +37,7 @@ const SignIn = () => {
     confirmPassword: "",
     department: "",
     phone: "",
+    officerPasscode: "",
     role: USER_ROLES.CITIZEN, // Default role
   })
 
@@ -49,6 +52,31 @@ const SignIn = () => {
   useEffect(() => {
     dispatch(clearError())
   }, [dispatch, isLogin])
+
+  // Fetch departments when officer role is selected
+  useEffect(() => {
+    if (!isLogin && formData.role === USER_ROLES.OFFICER) {
+      fetchDepartments()
+    }
+  }, [isLogin, formData.role])
+
+  const fetchDepartments = async () => {
+    try {
+      setLoadingDepartments(true)
+      const response = await fetch("/api/departments/active")
+      
+      if (response.ok) {
+        const data = await response.json()
+        setDepartments(data.data || [])
+      } else {
+        console.error("Failed to fetch departments")
+      }
+    } catch (error) {
+      console.error("Error fetching departments:", error)
+    } finally {
+      setLoadingDepartments(false)
+    }
+  }
 
   const handleInputChange = (e) => {
     setFormData({
@@ -89,6 +117,7 @@ const SignIn = () => {
         ...(formData.role === USER_ROLES.OFFICER && {
           department: formData.department,
           phone: formData.phone,
+          officerPasscode: formData.officerPasscode,
         }),
         ...(formData.role === USER_ROLES.CITIZEN && {
           phone: formData.phone,
@@ -115,6 +144,7 @@ const SignIn = () => {
         confirmPassword: "",
         department: "",
         phone: "",
+        officerPasscode: "",
         role: USER_ROLES.CITIZEN,
       })
       setTimeout(() => {
@@ -273,28 +303,57 @@ const SignIn = () => {
                 {!isLogin && formData.role === USER_ROLES.OFFICER && (
                   <div>
                     <label htmlFor="department" className="block text-sm font-medium text-slate-300 mb-2">
-                      Department
+                      Department *
                     </label>
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <select
-                        id="department"
-                        name="department"
-                        value={formData.department}
-                        onChange={handleInputChange}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
-                        required={!isLogin && formData.role === USER_ROLES.OFFICER}
-                      >
-                        <option value="">Select your department</option>
-                        <option value="municipal">Municipal Corporation</option>
-                        <option value="health">Health Department</option>
-                        <option value="education">Education Department</option>
-                        <option value="transport">Transport Department</option>
-                        <option value="police">Police Department</option>
-                        <option value="revenue">Revenue Department</option>
-                        <option value="other">Other</option>
-                      </select>
+                      {loadingDepartments ? (
+                        <div className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400">
+                          Loading departments...
+                        </div>
+                      ) : (
+                        <select
+                          id="department"
+                          name="department"
+                          value={formData.department}
+                          onChange={handleInputChange}
+                          className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+                          required={!isLogin && formData.role === USER_ROLES.OFFICER}
+                        >
+                          <option value="">Select your department</option>
+                          {departments.map((dept) => (
+                            <option key={dept._id} value={dept.code}>
+                              {dept.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
+                  </div>
+                )}
+
+                {/* Officer Passcode Field (Sign Up Only - Officers) */}
+                {!isLogin && formData.role === USER_ROLES.OFFICER && (
+                  <div>
+                    <label htmlFor="officerPasscode" className="block text-sm font-medium text-slate-300 mb-2">
+                      Officer Passcode *
+                    </label>
+                    <div className="relative">
+                      <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="password"
+                        id="officerPasscode"
+                        name="officerPasscode"
+                        value={formData.officerPasscode}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+                        placeholder="Enter officer passcode"
+                        required={!isLogin && formData.role === USER_ROLES.OFFICER}
+                      />
+                    </div>
+                    <p className="text-slate-500 text-xs mt-1">
+                      Contact your administrator for the officer passcode
+                    </p>
                   </div>
                 )}
 

@@ -14,6 +14,7 @@ import SubmitComplaint from "./pages/SubmitComplaint"
 import MyGrievances from "./pages/MyGrievances"
 import Analytics from "./pages/Analytics"
 import GrievanceDetail from "./pages/GrievanceDetail"
+import AssignedCases from "./pages/AssignedCases"
 
 // Make sure to import your CSS file that includes Tailwind
 import "./index.css"
@@ -74,10 +75,7 @@ function AppContent() {
               path="/assigned-cases"
               element={
                 <ProtectedRoute allowedRoles={[USER_ROLES.OFFICER]}>
-                  <div className="pt-20 p-8">
-                    <h1 className="text-white text-2xl">Assigned Cases</h1>
-                    {/* <AssignedCases /> */}
-                  </div>
+                  <AssignedCases />
                 </ProtectedRoute>
               }
             />
