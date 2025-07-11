@@ -47,7 +47,7 @@ router.post("/register", async (req, res) => {
       // Verify department exists and is active
       const Department = require("../models/Department")
       const departmentDoc = await Department.findOne({ 
-        $or: [{ code: department }, { _id: department }],
+        code: department,
         isActive: true 
       })
 
@@ -93,7 +93,7 @@ router.post("/register", async (req, res) => {
     if (role === "officer" && department) {
       const Department = require("../models/Department")
       await Department.findOneAndUpdate(
-        { $or: [{ code: department }, { _id: department }] },
+        { code: department },
         { $addToSet: { officers: user._id } }
       )
     }
