@@ -284,7 +284,7 @@ class SmartRoutingEngine {
         // Update grievance with assigned officer
         grievance.assignedOfficer = routingResult.assignedOfficer._id
         grievance.department = routingResult.department.code
-        grievance.status = "in_progress"
+        grievance.status = "assigned"
         
         // Add routing information to updates
         grievance.updates.push({
