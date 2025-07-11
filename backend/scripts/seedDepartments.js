@@ -184,12 +184,18 @@ const seedDepartments = async () => {
 
     // Update existing officers with department codes
     const departmentMap = {
-      municipal: "MUNICIPAL",
-      health: "HEALTH",
-      education: "EDUCATION",
-      transport: "TRANSPORT",
-      police: "POLICE",
-      revenue: "REVENUE",
+      "municipal": "MUNICIPAL",
+      "health": "HEALTH", 
+      "education": "EDUCATION",
+      "transport": "TRANSPORT",
+      "police": "POLICE",
+      "revenue": "REVENUE",
+      "MUNICIPAL": "MUNICIPAL",
+      "HEALTH": "HEALTH",
+      "EDUCATION": "EDUCATION", 
+      "TRANSPORT": "TRANSPORT",
+      "POLICE": "POLICE",
+      "REVENUE": "REVENUE"
     };
 
     for (const [oldCode, newCode] of Object.entries(departmentMap)) {

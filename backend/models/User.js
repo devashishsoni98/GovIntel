@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
         return this.role === "officer"
       },
       enum: {
-        values: ["municipal", "health", "education", "transport", "police", "revenue", "other"],
+        values: ["MUNICIPAL", "HEALTH", "EDUCATION", "TRANSPORT", "POLICE", "REVENUE", "OTHER"],
         message: "Please select a valid department",
       },
     },

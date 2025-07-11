@@ -189,7 +189,7 @@ grievanceSchema.pre("save", function (next) {
       police: "police",
       other: "municipal",
     }
-    this.department = categoryDepartmentMap[this.category] || "municipal"
+    this.department = (categoryDepartmentMap[this.category] || "municipal").toUpperCase()
   }
   next()
 })

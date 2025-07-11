@@ -322,7 +322,7 @@ const SignIn = () => {
                         >
                           <option value="">Select your department</option>
                           {departments.map((dept) => (
-                            <option key={dept._id} value={dept.code}>
+                            <option key={dept._id} value={dept.code.toUpperCase()}>
                               {dept.name}
                             </option>
                           ))}

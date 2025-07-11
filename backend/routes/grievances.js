@@ -9,6 +9,22 @@ const SmartRoutingEngine = require("../utils/smartRouting");
 
 const router = express.Router();
 
+// Add this function to map category to department
+const getCategoryDepartment = (category) => {
+  const categoryDepartmentMap = {
+    infrastructure: "municipal",
+    sanitation: "municipal",
+    water_supply: "municipal",
+    electricity: "municipal",
+    transportation: "transport",
+    healthcare: "health",
+    education: "education",
+    police: "police",
+    other: "municipal",
+  }
+  return (categoryDepartmentMap[category] || "municipal").toUpperCase()
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -752,7 +768,7 @@ router.get("/stats/overview", auth, async (req, res) => {
       {
         $group: {
           _id: "$category",
-          count: { $sum:1 },
+          count: { $sum: 1 },
         },
       },
     ]);
