@@ -84,6 +84,7 @@ router.delete("/grievances/bulk", auth, requireAdmin, async (req, res) => {
     const { grievanceIds, reason } = req.body
     const adminId = req.user.id
 
+    console.log("Bulk delete request:", { grievanceIds, reason, adminId })
     if (!grievanceIds || !Array.isArray(grievanceIds) || grievanceIds.length === 0) {
       return res.status(400).json({
         success: false,
@@ -91,6 +92,15 @@ router.delete("/grievances/bulk", auth, requireAdmin, async (req, res) => {
       })
     }
 
+    // Validate that all IDs are valid ObjectIds
+    const mongoose = require('mongoose')
+    const invalidIds = grievanceIds.filter(id => !mongoose.Types.ObjectId.isValid(id))
+    if (invalidIds.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid grievance IDs: ${invalidIds.join(', ')}`
+      })
+    }
     // Find all grievances to be deleted for audit
     const grievances = await Grievance.find({ _id: { $in: grievanceIds } })
       .populate("citizen", "name email")
@@ -103,6 +113,7 @@ router.delete("/grievances/bulk", auth, requireAdmin, async (req, res) => {
       })
     }
 
+    console.log(`Found ${grievances.length} grievances to delete`)
     // Create audit data
     const auditData = grievances.map(grievance => ({
       grievanceId: grievance._id,
@@ -118,6 +129,7 @@ router.delete("/grievances/bulk", auth, requireAdmin, async (req, res) => {
     // Delete all grievances
     const deleteResult = await Grievance.deleteMany({ _id: { $in: grievanceIds } })
 
+    console.log(`Delete result:`, deleteResult)
     // Log the bulk deletion
     console.log("Bulk grievances deleted:", auditData)
 
@@ -125,14 +137,17 @@ router.delete("/grievances/bulk", auth, requireAdmin, async (req, res) => {
       success: true,
       message: `${deleteResult.deletedCount} grievances deleted successfully`,
       deletedCount: deleteResult.deletedCount,
-      auditData
+      auditData,
+      requestedCount: grievanceIds.length,
+      foundCount: grievances.length
     })
 
   } catch (error) {
     console.error("Bulk delete grievances error:", error)
     res.status(500).json({
       success: false,
-      message: "Failed to delete grievances"
+      message: "Failed to delete grievances",
+      error: error.message
     })
   }
 })

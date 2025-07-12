@@ -266,35 +266,52 @@ class SmartRoutingEngine {
    */
   static async autoAssignGrievance(grievanceId) {
     try {
+      console.log("AutoAssignGrievance called with ID:", grievanceId)
+      
       const grievance = await Grievance.findById(grievanceId)
       if (!grievance) {
+        console.log("Grievance not found:", grievanceId)
         throw new Error("Grievance not found")
       }
 
       if (grievance.assignedOfficer) {
+        console.log("Grievance already assigned to:", grievance.assignedOfficer)
         return {
           success: false,
-          message: "Grievance already assigned"
+          message: "Grievance already assigned",
+          grievance
         }
       }
 
+      console.log("Starting routing for grievance category:", grievance.category)
       const routingResult = await this.routeGrievance(grievance)
       
       if (routingResult.success) {
+        console.log("Routing successful, updating grievance...")
         // Update grievance with assigned officer
         grievance.assignedOfficer = routingResult.assignedOfficer._id
-        grievance.department = routingResult.department.code
-        grievance.status = "assigned"
+        
+        // Only update department if it's different
+        if (grievance.department !== routingResult.department.code) {
+          grievance.department = routingResult.department.code
+        }
+        
+        // Update status to assigned
+        if (grievance.status === "pending") {
+          grievance.status = "assigned"
+        }
         
         // Add routing information to updates
         grievance.updates.push({
           message: `Auto-assigned to ${routingResult.assignedOfficer.name} (${routingResult.department.name}) - Confidence: ${Math.round(routingResult.confidence)}%`,
-          updatedBy: null, // System assignment
-          status: "in_progress",
+          updatedBy: routingResult.assignedOfficer._id, // Assigned officer
+          status: "assigned",
           timestamp: new Date()
         })
 
+        console.log("Saving grievance with assignment...")
         await grievance.save()
+        console.log("Grievance saved successfully")
 
         return {
           success: true,
@@ -302,6 +319,7 @@ class SmartRoutingEngine {
           routing: routingResult
         }
       } else {
+        console.log("Routing failed:", routingResult.error)
         return routingResult
       }
 
@@ -309,7 +327,8 @@ class SmartRoutingEngine {
       console.error("Auto-assignment error:", error)
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        stack: error.stack
       }
     }
   }

@@ -61,10 +61,10 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
   const newStatusInfo = getStatusInfo(status)
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full my-8 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700 sticky top-0 bg-slate-800 z-10">
           <div>
             <h2 className="text-xl font-bold text-white">Update Status</h2>
             <p className="text-slate-400 text-sm mt-1">
@@ -80,7 +80,7 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto">
           {/* Current Status */}
           <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
             <h3 className="text-white font-medium mb-2">Current Status</h3>
@@ -174,7 +174,7 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-700">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-700 sticky bottom-0 bg-slate-800">
           <button
             onClick={onClose}
             className="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all"

@@ -317,24 +317,33 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       await grievance.save();
 
       // Smart routing - auto-assign to best officer
-      const routingResult = await SmartRoutingEngine.autoAssignGrievance(grievance._id);
+      console.log("Starting auto-assignment for grievance:", grievance._id)
+      const routingResult = await SmartRoutingEngine.autoAssignGrievance(grievance._id)
       
       if (routingResult.success) {
-        console.log("Auto-assignment successful:", routingResult.routing.assignedOfficer.name);
+        console.log("Auto-assignment successful:", routingResult.routing?.assignedOfficer?.name)
+        // Reload the grievance to get the updated assignment
+        await grievance.populate([
+          { path: "citizen", select: "name email" },
+          { path: "assignedOfficer", select: "name email department" }
+        ])
       } else {
-        console.log("Auto-assignment failed:", routingResult.error);
+        console.log("Auto-assignment failed:", routingResult.error)
+        // Continue without assignment - grievance will remain unassigned
       }
 
     } catch (aiError) {
       console.error("AI/Routing error (non-blocking):", aiError);
       // Continue without AI analysis if it fails
     }
-    // Populate the citizen field for response
-    await grievance.populate([
-      { path: "citizen", select: "name email" },
-      { path: "assignedOfficer", select: "name email department" }
-    ]);
 
+    // Ensure grievance is populated for response
+    if (!grievance.populated('citizen')) {
+      await grievance.populate([
+        { path: "citizen", select: "name email" },
+        { path: "assignedOfficer", select: "name email department" }
+      ])
+    }
     res.status(201).json({
       success: true,
       message: "Grievance created successfully",
@@ -522,13 +531,21 @@ router.get("/", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id;
     } else if (req.user.role === "officer") {
-      filter.department = req.user.department;
+      // For officers, show grievances assigned to them OR in their department
+      filter.$or = [
+        { assignedOfficer: req.user.id },
+        { department: req.user.department, assignedOfficer: null }
+      ]
     }
 
     // Apply additional filters
     if (status) filter.status = status;
     if (category) filter.category = category;
-    if (department && req.user.role === "admin") filter.department = department;
+    if (department && req.user.role === "admin") {
+      // For admin department filter, override the base filter
+      delete filter.$or
+      filter.department = department
+    }
     if (priority) filter.priority = priority;
 
     console.log("Filter object:", filter);

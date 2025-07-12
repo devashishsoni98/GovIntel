@@ -153,6 +153,8 @@ const AdminDashboard = () => {
         }
       } else {
         // Bulk delete
+        console.log("Starting bulk delete for IDs:", selectedGrievances)
+        
         const response = await fetch("/api/admin/grievances/bulk", {
           method: "DELETE",
           headers: {
@@ -165,13 +167,21 @@ const AdminDashboard = () => {
           })
         })
 
+        console.log("Bulk delete response status:", response.status)
+        
         if (response.ok) {
           const data = await response.json()
+          console.log("Bulk delete response data:", data)
+          
           setRecentActivity(prev => prev.filter(g => !selectedGrievances.includes(g._id)))
           setSelectedGrievances([])
           setStats(prev => ({ ...prev, total: prev.total - data.deletedCount }))
+          
+          // Show success message
+          setError("")
         } else {
           const errorData = await response.json()
+          console.error("Bulk delete error:", errorData)
           setError(errorData.message || "Failed to delete grievances")
         }
       }
