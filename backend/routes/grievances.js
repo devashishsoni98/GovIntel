@@ -658,14 +658,18 @@ router.patch("/:id/status", auth, async (req, res) => {
     }
 
     // Check if officer has permission to update this grievance
-    if (
-      req.user.role === "officer" &&
-      grievance.department !== req.user.department
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
+    if (req.user.role === "officer") {
+      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
+      const grievanceDepartment = grievance.department ? grievance.department.toUpperCase() : null;
+      const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer.toString() === req.user.id;
+      const isSameDepartment = userDepartment && grievanceDepartment === userDepartment;
+      
+      if (!isAssignedToUser && !isSameDepartment) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied - you can only update grievances assigned to you or in your department",
+        });
+      }
     }
 
     // Update grievance
