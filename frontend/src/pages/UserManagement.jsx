@@ -17,7 +17,10 @@ import {
   Calendar,
   MoreVertical,
   Download,
-  Upload
+  Upload,
+  X,
+  Loader,
+  Save
 } from "lucide-react"
 import { selectUser } from "../redux/slices/authSlice"
 
@@ -29,7 +32,7 @@ const UserManagement = () => {
   const [filters, setFilters] = useState({
     role: "",
     department: "",
-    status: "",
+    status: "active", // Default to show only active users
     search: ""
   })
   const [pagination, setPagination] = useState({
@@ -39,12 +42,33 @@ const UserManagement = () => {
     limit: 10
   })
   const [selectedUsers, setSelectedUsers] = useState([])
+  const [departments, setDepartments] = useState([])
+
+  // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [editingUser, setEditingUser] = useState(null)
+  const [showViewModal, setShowViewModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
+  const [viewingUser, setViewingUser] = useState(null)
   const [deletingUser, setDeletingUser] = useState(null)
-  const [departments, setDepartments] = useState([])
+  const [modalLoading, setModalLoading] = useState(false)
+
+  // Form states
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "citizen",
+    phone: "",
+    department: "",
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    }
+  })
 
   const roleOptions = [
     { value: "", label: "All Roles" },
@@ -55,8 +79,8 @@ const UserManagement = () => {
 
   const statusOptions = [
     { value: "", label: "All Status" },
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" }
+    { value: "active", label: "Active Only" },
+    { value: "inactive", label: "Inactive Only" }
   ]
 
   useEffect(() => {
@@ -139,13 +163,47 @@ const UserManagement = () => {
     }
   }
 
+  // Modal handlers
   const handleCreateUser = () => {
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      role: "citizen",
+      phone: "",
+      department: "",
+      address: {
+        street: "",
+        city: "",
+        state: "",
+        zipCode: ""
+      }
+    })
     setShowCreateModal(true)
   }
 
   const handleEditUser = (user) => {
     setEditingUser(user)
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      password: "", // Don't populate password for security
+      role: user.role || "citizen",
+      phone: user.phone || "",
+      department: user.department || "",
+      address: {
+        street: user.address?.street || "",
+        city: user.address?.city || "",
+        state: user.address?.state || "",
+        zipCode: user.address?.zipCode || ""
+      }
+    })
     setShowEditModal(true)
+  }
+
+  const handleViewUser = (user) => {
+    setViewingUser(user)
+    setShowViewModal(true)
   }
 
   const handleDeleteUser = (user) => {
@@ -167,7 +225,10 @@ const UserManagement = () => {
       })
 
       if (response.ok) {
-        fetchUsers()
+        // Update the user in the local state
+        setUsers(prev => prev.map(u => 
+          u._id === user._id ? { ...u, isActive: !u.isActive } : u
+        ))
       } else {
         const errorData = await response.json()
         setError(errorData.message || "Failed to update user status")
@@ -175,6 +236,121 @@ const UserManagement = () => {
     } catch (error) {
       console.error("Toggle user status error:", error)
       setError("Network error during status update")
+    }
+  }
+
+  // Form submission handlers
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      setModalLoading(true)
+      
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        setShowCreateModal(false)
+        fetchUsers()
+        setError("")
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Failed to create user")
+      }
+    } catch (error) {
+      console.error("Create user error:", error)
+      setError("Network error during user creation")
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      setModalLoading(true)
+      
+      const updateData = { ...formData }
+      if (!updateData.password) {
+        delete updateData.password // Don't send empty password
+      }
+
+      const response = await fetch(`/api/users/${editingUser._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(updateData)
+      })
+
+      if (response.ok) {
+        setShowEditModal(false)
+        setEditingUser(null)
+        fetchUsers()
+        setError("")
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Failed to update user")
+      }
+    } catch (error) {
+      console.error("Update user error:", error)
+      setError("Network error during user update")
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  const handleDeleteSubmit = async () => {
+    try {
+      setModalLoading(true)
+      
+      const response = await fetch(`/api/users/${deletingUser._id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      })
+
+      if (response.ok) {
+        setShowDeleteModal(false)
+        setDeletingUser(null)
+        fetchUsers()
+        setError("")
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Failed to delete user")
+      }
+    } catch (error) {
+      console.error("Delete user error:", error)
+      setError("Network error during user deletion")
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    
+    if (name.startsWith('address.')) {
+      const addressField = name.split('.')[1]
+      setFormData(prev => ({
+        ...prev,
+        address: {
+          ...prev.address,
+          [addressField]: value
+        }
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
     }
   }
 
@@ -211,6 +387,425 @@ const UserManagement = () => {
       day: "numeric"
     })
   }
+
+  // Modal Components
+  const CreateUserModal = () => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700 sticky top-0 bg-slate-800">
+          <h2 className="text-xl font-bold text-white">Create New User</h2>
+          <button
+            onClick={() => setShowCreateModal(false)}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleCreateSubmit} className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Password *</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Role *</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              >
+                <option value="citizen">Citizen</option>
+                <option value="officer">Officer</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Phone</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            {formData.role === "officer" && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Department</label>
+                <select
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((dept) => (
+                    <option key={dept._id} value={dept.code}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-700">
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(false)}
+              className="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={modalLoading}
+              className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 flex items-center gap-2"
+            >
+              {modalLoading ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Create User
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+
+  const EditUserModal = () => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700 sticky top-0 bg-slate-800">
+          <h2 className="text-xl font-bold text-white">Edit User</h2>
+          <button
+            onClick={() => setShowEditModal(false)}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleEditSubmit} className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">New Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Leave blank to keep current password"
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Role *</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              >
+                <option value="citizen">Citizen</option>
+                <option value="officer">Officer</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Phone</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+            
+            {formData.role === "officer" && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Department</label>
+                <select
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((dept) => (
+                    <option key={dept._id} value={dept.code}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-700">
+            <button
+              type="button"
+              onClick={() => setShowEditModal(false)}
+              className="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={modalLoading}
+              className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 flex items-center gap-2"
+            >
+              {modalLoading ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Update User
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+
+  const ViewUserModal = () => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700 sticky top-0 bg-slate-800">
+          <h2 className="text-xl font-bold text-white">User Details</h2>
+          <button
+            onClick={() => setShowViewModal(false)}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        {viewingUser && (
+          <div className="p-6 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl">
+                  {viewingUser.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">{viewingUser.name}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(viewingUser.role)}`}>
+                    {getRoleIcon(viewingUser.role)}
+                    {viewingUser.role}
+                  </span>
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                    viewingUser.isActive
+                      ? "text-green-400 bg-green-400/10 border border-green-400/20"
+                      : "text-red-400 bg-red-400/10 border border-red-400/20"
+                  }`}>
+                    {viewingUser.isActive ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
+                    {viewingUser.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Email</label>
+                <div className="flex items-center gap-2 text-white">
+                  <Mail className="w-4 h-4" />
+                  {viewingUser.email}
+                </div>
+              </div>
+              
+              {viewingUser.phone && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Phone</label>
+                  <div className="flex items-center gap-2 text-white">
+                    <Phone className="w-4 h-4" />
+                    {viewingUser.phone}
+                  </div>
+                </div>
+              )}
+              
+              {viewingUser.department && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Department</label>
+                  <div className="flex items-center gap-2 text-white">
+                    <Building className="w-4 h-4" />
+                    <span className="capitalize">{viewingUser.department}</span>
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Created</label>
+                <div className="flex items-center gap-2 text-white">
+                  <Calendar className="w-4 h-4" />
+                  {formatDate(viewingUser.createdAt)}
+                </div>
+              </div>
+              
+              {viewingUser.lastLogin && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Last Login</label>
+                  <div className="flex items-center gap-2 text-white">
+                    <Calendar className="w-4 h-4" />
+                    {formatDate(viewingUser.lastLogin)}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {viewingUser.address && (
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">Address</label>
+                <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
+                  <p className="text-white">
+                    {[
+                      viewingUser.address.street,
+                      viewingUser.address.city,
+                      viewingUser.address.state,
+                      viewingUser.address.zipCode
+                    ].filter(Boolean).join(", ") || "No address provided"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  const DeleteUserModal = () => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-md w-full">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+          <h2 className="text-xl font-bold text-white">Delete User</h2>
+          <button
+            onClick={() => setShowDeleteModal(false)}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        {deletingUser && (
+          <div className="p-6">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
+              <p className="text-red-400 font-medium mb-2">⚠️ Warning</p>
+              <p className="text-slate-300 text-sm">
+                You are about to permanently delete the user "{deletingUser.name}". This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteSubmit}
+                disabled={modalLoading}
+                className="px-6 py-2 bg-red-500 rounded-lg text-white font-medium hover:bg-red-600 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {modalLoading ? (
+                  <>
+                    <Loader className="w-4 h-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete User
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 
   if (loading) {
     return (
@@ -325,7 +920,7 @@ const UserManagement = () => {
 
             {/* Clear Filters */}
             <button
-              onClick={() => setFilters({ role: "", department: "", status: "", search: "" })}
+              onClick={() => setFilters({ role: "", department: "", status: "active", search: "" })}
               className="px-4 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all"
             >
               Clear Filters
@@ -490,6 +1085,7 @@ const UserManagement = () => {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
+                            onClick={() => handleViewUser(user)}
                             className="p-2 text-green-400 hover:text-green-300 hover:bg-green-400/10 rounded-lg transition-all"
                             title="View Details"
                           >
@@ -570,6 +1166,12 @@ const UserManagement = () => {
             </div>
           )}
         </div>
+
+        {/* Modals */}
+        {showCreateModal && <CreateUserModal />}
+        {showEditModal && <EditUserModal />}
+        {showViewModal && <ViewUserModal />}
+        {showDeleteModal && <DeleteUserModal />}
       </div>
     </div>
   )

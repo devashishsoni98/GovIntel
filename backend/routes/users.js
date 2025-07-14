@@ -54,10 +54,18 @@ router.get("/", auth, async (req, res) => {
       })
     }
 
-    const { page = 1, limit = 10, role, department, search, sortBy = "createdAt", sortOrder = "desc" } = req.query
+    const { page = 1, limit = 10, role, department, status, search, sortBy = "createdAt", sortOrder = "desc" } = req.query
 
     // Build query
-    const query = { isActive: true }
+    const query = {}
+
+    // Handle status filter
+    if (status === "active") {
+      query.isActive = true
+    } else if (status === "inactive") {
+      query.isActive = false
+    }
+    // If status is empty, show all users (no filter)
 
     if (role) query.role = role
     if (department) query.department = department
