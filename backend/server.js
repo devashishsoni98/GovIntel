@@ -12,6 +12,7 @@ const userRoutes = require("./routes/users")
 const analyticsRoutes = require("./routes/analytics")
 const departmentRoutes = require("./routes/departments")
 const adminRoutes = require("./routes/admin")
+const aiRoutes = require("./routes/ai")
 
 // Import models
 const User = require("./models/User")
@@ -45,6 +46,7 @@ app.use("/api/users", userRoutes)
 app.use("/api/analytics", analyticsRoutes)
 app.use("/api/departments", departmentRoutes)
 app.use("/api/admin", adminRoutes)
+app.use("/api/ai", aiRoutes)
 
 // Debug route to test password (REMOVE IN PRODUCTION)
 app.post("/api/debug/test-password", async (req, res) => {

@@ -25,12 +25,14 @@ import {
   Phone,
   Mail,
   Tag,
-  Activity
+  Activity,
+  Brain
 } from "lucide-react"
 import { selectUser, USER_ROLES } from "../redux/slices/authSlice"
 import AdminReassignModal from "../components/AdminReassignModal"
 import StatusUpdateModal from "../components/StatusUpdateModal"
 import FeedbackModal from "../components/FeedbackModal"
+import AIInsightsPanel from "../components/AIInsightsPanel"
 
 const GrievanceDetail = () => {
   const { id } = useParams()
@@ -46,6 +48,7 @@ const GrievanceDetail = () => {
   const [showReassignModal, setShowReassignModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+  const [showAIInsights, setShowAIInsights] = useState(false)
 
   useEffect(() => {
     fetchGrievanceDetail()
@@ -245,10 +248,10 @@ const GrievanceDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 p-8">
+    <div className="min-h-screen bg-slate-900 pt-20 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-sm text-slate-400 mb-6">
+        <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4 sm:mb-6">
           <Link to="/dashboard" className="hover:text-white transition-colors">
             Dashboard
           </Link>
@@ -344,6 +347,16 @@ const GrievanceDetail = () => {
               >
                 <UserCheck className="w-4 h-4" />
                 Auto Assign
+              </button>
+            )}
+
+            {(user?.role === "officer" || user?.role === "admin") && (
+              <button
+                onClick={() => setShowAIInsights(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
+              >
+                <Brain className="w-4 h-4" />
+                AI Insights
               </button>
             )}
 
@@ -677,6 +690,13 @@ const GrievanceDetail = () => {
               setShowFeedbackModal(false)
               fetchGrievanceDetail()
             }}
+          />
+        )}
+
+        {showAIInsights && (
+          <AIInsightsPanel
+            grievance={grievance}
+            onClose={() => setShowAIInsights(false)}
           />
         )}
       </div>

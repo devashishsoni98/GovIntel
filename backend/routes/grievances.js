@@ -611,14 +611,28 @@ router.get("/:id", auth, async (req, res) => {
       });
     }
 
-    if (
-      req.user.role === "officer" &&
-      grievance.department !== req.user.department
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
+    // Enhanced officer access check
+    if (req.user.role === "officer") {
+      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
+      const grievanceDepartment = grievance.department ? grievance.department.toUpperCase() : null;
+      const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer._id.toString() === req.user.id;
+      const isSameDepartment = userDepartment && grievanceDepartment === userDepartment;
+      
+      console.log("Officer access check:", {
+        userId: req.user.id,
+        userDepartment,
+        grievanceDepartment,
+        isAssignedToUser,
+        isSameDepartment,
+        assignedOfficerId: grievance.assignedOfficer?._id?.toString()
       });
+      
+      if (!isAssignedToUser && !isSameDepartment) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied - you can only view grievances assigned to you or in your department",
+        });
+      }
     }
 
     res.json({
