@@ -262,14 +262,14 @@ async function generateSmartRecommendations(grievance) {
     .limit(3)
     .select("title resolutionTime")
 
-    recommendations.similarCases = similarCases.map(case => ({
-      title: case.title,
-      resolutionTime: case.resolutionTime
+    recommendations.similarCases = similarCases.map(grievanceCase => ({
+      title: grievanceCase.title,
+      resolutionTime: grievanceCase.resolutionTime
     }))
 
     // Calculate average resolution time for similar cases
     if (similarCases.length > 0) {
-      const avgTime = similarCases.reduce((sum, case) => sum + (case.resolutionTime || 48), 0) / similarCases.length
+      const avgTime = similarCases.reduce((sum, grievanceCase) => sum + (grievanceCase.resolutionTime || 48), 0) / similarCases.length
       recommendations.estimatedResolutionTime = `${Math.round(avgTime)} hours`
     }
 
@@ -432,20 +432,20 @@ async function predictResolutionTime(grievance) {
       let totalTime = 0
       let totalWeight = 0
 
-      similarCases.forEach(case => {
+      similarCases.forEach(grievanceCase => {
         let weight = 1
         
         // Weight by priority
-        if (case.priority === grievance.priority) weight += 0.5
-        if (case.priority === "urgent") weight += 0.3
+        if (grievanceCase.priority === grievance.priority) weight += 0.5
+        if (grievanceCase.priority === "urgent") weight += 0.3
         
         // Weight by urgency score similarity
-        if (case.aiAnalysis?.urgencyScore && grievance.aiAnalysis?.urgencyScore) {
-          const scoreDiff = Math.abs(case.aiAnalysis.urgencyScore - grievance.aiAnalysis.urgencyScore)
+        if (grievanceCase.aiAnalysis?.urgencyScore && grievance.aiAnalysis?.urgencyScore) {
+          const scoreDiff = Math.abs(grievanceCase.aiAnalysis.urgencyScore - grievance.aiAnalysis.urgencyScore)
           if (scoreDiff < 20) weight += 0.3
         }
 
-        totalTime += case.resolutionTime * weight
+        totalTime += grievanceCase.resolutionTime * weight
         totalWeight += weight
       })
 
