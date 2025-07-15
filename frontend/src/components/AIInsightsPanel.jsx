@@ -209,10 +209,10 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
                     <h3 className="text-white font-semibold">Similar Resolved Cases</h3>
                   </div>
                   <div className="space-y-2">
-                    {recommendations.similarCases.map((case, index) => (
+                    {recommendations.similarCases.map((similarCase, index) => (
                       <div key={index} className="bg-slate-600/30 rounded p-3">
-                        <p className="text-slate-300 text-sm font-medium">{case.title}</p>
-                        <p className="text-slate-400 text-xs">Resolved in {case.resolutionTime}h</p>
+                        <p className="text-slate-300 text-sm font-medium">{similarCase.title}</p>
+                        <p className="text-slate-400 text-xs">Resolved in {similarCase.resolutionTime}h</p>
                       </div>
                     ))}
                   </div>

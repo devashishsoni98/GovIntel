@@ -249,7 +249,7 @@ const GrievanceDetail = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 pt-20 p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto pt-16">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4 sm:mb-6">
           <Link to="/dashboard" className="hover:text-white transition-colors">
