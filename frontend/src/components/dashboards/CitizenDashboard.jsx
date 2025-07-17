@@ -228,7 +228,7 @@ const CitizenDashboard = () => {
           <div className="lg:col-span-2">
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
               <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link
                   to="/submit-complaint"
                   className="group bg-gradient-to-r from-purple-500 to-blue-500 p-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105"

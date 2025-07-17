@@ -16,6 +16,7 @@ import Analytics from "./pages/Analytics"
 import GrievanceDetail from "./pages/GrievanceDetail"
 import AssignedCases from "./pages/AssignedCases"
 import UserManagement from "./pages/UserManagement"
+import Reports from "./pages/Reports"
 
 // Make sure to import your CSS file that includes Tailwind
 import "./index.css"
@@ -105,10 +106,16 @@ function AppContent() {
               path="/reports/*"
               element={
                 <ProtectedRoute allowedRoles={[USER_ROLES.OFFICER, USER_ROLES.ADMIN]}>
-                  <div className="pt-20 p-8">
-                    <h1 className="text-white text-2xl">Reports</h1>
-                    {/* <Reports /> */}
-                  </div>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/reports/:reportType"
+              element={
+                <ProtectedRoute allowedRoles={[USER_ROLES.OFFICER, USER_ROLES.ADMIN]}>
+                  <Reports />
                 </ProtectedRoute>
               }
             />

@@ -28,14 +28,17 @@ const FeedbackModal = ({ grievance, onClose, onSuccess }) => {
         },
         body: JSON.stringify({
           rating,
-          comment: comment.trim()
+          comment: comment.trim() || ""
         }),
       })
 
       if (response.ok) {
+        const data = await response.json()
+        console.log("Feedback submitted successfully:", data)
         onSuccess()
       } else {
         const errorData = await response.json()
+        console.error("Feedback submission failed:", errorData)
         setError(errorData.message || "Failed to submit feedback")
       }
     } catch (error) {

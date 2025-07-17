@@ -246,7 +246,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-8">
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -445,8 +445,17 @@ const AdminDashboard = () => {
                   </div>
                 </Link>
                 <Link
-                  to="/reports/system"
+                  to="/reports"
                   className="block w-full bg-green-500/20 border border-green-500/30 rounded-lg p-3 text-green-300 hover:bg-green-500/30 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5" />
+                    All Reports
+                  </div>
+                </Link>
+                <Link
+                  to="/reports/system"
+                  className="block w-full bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 text-orange-300 hover:bg-orange-500/30 transition-all"
                 >
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5" />

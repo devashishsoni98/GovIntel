@@ -729,6 +729,8 @@ router.post("/:id/feedback", auth, async (req, res) => {
     const { rating, comment } = req.body;
     const grievanceId = req.params.id;
 
+    console.log("Feedback submission request:", { grievanceId, rating, comment, userId: req.user.id });
+
     const grievance = await Grievance.findById(grievanceId);
 
     if (!grievance) {
@@ -754,14 +756,32 @@ router.post("/:id/feedback", auth, async (req, res) => {
       });
     }
 
+    // Check if feedback already exists
+    if (grievance.feedback && grievance.feedback.rating) {
+      return res.status(400).json({
+        success: false,
+        message: "Feedback has already been provided for this grievance",
+      });
+    }
+
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 1 and 5",
+      });
+    }
+
     // Add feedback
     grievance.feedback = {
       rating: parseInt(rating),
-      comment,
+      comment: comment || "",
       submittedAt: new Date(),
     };
 
     await grievance.save();
+
+    console.log("Feedback saved successfully:", grievance.feedback);
 
     res.json({
       success: true,

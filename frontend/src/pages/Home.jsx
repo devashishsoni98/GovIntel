@@ -159,7 +159,7 @@ const Home = () => {
               {isAuthenticated ? (
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="group bg-gradient-to-r from-purple-500 to-pink-500 px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25"
+                  className="w-full xs:w-auto group bg-gradient-to-r from-purple-500 to-pink-500 px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 text-center"
                 >
                   Go to Dashboard
                   <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -167,13 +167,13 @@ const Home = () => {
               ) : (
                 <Link
                   to="/signin"
-                  className="group bg-gradient-to-r from-purple-500 to-pink-500 px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 inline-flex items-center"
+                  className="w-full xs:w-auto group bg-gradient-to-r from-purple-500 to-pink-500 px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 inline-flex items-center justify-center"
                 >
                   Start Free Trial
                   <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               )}
-              <button className="px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 transition-all backdrop-blur-sm">
+              <button className="w-full xs:w-auto px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 transition-all backdrop-blur-sm">
                 Watch Demo
               </button>
             </div>

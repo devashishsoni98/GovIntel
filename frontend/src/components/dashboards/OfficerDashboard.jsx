@@ -175,7 +175,7 @@ const OfficerDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -350,13 +350,28 @@ const OfficerDashboard = () => {
                   to="/assigned-cases"
                   className="block w-full bg-purple-500/20 border border-purple-500/30 rounded-lg p-3 text-purple-300 hover:bg-purple-500/30 transition-all"
                 >
-                  View All Cases
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5" />
+                    View All Cases
+                  </div>
                 </Link>
                 <Link
                   to="/reports/department"
                   className="block w-full bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 text-blue-300 hover:bg-blue-500/30 transition-all"
                 >
-                  Generate Report
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="w-5 h-5" />
+                    Department Reports
+                  </div>
+                </Link>
+                <Link
+                  to="/reports"
+                  className="block w-full bg-green-500/20 border border-green-500/30 rounded-lg p-3 text-green-300 hover:bg-green-500/30 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="w-5 h-5" />
+                    All Reports
+                  </div>
                 </Link>
               </div>
             </div>

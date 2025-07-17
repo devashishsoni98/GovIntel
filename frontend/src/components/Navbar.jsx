@@ -146,6 +146,7 @@ const Navbar = () => {
             { name: "System Reports", href: "/reports/system", icon: <Database className="w-4 h-4" /> },
             { name: "Department Reports", href: "/reports/departments", icon: <Building className="w-4 h-4" /> },
             { name: "Monthly Reports", href: "/reports/monthly", icon: <Calendar className="w-4 h-4" /> },
+            { name: "Performance Reports", href: "/reports/performance", icon: <BarChart3 className="w-4 h-4" /> },
             { name: "Custom Reports", href: "/reports/custom", icon: <Settings className="w-4 h-4" /> },
             { name: "Export Data", href: "/reports/export", icon: <Database className="w-4 h-4" /> },
           ],
@@ -199,7 +200,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation (only ≥xl: 1280px) */}
-            <div className="hidden xl:flex items-center gap-x-4 2xl:gap-x-8 min-w-0 flex-shrink">
+            <div className="hidden lg:flex items-center gap-x-4 2xl:gap-x-8 min-w-0 flex-shrink">
               {navigationItems.map((item) => (
                 <div key={item.name} className="relative" ref={dropdownRef}>
                   {item.dropdown ? (
@@ -256,12 +257,12 @@ const Navbar = () => {
 
             {/* Right Side Items (only ≥xl: 1280px) */}
             {isAuthenticated && (
-              <div className="hidden xl:flex items-center gap-x-3 2xl:gap-x-4 min-w-0">
+              <div className="hidden lg:flex items-center gap-x-3 2xl:gap-x-4 min-w-0">
                 {/* Search Bar */}
                 <div className="relative min-w-0">
                   <div
                     className={`flex items-center bg-slate-700/50 border border-slate-600/50 rounded-xl transition-all duration-300 ${
-                      isSearchFocused ? "ring-2 ring-purple-500/50 border-purple-500/50 w-56 xl:w-80" : "w-40 xl:w-64"
+                      isSearchFocused ? "ring-2 ring-purple-500/50 border-purple-500/50 w-56 lg:w-80" : "w-40 lg:w-64"
                     }`}
                   >
                     <Search className="w-5 h-5 text-slate-400 ml-3" />
@@ -339,7 +340,7 @@ const Navbar = () => {
             )}
 
             {/* Hamburger Menu (≤lg: 1024px and below) */}
-            <div className="flex xl:hidden items-center">
+            <div className="flex lg:hidden items-center">
               <button
                 onClick={toggleMobileMenu}
                 className="p-2 text-slate-400 hover:text-white transition-colors duration-300 hover:bg-slate-700/50 rounded-lg"
@@ -354,7 +355,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 z-[100] xl:hidden transition-all duration-500 ${
+        className={`fixed inset-0 z-[100] lg:hidden transition-all duration-500 ${
           isMobileMenuOpen ? "visible" : "invisible"
         }`}
       >
