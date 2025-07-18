@@ -237,107 +237,109 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 p-8">
+    <div className="min-h-screen bg-slate-900 pt-24 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
-          <p className="text-slate-400">System overview and management - Welcome, {user?.name}</p>
+        <div className="mb-8 sm:mb-10">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
+            Admin Dashboard
+          </h1>
+          <p className="text-slate-400 text-base sm:text-lg">System overview and management - Welcome, {user?.name}</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Total Users</p>
-                <p className="text-2xl font-bold text-white">{stats.totalUsers || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Total Users</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">{stats.totalUsers || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Citizens</p>
-                <p className="text-2xl font-bold text-green-400">{stats.totalCitizens || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Citizens</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-400 group-hover:text-green-300 transition-colors duration-300">{stats.totalCitizens || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-green-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-green-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Officers</p>
-                <p className="text-2xl font-bold text-purple-400">{stats.totalOfficers || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Officers</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 group-hover:text-purple-300 transition-colors duration-300">{stats.totalOfficers || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-purple-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Total Grievances</p>
-                <p className="text-2xl font-bold text-white">{stats.total || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Total Grievances</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white group-hover:text-orange-300 transition-colors duration-300">{stats.total || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-orange-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-orange-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-orange-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Pending</p>
-                <p className="text-2xl font-bold text-yellow-400">{stats.pending || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Pending</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300">{stats.pending || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-yellow-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Resolved</p>
-                <p className="text-2xl font-bold text-green-400">{stats.resolved || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Resolved</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-400 group-hover:text-green-300 transition-colors duration-300">{stats.resolved || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-green-400" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Recent Activity */}
           <div className="lg:col-span-2">
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Recent Activity</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-white">Recent Activity</h2>
                 <div className="flex items-center gap-3">
                   {selectedGrievances.length > 0 && (
                     <button
                       onClick={handleDeleteBulk}
-                      className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-all text-sm"
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-all duration-300 text-sm hover:shadow-lg hover:shadow-red-500/25"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete ({selectedGrievances.length})
                     </button>
                   )}
-                  <Link to="/analytics" className="text-purple-400 hover:text-purple-300 text-sm font-medium">
+                  <Link to="/analytics" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-300">
                     View Analytics
                   </Link>
                 </div>
@@ -345,7 +347,7 @@ const AdminDashboard = () => {
 
               {!recentActivity || recentActivity.length === 0 ? (
                 <div className="text-center py-8">
-                  <FileText className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                  <FileText className="w-12 h-12 text-slate-600 mx-auto mb-4 animate-pulse" />
                   <p className="text-slate-400">No recent activity</p>
                 </div>
               ) : (
@@ -364,7 +366,7 @@ const AdminDashboard = () => {
                   </div>
 
                   {recentActivity.map((grievance) => (
-                    <div key={grievance._id} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
+                    <div key={grievance._id} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-slate-500/10">
                       <div className="flex items-start gap-3">
                         {/* Selection Checkbox */}
                         <input
@@ -400,14 +402,14 @@ const AdminDashboard = () => {
                         <div className="flex items-center gap-2">
                           <Link
                             to={`/grievance/${grievance._id}`}
-                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all text-sm"
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all duration-300 text-sm hover:shadow-lg hover:shadow-blue-500/25"
                           >
                             <Eye className="w-3 h-3" />
                             View
                           </Link>
                           <button
                             onClick={() => handleDeleteSingle(grievance)}
-                            className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-all text-sm"
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-all duration-300 text-sm hover:shadow-lg hover:shadow-red-500/25"
                           >
                             <Trash2 className="w-3 h-3" />
                             Delete
@@ -423,50 +425,32 @@ const AdminDashboard = () => {
 
           {/* Quick Actions & Stats */}
           <div className="space-y-6">
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Quick Actions</h2>
               <div className="space-y-3">
                 <Link
                   to="/user-management"
-                  className="block w-full bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 text-blue-300 hover:bg-blue-500/30 transition-all"
+                  className="block w-full bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 text-blue-300 hover:bg-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25"
                 >
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5" />
-                    Manage Users
+                    <span className="text-sm sm:text-base">Manage Users</span>
                   </div>
                 </Link>
                 <Link
                   to="/analytics"
-                  className="block w-full bg-purple-500/20 border border-purple-500/30 rounded-lg p-3 text-purple-300 hover:bg-purple-500/30 transition-all"
+                  className="block w-full bg-purple-500/20 border border-purple-500/30 rounded-lg p-3 text-purple-300 hover:bg-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
                 >
                   <div className="flex items-center gap-3">
                     <BarChart3 className="w-5 h-5" />
-                    View Analytics
-                  </div>
-                </Link>
-                <Link
-                  to="/reports"
-                  className="block w-full bg-green-500/20 border border-green-500/30 rounded-lg p-3 text-green-300 hover:bg-green-500/30 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5" />
-                    All Reports
-                  </div>
-                </Link>
-                <Link
-                  to="/reports/system"
-                  className="block w-full bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 text-orange-300 hover:bg-orange-500/30 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5" />
-                    System Reports
+                    <span className="text-sm sm:text-base">View Analytics</span>
                   </div>
                 </Link>
               </div>
             </div>
 
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-white mb-6">Department Distribution</h2>
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Department Distribution</h2>
               <div className="space-y-3">
                 {!departmentStats || departmentStats.length === 0 ? (
                   <p className="text-slate-400 text-sm">No department data available</p>
@@ -483,8 +467,8 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-white mb-6">System Health</h2>
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">System Health</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300 text-sm">Average Resolution Time</span>
@@ -501,7 +485,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300 text-sm">System Status</span>
                   <span className="text-green-400 font-medium flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     Online
                   </span>
                 </div>

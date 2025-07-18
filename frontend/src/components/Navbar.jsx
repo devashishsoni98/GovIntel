@@ -117,16 +117,6 @@ const Navbar = () => {
           href: "/assigned-cases",
           icon: <FileText className="w-4 h-4" />,
         },
-        {
-          name: "Reports",
-          href: "#",
-          icon: <BarChart3 className="w-4 h-4" />,
-          dropdown: [
-            { name: "Department Reports", href: "/reports/department", icon: <Building className="w-4 h-4" /> },
-            { name: "Monthly Reports", href: "/reports/monthly", icon: <Calendar className="w-4 h-4" /> },
-            { name: "Performance Reports", href: "/reports/performance", icon: <BarChart3 className="w-4 h-4" /> },
-          ],
-        },
       ]
     }
 
@@ -137,19 +127,6 @@ const Navbar = () => {
           name: "User Management",
           href: "/user-management",
           icon: <Users className="w-4 h-4" />,
-        },
-        {
-          name: "Reports",
-          href: "#",
-          icon: <BarChart3 className="w-4 h-4" />,
-          dropdown: [
-            { name: "System Reports", href: "/reports/system", icon: <Database className="w-4 h-4" /> },
-            { name: "Department Reports", href: "/reports/departments", icon: <Building className="w-4 h-4" /> },
-            { name: "Monthly Reports", href: "/reports/monthly", icon: <Calendar className="w-4 h-4" /> },
-            { name: "Performance Reports", href: "/reports/performance", icon: <BarChart3 className="w-4 h-4" /> },
-            { name: "Custom Reports", href: "/reports/custom", icon: <Settings className="w-4 h-4" /> },
-            { name: "Export Data", href: "/reports/export", icon: <Database className="w-4 h-4" /> },
-          ],
         },
         {
           name: "Analytics",

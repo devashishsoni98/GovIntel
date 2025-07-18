@@ -130,68 +130,68 @@ const Home = () => {
         bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900
         text-white
         overflow-x-hidden
-        pt-[56px] sm:pt-[56px] md:pt-[72px] lg:pt-[72px]
+        pt-16 sm:pt-16 md:pt-20 lg:pt-20
       `}
     >
       {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-56px)] md:min-h-[calc(100vh-72px)] flex items-center justify-center px-2 sm:px-4 lg:px-8">
+      <section className="relative min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-blue-600/20 to-cyan-600/20 backdrop-blur-3xl"></div>
         <div className="relative z-10 max-w-7xl mx-auto text-center">
           <ScrollReveal>
-            <div className="mb-6 sm:mb-8">
-              <span className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-medium backdrop-blur-sm">
+            <div className="mb-8 sm:mb-10">
+              <span className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm sm:text-base font-medium backdrop-blur-sm hover:bg-purple-500/30 transition-all duration-300">
                 <Zap className="w-4 h-4 mr-2" />
                 AI-Powered Government Solution
               </span>
             </div>
-            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-white via-purple-100 to-cyan-100 bg-clip-text text-transparent leading-tight">
+            <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-white via-purple-100 to-cyan-100 bg-clip-text text-transparent leading-tight">
               Transform Public
               <br />
               <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 Grievance Management
               </span>
             </h1>
-            <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-slate-300 mb-8 sm:mb-12 max-w-2xl sm:max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg xs:text-xl sm:text-2xl md:text-3xl text-slate-300 mb-10 sm:mb-14 max-w-3xl sm:max-w-5xl mx-auto leading-relaxed">
               AI-backed complaint analyzer that automatically prioritizes, classifies, and routes citizen grievances to
               the right department with advanced NLP and sentiment analysis.
             </p>
-            <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
               {isAuthenticated ? (
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="w-full xs:w-auto group bg-gradient-to-r from-purple-500 to-pink-500 px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 text-center"
+                  className="w-full sm:w-auto group bg-gradient-to-r from-purple-500 to-pink-500 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 text-center"
                 >
                   Go to Dashboard
-                  <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="inline-block ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </button>
               ) : (
                 <Link
                   to="/signin"
-                  className="w-full xs:w-auto group bg-gradient-to-r from-purple-500 to-pink-500 px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 inline-flex items-center justify-center"
+                  className="w-full sm:w-auto group bg-gradient-to-r from-purple-500 to-pink-500 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 inline-flex items-center justify-center"
                 >
                   Start Free Trial
-                  <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="inline-block ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
               )}
-              <button className="w-full xs:w-auto px-6 xs:px-8 py-3 xs:py-4 rounded-xl text-base xs:text-lg font-semibold border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 transition-all backdrop-blur-sm">
+              <button className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 transition-all duration-300 backdrop-blur-sm">
                 Watch Demo
               </button>
             </div>
             {isAuthenticated && (
-              <div className="mt-6 p-4 bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-xl inline-block">
+              <div className="mt-8 p-6 bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-xl inline-block hover:bg-slate-800/40 transition-all duration-300">
                 <p className="text-slate-300">
                   Welcome back, <span className="text-white font-semibold">{user?.name}</span>!
                 </p>
-                <p className="text-sm text-slate-400">Role: {user?.role}</p>
+                <p className="text-sm text-slate-400 capitalize">Role: {user?.role}</p>
               </div>
             )}
           </ScrollReveal>
         </div>
         {/* Floating Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-40 h-40 xs:w-64 xs:h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-56 h-56 xs:w-96 xs:h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 right-1/3 w-48 h-48 xs:w-80 xs:h-80 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 sm:w-[32rem] sm:h-[32rem] bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-72 h-72 sm:w-[28rem] sm:h-[28rem] bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
         </div>
       </section>
 

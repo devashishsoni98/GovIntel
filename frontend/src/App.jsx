@@ -16,7 +16,6 @@ import Analytics from "./pages/Analytics"
 import GrievanceDetail from "./pages/GrievanceDetail"
 import AssignedCases from "./pages/AssignedCases"
 import UserManagement from "./pages/UserManagement"
-import Reports from "./pages/Reports"
 
 // Make sure to import your CSS file that includes Tailwind
 import "./index.css"
@@ -102,31 +101,16 @@ function AppContent() {
             />
 
             {/* Shared Protected Routes */}
-            <Route
-              path="/reports/*"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.OFFICER, USER_ROLES.ADMIN]}>
-                  <Reports />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/reports/:reportType"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.OFFICER, USER_ROLES.ADMIN]}>
-                  <Reports />
-                </ProtectedRoute>
-              }
-            />
 
             {/* Unauthorized Page */}
             <Route
               path="/unauthorized"
               element={
-                <div className="pt-20 p-8 text-center">
+                <div className="min-h-screen bg-slate-900 pt-24 p-8 flex items-center justify-center">
+                  <div className="text-center">
                   <h1 className="text-white text-2xl mb-4">Unauthorized Access</h1>
                   <p className="text-slate-400">You don't have permission to access this page.</p>
+                  </div>
                 </div>
               }
             />

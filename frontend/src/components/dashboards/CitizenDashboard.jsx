@@ -164,97 +164,99 @@ const CitizenDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 p-8">
+    <div className="min-h-screen bg-slate-900 pt-24 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user?.name}!</h1>
-          <p className="text-slate-400">Track your grievances and submit new complaints</p>
+        <div className="mb-8 sm:mb-10">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+            Welcome back, {user?.name}!
+          </h1>
+          <p className="text-slate-400 text-base sm:text-lg">Track your grievances and submit new complaints</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Total Grievances</p>
-                <p className="text-2xl font-bold text-white">{stats.total || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Total Grievances</p>
+                <p className="text-xl sm:text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">{stats.total || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-blue-400" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Pending</p>
-                <p className="text-2xl font-bold text-yellow-400">{stats.pending || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Pending</p>
+                <p className="text-xl sm:text-2xl font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300">{stats.pending || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-400" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">In Progress</p>
-                <p className="text-2xl font-bold text-blue-400">{stats.inProgress || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">In Progress</p>
+                <p className="text-xl sm:text-2xl font-bold text-blue-400 group-hover:text-blue-300 transition-colors duration-300">{stats.inProgress || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-blue-400" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Resolved</p>
-                <p className="text-2xl font-bold text-green-400">{stats.resolved || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Resolved</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-400 group-hover:text-green-300 transition-colors duration-300">{stats.resolved || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-400" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-10">
           <div className="lg:col-span-2">
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Quick Actions</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <Link
                   to="/submit-complaint"
-                  className="group bg-gradient-to-r from-purple-500 to-blue-500 p-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105"
+                  className="group bg-gradient-to-r from-purple-500 to-blue-500 p-4 sm:p-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                      <Plus className="w-6 h-6 text-white" />
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-white font-semibold">Submit New Complaint</h3>
-                      <p className="text-white/80 text-sm">Report a new grievance</p>
+                      <h3 className="text-white font-semibold text-sm sm:text-base">Submit New Complaint</h3>
+                      <p className="text-white/80 text-xs sm:text-sm">Report a new grievance</p>
                     </div>
                   </div>
                 </Link>
 
                 <Link
                   to="/my-grievances"
-                  className="group bg-slate-700/50 border border-slate-600/50 p-6 rounded-xl hover:bg-slate-700/70 transition-all transform hover:scale-105"
+                  className="group bg-slate-700/50 border border-slate-600/50 p-4 sm:p-6 rounded-xl hover:bg-slate-700/70 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-slate-500/25"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                      <MessageSquare className="w-6 h-6 text-blue-400" />
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-white font-semibold">View My Grievances</h3>
-                      <p className="text-slate-400 text-sm">Track your complaints</p>
+                      <h3 className="text-white font-semibold text-sm sm:text-base">View My Grievances</h3>
+                      <p className="text-slate-400 text-xs sm:text-sm">Track your complaints</p>
                     </div>
                   </div>
                 </Link>
@@ -262,41 +264,41 @@ const CitizenDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-xl font-bold text-white mb-6">Tips</h2>
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Tips</h2>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
-                <p className="text-slate-300 text-sm">Provide detailed descriptions for faster resolution</p>
+                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 animate-pulse"></div>
+                <p className="text-slate-300 text-xs sm:text-sm">Provide detailed descriptions for faster resolution</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
-                <p className="text-slate-300 text-sm">Include photos or videos as evidence</p>
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 animate-pulse delay-200"></div>
+                <p className="text-slate-300 text-xs sm:text-sm">Include photos or videos as evidence</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
-                <p className="text-slate-300 text-sm">Check back regularly for updates</p>
+                <div className="w-2 h-2 bg-green-400 rounded-full mt-2 animate-pulse delay-500"></div>
+                <p className="text-slate-300 text-xs sm:text-sm">Check back regularly for updates</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Recent Grievances */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-white">Recent Grievances</h2>
-            <Link to="/my-grievances" className="text-purple-400 hover:text-purple-300 text-sm font-medium">
+            <h2 className="text-lg sm:text-xl font-bold text-white">Recent Grievances</h2>
+            <Link to="/my-grievances" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-300">
               View All
             </Link>
           </div>
 
           {!recentGrievances || recentGrievances.length === 0 ? (
             <div className="text-center py-8">
-              <MessageSquare className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+              <MessageSquare className="w-12 h-12 text-slate-600 mx-auto mb-4 animate-pulse" />
               <p className="text-slate-400">No grievances submitted yet</p>
               <Link
                 to="/submit-complaint"
-                className="inline-flex items-center gap-2 mt-4 text-purple-400 hover:text-purple-300"
+                className="inline-flex items-center gap-2 mt-4 text-purple-400 hover:text-purple-300 transition-colors duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Submit your first complaint
@@ -307,20 +309,20 @@ const CitizenDashboard = () => {
               {recentGrievances.map((grievance) => (
                 <div
                   key={grievance._id}
-                  className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all"
+                  className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-slate-500/10"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-white font-medium">{grievance.title}</h3>
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(grievance.status)}`}
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(grievance.status)}`}
                         >
                           {getStatusIcon(grievance.status)}
                           {grievance.status.replace("_", " ")}
                         </span>
                       </div>
-                      <p className="text-slate-400 text-sm mb-2 line-clamp-2">{grievance.description}</p>
+                      <p className="text-slate-400 text-sm mb-2 line-clamp-2 leading-relaxed">{grievance.description}</p>
                       <div className="flex items-center gap-4 text-xs text-slate-500">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
@@ -334,7 +336,7 @@ const CitizenDashboard = () => {
                     </div>
                     <Link
                       to={`/grievance/${grievance._id}`}
-                      className="text-purple-400 hover:text-purple-300 text-sm font-medium ml-4"
+                      className="text-purple-400 hover:text-purple-300 text-sm font-medium ml-4 transition-colors duration-300 hover:underline"
                     >
                       View Details
                     </Link>
