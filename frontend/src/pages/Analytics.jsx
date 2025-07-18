@@ -130,21 +130,21 @@ const Analytics = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 p-8">
+    <div className="min-h-screen bg-slate-900 pt-20 sm:pt-24 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 animate-fade-in">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
             <p className="text-slate-400">Comprehensive insights and performance metrics</p>
           </div>
           
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 md:mt-0">
             {/* Timeframe Selector */}
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
-              className="px-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 hover:bg-slate-700/70 transition-all text-sm"
             >
               <option value="week">Last Week</option>
               <option value="month">Last Month</option>
@@ -154,7 +154,7 @@ const Analytics = () => {
             {/* Export Button */}
             <button
               onClick={() => exportData('all')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all"
+              className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all hover:scale-105 text-sm"
             >
               <Download className="w-4 h-4" />
               Export
@@ -163,7 +163,7 @@ const Analytics = () => {
             {/* Refresh Button */}
             <button
               onClick={fetchAnalytics}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all"
+              className="inline-flex items-center gap-2 px-3 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all hover:scale-105 text-sm"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
@@ -172,15 +172,15 @@ const Analytics = () => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg animate-bounce-in">
             <p className="text-red-400">{error}</p>
           </div>
         )}
 
         {/* Key Metrics */}
         {analytics.dashboard && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10 animate-slide-up">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm">Total Grievances</p>
@@ -192,7 +192,7 @@ const Analytics = () => {
               </div>
             </div>
 
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/10 animate-slide-up" style={{animationDelay: '0.1s'}}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm">Resolution Rate</p>
@@ -204,7 +204,7 @@ const Analytics = () => {
               </div>
             </div>
 
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 animate-slide-up" style={{animationDelay: '0.2s'}}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm">Avg Resolution Time</p>
@@ -217,7 +217,7 @@ const Analytics = () => {
             </div>
 
             {user.role === "admin" && analytics.dashboard.userStats && (
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/10 animate-slide-up" style={{animationDelay: '0.3s'}}>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-slate-400 text-sm">Active Users</p>
@@ -232,10 +232,10 @@ const Analytics = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
           {/* Status Distribution */}
           {analytics.dashboard?.statusStats && (
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in">
               <h2 className="text-xl font-bold text-white mb-6">Status Distribution</h2>
               <div className="space-y-4">
                 {analytics.dashboard.statusStats.map((stat) => (
@@ -263,7 +263,7 @@ const Analytics = () => {
 
           {/* Category Breakdown */}
           {analytics.dashboard?.categoryStats && (
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.1s'}}>
               <h2 className="text-xl font-bold text-white mb-6">Category Breakdown</h2>
               <div className="space-y-4">
                 {analytics.dashboard.categoryStats.map((stat) => (
@@ -287,7 +287,7 @@ const Analytics = () => {
 
         {/* Trends Chart */}
         {analytics.trends?.trends && (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 animate-fade-in" style={{animationDelay: '0.2s'}}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Trends Analysis</h2>
               <div className="flex items-center gap-2 text-sm text-slate-400">
@@ -298,7 +298,7 @@ const Analytics = () => {
             
             <div className="space-y-4">
               {analytics.trends.trends.map((trend, index) => (
-                <div key={index} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
+                <div key={index} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-300 hover:scale-[1.02]">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-slate-300 font-medium">
                       {formatTrendDate(trend._id)}
@@ -328,11 +328,11 @@ const Analytics = () => {
 
         {/* Performance Metrics (Officer/Admin only) */}
         {user.role !== "citizen" && analytics.performance && (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.3s'}}>
             <h2 className="text-xl font-bold text-white mb-6">Performance Metrics</h2>
             <div className="space-y-4">
               {analytics.performance.map((perf, index) => (
-                <div key={index} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
+                <div key={index} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-300 hover:scale-[1.02]">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-white font-medium">

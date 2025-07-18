@@ -825,16 +825,16 @@ const UserManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 p-8">
+    <div className="min-h-screen bg-slate-900 pt-20 sm:pt-24 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 animate-fade-in">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">User Management</h1>
             <p className="text-slate-400">Manage system users, roles, and permissions</p>
           </div>
           
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 md:mt-0">
             {selectedUsers.length > 0 && (
               <div className="flex items-center gap-2">
                 <button className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-all">
@@ -848,14 +848,14 @@ const UserManagement = () => {
               </div>
             )}
             
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all">
+            <button className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all hover:scale-105 text-sm">
               <Download className="w-4 h-4" />
               Export
             </button>
             
             <button 
               onClick={handleCreateUser}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-2 rounded-lg text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 rounded-lg text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all hover:scale-105"
             >
               <Plus className="w-4 h-4" />
               Add User
@@ -864,7 +864,7 @@ const UserManagement = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8">
+        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 animate-slide-up">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div className="relative">
@@ -874,7 +874,7 @@ const UserManagement = () => {
                 placeholder="Search users..."
                 value={filters.search}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
               />
             </div>
 
@@ -882,7 +882,7 @@ const UserManagement = () => {
             <select
               value={filters.role}
               onChange={(e) => handleFilterChange("role", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
             >
               {roleOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -895,7 +895,7 @@ const UserManagement = () => {
             <select
               value={filters.department}
               onChange={(e) => handleFilterChange("department", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
             >
               <option value="">All Departments</option>
               {departments.map((dept) => (
@@ -909,7 +909,7 @@ const UserManagement = () => {
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange("status", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -921,7 +921,7 @@ const UserManagement = () => {
             {/* Clear Filters */}
             <button
               onClick={() => setFilters({ role: "", department: "", status: "active", search: "" })}
-              className="px-4 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all"
+              className="px-4 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all hover:scale-105"
             >
               Clear Filters
             </button>
@@ -930,13 +930,13 @@ const UserManagement = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg animate-bounce-in">
             <p className="text-red-400">{error}</p>
           </div>
         )}
 
         {/* Users Table */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl overflow-hidden">
+        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl overflow-hidden animate-fade-in">
           {/* Table Header */}
           <div className="p-6 border-b border-slate-700/50">
             <div className="flex items-center justify-between">
@@ -968,7 +968,7 @@ const UserManagement = () => {
               </p>
               <button 
                 onClick={handleCreateUser}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all hover:scale-105"
               >
                 <Plus className="w-5 h-5" />
                 Create First User
@@ -1009,7 +1009,7 @@ const UserManagement = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-700/50">
                   {users.map((user) => (
-                    <tr key={user._id} className="hover:bg-slate-700/30 transition-colors">
+                    <tr key={user._id} className="hover:bg-slate-700/30 transition-all duration-300 hover:scale-[1.01]">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="checkbox"
@@ -1079,14 +1079,14 @@ const UserManagement = () => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEditUser(user)}
-                            className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-lg transition-all"
+                            className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-lg transition-all hover:scale-110"
                             title="Edit User"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleViewUser(user)}
-                            className="p-2 text-green-400 hover:text-green-300 hover:bg-green-400/10 rounded-lg transition-all"
+                            className="p-2 text-green-400 hover:text-green-300 hover:bg-green-400/10 rounded-lg transition-all hover:scale-110"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
@@ -1094,7 +1094,7 @@ const UserManagement = () => {
                           {user._id !== currentUser?.id && (
                             <button
                               onClick={() => handleDeleteUser(user)}
-                              className="p-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-all"
+                              className="p-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-all hover:scale-110"
                               title="Delete User"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1120,7 +1120,7 @@ const UserManagement = () => {
                 <button
                   onClick={() => handlePageChange(pagination.current - 1)}
                   disabled={pagination.current === 1}
-                  className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                 >
                   Previous
                 </button>
@@ -1158,7 +1158,7 @@ const UserManagement = () => {
                 <button
                   onClick={() => handlePageChange(pagination.current + 1)}
                   disabled={pagination.current === pagination.pages}
-                  className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                 >
                   Next
                 </button>

@@ -165,10 +165,10 @@ const MyGrievances = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-24 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-900 pt-20 sm:pt-24 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 sm:mb-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 sm:mb-8 animate-fade-in">
           <div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">
               My Grievances
@@ -177,7 +177,7 @@ const MyGrievances = () => {
           </div>
           <Link
             to="/submit-complaint"
-            className="mt-4 lg:mt-0 inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25"
+            className="mt-4 lg:mt-0 inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 rounded-lg text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25"
           >
             <Plus className="w-5 h-5" />
             Submit New Complaint
@@ -185,7 +185,7 @@ const MyGrievances = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-8">
+        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 animate-slide-up">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
@@ -195,7 +195,7 @@ const MyGrievances = () => {
                 placeholder="Search grievances..."
                 value={filters.search}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+                className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
               />
             </div>
 
@@ -203,7 +203,7 @@ const MyGrievances = () => {
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange("status", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -216,7 +216,7 @@ const MyGrievances = () => {
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange("category", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
             >
               {categoryOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -229,7 +229,7 @@ const MyGrievances = () => {
             <select
               value={filters.priority}
               onChange={(e) => handleFilterChange("priority", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
             >
               {priorityOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -242,7 +242,7 @@ const MyGrievances = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg animate-bounce-in">
             <p className="text-red-400">{error}</p>
           </div>
         )}
@@ -251,16 +251,16 @@ const MyGrievances = () => {
         {loading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 animate-pulse">
-                <div className="h-6 bg-slate-700 rounded w-1/3 mb-4"></div>
-                <div className="h-4 bg-slate-700 rounded w-2/3 mb-2"></div>
-                <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+              <div key={i} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+                <div className="h-6 bg-slate-700 rounded w-1/3 mb-4 skeleton"></div>
+                <div className="h-4 bg-slate-700 rounded w-2/3 mb-2 skeleton"></div>
+                <div className="h-4 bg-slate-700 rounded w-1/2 skeleton"></div>
               </div>
             ))}
           </div>
         ) : grievances.length === 0 ? (
           /* Empty State */
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-12 text-center">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8 sm:p-12 text-center animate-fade-in">
             <MessageSquare className="w-16 h-16 text-slate-600 mx-auto mb-6 animate-pulse" />
             <h3 className="text-xl font-bold text-white mb-4">No Grievances Found</h3>
             <p className="text-slate-400 mb-8">
@@ -271,7 +271,7 @@ const MyGrievances = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/submit-complaint"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 hover:scale-105"
               >
                 <Plus className="w-5 h-5" />
                 Submit Your First Complaint
@@ -279,7 +279,7 @@ const MyGrievances = () => {
               {Object.values(filters).some((f) => f) && (
                 <button
                   onClick={() => setFilters({ status: "", category: "", priority: "", search: "" })}
-                  className="px-6 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all duration-300"
+                  className="px-6 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all duration-300 hover:scale-105"
                 >
                   Clear Filters
                 </button>
@@ -288,11 +288,11 @@ const MyGrievances = () => {
           </div>
         ) : (
           /* Grievances List */
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {grievances.map((grievance) => (
               <div
                 key={grievance._id}
-                className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg hover:shadow-slate-500/10"
+                className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:shadow-lg hover:shadow-slate-500/10 card-hover animate-fade-in"
               >
                 <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
                   <div className="flex-1">
@@ -371,7 +371,7 @@ const MyGrievances = () => {
                   <div className="flex flex-col sm:flex-row xl:flex-col gap-3">
                     <Link
                       to={`/grievance/${grievance._id}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all duration-300 text-center justify-center hover:shadow-lg hover:shadow-purple-500/25"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all duration-300 text-center justify-center hover:shadow-lg hover:shadow-purple-500/25 hover:scale-105 text-sm"
                     >
                       <Eye className="w-4 h-4" />
                       View Details
@@ -380,7 +380,7 @@ const MyGrievances = () => {
                     {grievance.status === "resolved" && !grievance.feedback?.rating && (
                       <Link
                         to={`/grievance/${grievance._id}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all duration-300 text-center justify-center hover:shadow-lg hover:shadow-green-500/25"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all duration-300 text-center justify-center hover:shadow-lg hover:shadow-green-500/25 hover:scale-105 text-sm"
                       >
                         <Star className="w-4 h-4" />
                         Rate & Review
@@ -406,7 +406,7 @@ const MyGrievances = () => {
 
             {/* Pagination */}
             {pagination.pages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 gap-4 animate-fade-in">
                 <div className="text-slate-400 text-sm">
                   Showing {(pagination.current - 1) * pagination.limit + 1} to{" "}
                   {Math.min(pagination.current * pagination.limit, pagination.total)} of {pagination.total} grievances
@@ -415,7 +415,7 @@ const MyGrievances = () => {
                   <button
                     onClick={() => handlePageChange(pagination.current - 1)}
                     disabled={pagination.current === 1}
-                    className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                   >
                     Previous
                   </button>
@@ -453,7 +453,7 @@ const MyGrievances = () => {
                   <button
                     onClick={() => handlePageChange(pagination.current + 1)}
                     disabled={pagination.current === pagination.pages}
-                    className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                   >
                     Next
                   </button>

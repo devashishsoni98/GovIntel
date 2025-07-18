@@ -248,10 +248,10 @@ const GrievanceDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 p-4 sm:p-8">
+    <div className="min-h-screen bg-slate-900 pt-20 sm:pt-24 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto pt-16">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4 sm:mb-6">
+        <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4 sm:mb-6 animate-fade-in">
           <Link to="/dashboard" className="hover:text-white transition-colors">
             Dashboard
           </Link>
@@ -267,11 +267,11 @@ const GrievanceDetail = () => {
         </nav>
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-start justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-start justify-between mb-6 sm:mb-8 animate-slide-up">
           <div className="flex items-start gap-4 mb-4 md:mb-0">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 bg-slate-700/50 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
+              className="p-2 bg-slate-700/50 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-all hover:scale-105"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -308,11 +308,11 @@ const GrievanceDetail = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {canUpdateStatus() && (
               <button
                 onClick={() => setShowStatusModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all hover:scale-105 text-sm"
               >
                 <Edit className="w-4 h-4" />
                 Update Status
@@ -322,7 +322,7 @@ const GrievanceDetail = () => {
             {canReassign() && (
               <button
                 onClick={() => setShowReassignModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all hover:scale-105 text-sm"
               >
                 <UserCheck className="w-4 h-4" />
                 Reassign
@@ -332,7 +332,7 @@ const GrievanceDetail = () => {
             {canProvideFeedback() && (
               <button
                 onClick={() => setShowFeedbackModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all hover:scale-105 text-sm"
               >
                 <Star className="w-4 h-4" />
                 Rate & Review
@@ -343,7 +343,7 @@ const GrievanceDetail = () => {
               <button
                 onClick={handleAutoAssign}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 hover:bg-orange-500/30 transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 hover:bg-orange-500/30 transition-all disabled:opacity-50 hover:scale-105 text-sm"
               >
                 <UserCheck className="w-4 h-4" />
                 Auto Assign
@@ -353,7 +353,7 @@ const GrievanceDetail = () => {
             {(user?.role === "officer" || user?.role === "admin") && (
               <button
                 onClick={() => setShowAIInsights(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all hover:scale-105 text-sm"
               >
                 <Brain className="w-4 h-4" />
                 AI Insights
@@ -364,7 +364,7 @@ const GrievanceDetail = () => {
               <button
                 onClick={handleReanalyze}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 hover:bg-slate-700 transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 hover:bg-slate-700 transition-all disabled:opacity-50 hover:scale-105 text-sm"
               >
                 <RefreshCw className={`w-4 h-4 ${actionLoading ? 'animate-spin' : ''}`} />
                 Reanalyze
@@ -373,11 +373,11 @@ const GrievanceDetail = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Grievance Content */}
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in">
               <h2 className="text-xl font-bold text-white mb-4">Description</h2>
               <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{grievance.description}</p>
               
@@ -406,7 +406,7 @@ const GrievanceDetail = () => {
                   <h3 className="text-lg font-semibold text-white mb-3">Attachments</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {grievance.attachments.map((attachment, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-slate-700/30 border border-slate-600/30 rounded-lg">
+                      <div key={index} className="flex items-center gap-3 p-3 bg-slate-700/30 border border-slate-600/30 rounded-lg hover:bg-slate-700/50 transition-all duration-300 hover:scale-105">
                         <FileText className="w-5 h-5 text-slate-400" />
                         <div className="flex-1 min-w-0">
                           <p className="text-slate-300 text-sm font-medium truncate">{attachment.originalName}</p>
@@ -416,7 +416,7 @@ const GrievanceDetail = () => {
                           href={`/uploads/${attachment.path}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1 text-slate-400 hover:text-white transition-colors"
+                          className="p-1 text-slate-400 hover:text-white transition-all hover:scale-110"
                         >
                           <Download className="w-4 h-4" />
                         </a>
@@ -429,7 +429,7 @@ const GrievanceDetail = () => {
 
             {/* AI Analysis (Officer/Admin only) */}
             {(user?.role === "officer" || user?.role === "admin") && grievance.aiAnalysis && (
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.1s'}}>
                 <h2 className="text-xl font-bold text-white mb-4">AI Analysis</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
@@ -474,7 +474,7 @@ const GrievanceDetail = () => {
             )}
 
             {/* Timeline */}
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.2s'}}>
               <h2 className="text-xl font-bold text-white mb-6">Timeline</h2>
               <div className="space-y-4">
                 {/* Creation */}
@@ -536,7 +536,7 @@ const GrievanceDetail = () => {
 
             {/* Feedback */}
             {grievance.feedback?.rating && (
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.3s'}}>
                 <h2 className="text-xl font-bold text-white mb-4">Citizen Feedback</h2>
                 <div className="flex items-center gap-2 mb-3">
                   {[...Array(5)].map((_, i) => (
@@ -560,9 +560,9 @@ const GrievanceDetail = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Assignment Info */}
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-in-right">
               <h3 className="text-lg font-bold text-white mb-4">Assignment</h3>
               
               {grievance.assignedOfficer ? (
@@ -596,7 +596,7 @@ const GrievanceDetail = () => {
                     <button
                       onClick={handleAutoAssign}
                       disabled={actionLoading}
-                      className="mt-3 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all text-sm disabled:opacity-50"
+                      className="mt-3 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all text-sm disabled:opacity-50 hover:scale-105"
                     >
                       Auto Assign
                     </button>
@@ -607,7 +607,7 @@ const GrievanceDetail = () => {
 
             {/* Citizen Info (Officer/Admin only) */}
             {(user?.role === "officer" || user?.role === "admin") && !grievance.isAnonymous && (
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-in-right" style={{animationDelay: '0.1s'}}>
                 <h3 className="text-lg font-bold text-white mb-4">Citizen Information</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -629,7 +629,7 @@ const GrievanceDetail = () => {
             )}
 
             {/* Quick Stats */}
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-in-right" style={{animationDelay: '0.2s'}}>
               <h3 className="text-lg font-bold text-white mb-4">Quick Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">

@@ -299,30 +299,30 @@ const SubmitComplaint = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20 p-8">
+    <div className="min-h-screen bg-slate-900 pt-20 sm:pt-24 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-white mb-2">Submit Complaint</h1>
           <p className="text-slate-400">Report your grievance with detailed information for faster resolution</p>
         </div>
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg animate-bounce-in">
             <p className="text-green-400">{success}</p>
           </div>
         )}
 
         {(error || (isError && message)) && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg animate-bounce-in">
             <p className="text-red-400">{error || message}</p>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up">
             <h2 className="text-xl font-bold text-white mb-6">Complaint Details</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -337,7 +337,7 @@ const SubmitComplaint = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                   placeholder="Brief title describing your complaint"
                   required
                 />
@@ -353,7 +353,7 @@ const SubmitComplaint = () => {
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                   required
                 >
                   <option value="">Select a category</option>
@@ -375,7 +375,7 @@ const SubmitComplaint = () => {
                   name="priority"
                   value={formData.priority}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                 >
                   {priorities.map((priority) => (
                     <option key={priority.value} value={priority.value}>
@@ -396,7 +396,7 @@ const SubmitComplaint = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={6}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all resize-none"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all resize-none hover:bg-slate-700/70"
                   placeholder="Provide detailed information about your complaint..."
                   required
                 />
@@ -405,7 +405,7 @@ const SubmitComplaint = () => {
           </div>
 
           {/* Location Information */}
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up" style={{animationDelay: '0.1s'}}>
             <h2 className="text-xl font-bold text-white mb-6">Location Information</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -420,7 +420,7 @@ const SubmitComplaint = () => {
                   name="address"
                   value={formData.location.address}
                   onChange={handleLocationChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                   placeholder="Enter the location where the issue occurred"
                   required
                 />
@@ -438,7 +438,7 @@ const SubmitComplaint = () => {
                   value={formData.location.coordinates.latitude}
                   onChange={handleLocationChange}
                   step="any"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                   placeholder="Optional"
                 />
               </div>
@@ -454,7 +454,7 @@ const SubmitComplaint = () => {
                   value={formData.location.coordinates.longitude}
                   onChange={handleLocationChange}
                   step="any"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                   placeholder="Optional"
                 />
               </div>
@@ -464,7 +464,7 @@ const SubmitComplaint = () => {
                 <button
                   type="button"
                   onClick={getCurrentLocation}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all hover:scale-105"
                 >
                   <MapPin className="w-4 h-4" />
                   Use Current Location
@@ -482,7 +482,7 @@ const SubmitComplaint = () => {
                   name="landmark"
                   value={formData.location.landmark}
                   onChange={handleLocationChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                   placeholder="Any nearby landmark to help locate the issue"
                 />
               </div>
@@ -490,7 +490,7 @@ const SubmitComplaint = () => {
           </div>
 
           {/* Attachments */}
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up" style={{animationDelay: '0.2s'}}>
             <h2 className="text-xl font-bold text-white mb-6">Attachments</h2>
             <p className="text-slate-400 text-sm mb-4">
               Upload photos, videos, audio recordings, or documents (Max 5 files, 10MB each)
@@ -499,7 +499,7 @@ const SubmitComplaint = () => {
             {/* File Upload Area */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center cursor-pointer hover:border-purple-500/50 transition-all"
+              className="border-2 border-dashed border-slate-600 rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-purple-500/50 transition-all hover:bg-slate-700/20"
             >
               <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
               <p className="text-slate-300 mb-2">Click to upload files</p>
@@ -523,7 +523,7 @@ const SubmitComplaint = () => {
                   {attachments.map((file, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between bg-slate-700/30 border border-slate-600/30 rounded-lg p-3"
+                      className="flex items-center justify-between bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 hover:bg-slate-700/50 transition-all duration-300"
                     >
                       <div className="flex items-center gap-3">
                         {getFileIcon(file)}
@@ -535,7 +535,7 @@ const SubmitComplaint = () => {
                       <button
                         type="button"
                         onClick={() => removeAttachment(index)}
-                        className="text-red-400 hover:text-red-300 transition-colors"
+                        className="text-red-400 hover:text-red-300 transition-all hover:scale-110"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -547,7 +547,7 @@ const SubmitComplaint = () => {
           </div>
 
           {/* Additional Options */}
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up" style={{animationDelay: '0.3s'}}>
             <h2 className="text-xl font-bold text-white mb-6">Additional Options</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -563,7 +563,7 @@ const SubmitComplaint = () => {
                   value={formData.expectedResolutionDate}
                   onChange={handleInputChange}
                   min={new Date().toISOString().split("T")[0]}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
                 />
               </div>
 
@@ -589,14 +589,14 @@ const SubmitComplaint = () => {
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
-              className="w-full sm:w-auto px-6 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all"
+              className="w-full sm:w-auto px-6 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all hover:scale-105"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto group bg-gradient-to-r from-purple-500 to-blue-500 px-8 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              className="w-full sm:w-auto group bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
