@@ -12,6 +12,7 @@ const userRoutes = require("./routes/users")
 const analyticsRoutes = require("./routes/analytics")
 const departmentRoutes = require("./routes/departments")
 const adminRoutes = require("./routes/admin")
+const aiRoutes = require("./routes/ai")
 
 // Import models
 const User = require("./models/User")
