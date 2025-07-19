@@ -47,6 +47,16 @@ app.use("/api/analytics", analyticsRoutes)
 app.use("/api/departments", departmentRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/ai", aiRoutes)
+
+// Test route to verify API is working
+app.get("/api/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "API is working",
+    timestamp: new Date().toISOString()
+  })
+})
+
 // Debug route to test password (REMOVE IN PRODUCTION)
 app.post("/api/debug/test-password", async (req, res) => {
   try {
@@ -291,6 +301,7 @@ const startServer = async () => {
       console.log("   Admin: admin@gmail.com / 123456")
       console.log("   Citizen: citizen@example.com / password123")
       console.log("   Officer: officer@municipal.gov / password123")
+      console.log("   Officer Passcode: OFFICER2024")
       console.log("=".repeat(50))
     })
   } catch (error) {

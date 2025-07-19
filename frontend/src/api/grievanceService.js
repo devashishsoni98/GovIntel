@@ -3,13 +3,13 @@ import api from "./index"
 export const grievanceService = {
   // Get all grievances (with optional filters)
   getGrievances: async (filters = {}) => {
-    const response = await api.get("/api/grievances", { params: filters })
+    const response = await api.get("/grievances", { params: filters })
     return response.data.data
   },
 
   // Get a single grievance by ID
   getGrievanceById: async (id) => {
-    const response = await api.get(`/api/grievances/${id}`)
+    const response = await api.get(`/grievances/${id}`)
     return response.data.data
   },
 
@@ -42,7 +42,7 @@ export const grievanceService = {
         })
       }
 
-      const response = await api.post("/api/grievances", formData, {
+      const response = await api.post("/grievances", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -54,13 +54,13 @@ export const grievanceService = {
 
   // Update a grievance
   updateGrievance: async (id, updateData) => {
-    const response = await api.put(`/api/grievances/${id}`, updateData)
+    const response = await api.put(`/grievances/${id}`, updateData)
     return response.data.data
   },
 
   // Update grievance status
   updateStatus: async (id, status, comment) => {
-    const response = await api.patch(`/api/grievances/${id}/status`, {
+    const response = await api.patch(`/grievances/${id}/status`, {
       status,
       comment,
     })
@@ -69,7 +69,7 @@ export const grievanceService = {
 
   // Add feedback to a resolved grievance
   addFeedback: async (id, rating, comment) => {
-    const response = await api.post(`/api/grievances/${id}/feedback`, {
+    const response = await api.post(`/grievances/${id}/feedback`, {
       rating,
       comment,
     })
@@ -78,7 +78,7 @@ export const grievanceService = {
 
   // Get grievance statistics
   getStatistics: async () => {
-    const response = await api.get("/api/grievances/statistics")
+    const response = await api.get("/grievances/statistics")
     return response.data.data
   },
 }

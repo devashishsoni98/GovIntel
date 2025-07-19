@@ -63,7 +63,7 @@ const SignIn = () => {
   const fetchDepartments = async () => {
     try {
       setLoadingDepartments(true)
-      const response = await fetch("/api/departments/active")
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/departments/active`)
       
       if (response.ok) {
         const data = await response.json()
@@ -352,7 +352,7 @@ const SignIn = () => {
                       />
                     </div>
                     <p className="text-slate-500 text-xs mt-1">
-                      Contact your administrator for the officer passcode
+                      Contact your administrator for the officer passcode (Demo: OFFICER2024)
                     </p>
                   </div>
                 )}

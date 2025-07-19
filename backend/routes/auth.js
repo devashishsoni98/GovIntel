@@ -30,7 +30,7 @@ router.post("/register", async (req, res) => {
         })
       }
 
-      if (officerPasscode !== "123456") {
+      if (officerPasscode !== "OFFICER2024") {
         return res.status(400).json({
           success: false,
           message: "Invalid officer passcode. Please contact your administrator.",

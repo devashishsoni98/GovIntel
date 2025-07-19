@@ -12,7 +12,7 @@ export const USER_ROLES = {
 export const registerUser = createAsyncThunk("auth/registerUser", async (userData, { rejectWithValue }) => {
   try {
     console.log("Registering user with data:", userData)
-    const response = await api.post("/api/auth/register", userData)
+    const response = await api.post("/auth/register", userData)
 
     console.log("Registration response:", response.data)
 
@@ -34,7 +34,7 @@ export const registerUser = createAsyncThunk("auth/registerUser", async (userDat
 export const loginUser = createAsyncThunk("auth/loginUser", async ({ email, password, role }, { rejectWithValue }) => {
   try {
     console.log("Logging in user with:", { email, role })
-    const response = await api.post("/api/auth/login", {
+    const response = await api.post("/auth/login", {
       email,
       password,
       role,
@@ -59,7 +59,7 @@ export const loginUser = createAsyncThunk("auth/loginUser", async ({ email, pass
 
 export const logoutUser = createAsyncThunk("auth/logoutUser", async (_, { rejectWithValue }) => {
   try {
-    await api.post("/api/auth/logout")
+    await api.post("/auth/logout")
   } catch (error) {
     console.error("Logout error:", error)
     // Continue with logout even if API call fails
