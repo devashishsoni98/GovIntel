@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const Department = require("../models/Department");
 const Grievance = require("../models/Grievance");
-const AIAnalysisEngine = require("../utils/aiAnalysis");
 require("dotenv").config();
 
 class ComprehensiveSeeder {
@@ -15,7 +14,7 @@ class ComprehensiveSeeder {
         categories: ["infrastructure", "sanitation", "water_supply", "electricity", "other"],
         contactInfo: {
           email: "municipal@city.gov",
-          phone: "+91-11-23456789",
+          phone: "9876543210",
           address: {
             street: "City Hall, Main Street",
             city: "New Delhi",
@@ -36,7 +35,7 @@ class ComprehensiveSeeder {
         categories: ["healthcare"],
         contactInfo: {
           email: "health@city.gov",
-          phone: "+91-11-23456790",
+          phone: "9876543211",
           address: {
             street: "Health Secretariat, Medical Complex",
             city: "New Delhi",
@@ -57,7 +56,7 @@ class ComprehensiveSeeder {
         categories: ["education"],
         contactInfo: {
           email: "education@city.gov",
-          phone: "+91-11-23456791",
+          phone: "9876543212",
           address: {
             street: "Education Bhawan, Academic Road",
             city: "New Delhi",
@@ -78,7 +77,7 @@ class ComprehensiveSeeder {
         categories: ["transportation"],
         contactInfo: {
           email: "transport@city.gov",
-          phone: "+91-11-23456792",
+          phone: "9876543213",
           address: {
             street: "Transport Bhawan, Highway Circle",
             city: "New Delhi",
@@ -99,7 +98,7 @@ class ComprehensiveSeeder {
         categories: ["police"],
         contactInfo: {
           email: "police@city.gov",
-          phone: "+91-100",
+          phone: "9876543214",
           address: {
             street: "Police Headquarters, Central District",
             city: "New Delhi",
@@ -113,432 +112,495 @@ class ComprehensiveSeeder {
           workingDays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         },
       },
-    ];
-
-    this.users = {
-      admin: {
-        name: "System Administrator",
-        email: "admin@govintel.gov",
-        password: "admin123",
-        role: "admin",
-        phone: "+91-9999999999",
-        isActive: true,
-      },
-      officers: [
-        // Municipal Officers
-        {
-          name: "Rajesh Kumar Singh",
-          email: "rajesh.singh@municipal.gov",
-          password: "officer123",
-          role: "officer",
-          department: "MUNICIPAL",
-          phone: "+91-9876543210",
+      {
+        name: "Revenue Department",
+        code: "REVENUE",
+        description: "Manages taxation, revenue collection, and financial administration",
+        categories: ["revenue"],
+        contactInfo: {
+          email: "revenue@city.gov",
+          phone: "9876543215",
           address: {
-            street: "123 Officer Colony",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110001",
-          },
-        },
-        {
-          name: "Priya Sharma",
-          email: "priya.sharma@municipal.gov",
-          password: "officer123",
-          role: "officer",
-          department: "MUNICIPAL",
-          phone: "+91-9876543211",
-          address: {
-            street: "456 Government Quarters",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110001",
-          },
-        },
-        {
-          name: "Amit Patel",
-          email: "amit.patel@municipal.gov",
-          password: "officer123",
-          role: "officer",
-          department: "MUNICIPAL",
-          phone: "+91-9876543212",
-          address: {
-            street: "789 Civil Lines",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110001",
-          },
-        },
-        // Health Officers
-        {
-          name: "Dr. Sunita Reddy",
-          email: "sunita.reddy@health.gov",
-          password: "officer123",
-          role: "officer",
-          department: "HEALTH",
-          phone: "+91-9876543213",
-          address: {
-            street: "Medical Complex, Block A",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110002",
-          },
-        },
-        {
-          name: "Dr. Vikram Gupta",
-          email: "vikram.gupta@health.gov",
-          password: "officer123",
-          role: "officer",
-          department: "HEALTH",
-          phone: "+91-9876543214",
-          address: {
-            street: "Health Secretariat",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110002",
-          },
-        },
-        {
-          name: "Dr. Meera Joshi",
-          email: "meera.joshi@health.gov",
-          password: "officer123",
-          role: "officer",
-          department: "HEALTH",
-          phone: "+91-9876543215",
-          address: {
-            street: "Public Health Center",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110002",
-          },
-        },
-        // Education Officers
-        {
-          name: "Prof. Ramesh Agarwal",
-          email: "ramesh.agarwal@education.gov",
-          password: "officer123",
-          role: "officer",
-          department: "EDUCATION",
-          phone: "+91-9876543216",
-          address: {
-            street: "Education Bhawan",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110003",
-          },
-        },
-        {
-          name: "Kavita Desai",
-          email: "kavita.desai@education.gov",
-          password: "officer123",
-          role: "officer",
-          department: "EDUCATION",
-          phone: "+91-9876543217",
-          address: {
-            street: "Academic Complex",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110003",
-          },
-        },
-        {
-          name: "Suresh Yadav",
-          email: "suresh.yadav@education.gov",
-          password: "officer123",
-          role: "officer",
-          department: "EDUCATION",
-          phone: "+91-9876543218",
-          address: {
-            street: "School Board Office",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110003",
-          },
-        },
-        // Transport Officers
-        {
-          name: "Ravi Malhotra",
-          email: "ravi.malhotra@transport.gov",
-          password: "officer123",
-          role: "officer",
-          department: "TRANSPORT",
-          phone: "+91-9876543219",
-          address: {
-            street: "Transport Bhawan",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110004",
-          },
-        },
-        {
-          name: "Neha Kapoor",
-          email: "neha.kapoor@transport.gov",
-          password: "officer123",
-          role: "officer",
-          department: "TRANSPORT",
-          phone: "+91-9876543220",
-          address: {
-            street: "Traffic Control Center",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110004",
-          },
-        },
-        {
-          name: "Deepak Verma",
-          email: "deepak.verma@transport.gov",
-          password: "officer123",
-          role: "officer",
-          department: "TRANSPORT",
-          phone: "+91-9876543221",
-          address: {
-            street: "Highway Authority Office",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110004",
-          },
-        },
-        // Police Officers
-        {
-          name: "Inspector Arjun Thakur",
-          email: "arjun.thakur@police.gov",
-          password: "officer123",
-          role: "officer",
-          department: "POLICE",
-          phone: "+91-9876543222",
-          address: {
-            street: "Police Headquarters",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110005",
-          },
-        },
-        {
-          name: "Sub-Inspector Pooja Nair",
-          email: "pooja.nair@police.gov",
-          password: "officer123",
-          role: "officer",
-          department: "POLICE",
-          phone: "+91-9876543223",
-          address: {
-            street: "Central Police Station",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110005",
-          },
-        },
-        {
-          name: "Constable Manoj Kumar",
-          email: "manoj.kumar@police.gov",
-          password: "officer123",
-          role: "officer",
-          department: "POLICE",
-          phone: "+91-9876543224",
-          address: {
-            street: "District Police Office",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110005",
-          },
-        },
-      ],
-      citizens: [
-        {
-          name: "Anita Sharma",
-          email: "anita.sharma@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543225",
-          address: {
-            street: "123 Residential Area",
+            street: "Revenue Secretariat, Finance Complex",
             city: "New Delhi",
             state: "Delhi",
             zipCode: "110006",
           },
         },
-        {
-          name: "Rohit Gupta",
-          email: "rohit.gupta@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543226",
-          address: {
-            street: "456 Housing Society",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110007",
-          },
+        workingHours: {
+          start: "10:00",
+          end: "16:00",
+          workingDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
         },
-        {
-          name: "Sneha Patel",
-          email: "sneha.patel@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543227",
-          address: {
-            street: "789 Apartment Complex",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110008",
-          },
+      },
+    ];
+
+    this.users = [
+      // Admin users
+      {
+        name: "System Administrator",
+        email: "admin@govintel.gov",
+        password: "admin123",
+        role: "admin",
+        phone: "9999999999",
+        isActive: true,
+      },
+      {
+        name: "Super Admin",
+        email: "superadmin@govintel.gov",
+        password: "superadmin123",
+        role: "admin",
+        phone: "9999999998",
+        isActive: true,
+      },
+
+      // Municipal Officers
+      {
+        name: "Rajesh Kumar Singh",
+        email: "rajesh.singh@municipal.gov",
+        password: "officer123",
+        role: "officer",
+        department: "MUNICIPAL",
+        phone: "9876543220",
+        address: {
+          street: "Officer Colony Block A",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110001",
         },
-        {
-          name: "Vikash Singh",
-          email: "vikash.singh@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543228",
-          address: {
-            street: "321 Colony Road",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110009",
-          },
+      },
+      {
+        name: "Priya Sharma",
+        email: "priya.sharma@municipal.gov",
+        password: "officer123",
+        role: "officer",
+        department: "MUNICIPAL",
+        phone: "9876543221",
+        address: {
+          street: "Government Quarters B-12",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110001",
         },
-        {
-          name: "Ritu Agarwal",
-          email: "ritu.agarwal@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543229",
-          address: {
-            street: "654 Sector 12",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110010",
-          },
+      },
+      {
+        name: "Amit Patel",
+        email: "amit.patel@municipal.gov",
+        password: "officer123",
+        role: "officer",
+        department: "MUNICIPAL",
+        phone: "9876543222",
+        address: {
+          street: "Municipal Housing C-45",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110001",
         },
-        {
-          name: "Manish Kumar",
-          email: "manish.kumar@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543230",
-          address: {
-            street: "987 Block B",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110011",
-          },
+      },
+
+      // Health Officers
+      {
+        name: "Dr. Sunita Reddy",
+        email: "sunita.reddy@health.gov",
+        password: "officer123",
+        role: "officer",
+        department: "HEALTH",
+        phone: "9876543223",
+        address: {
+          street: "Medical Officers Residence",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110002",
         },
-        {
-          name: "Deepika Reddy",
-          email: "deepika.reddy@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543231",
-          address: {
-            street: "147 Green Park",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110012",
-          },
+      },
+      {
+        name: "Dr. Vikram Gupta",
+        email: "vikram.gupta@health.gov",
+        password: "officer123",
+        role: "officer",
+        department: "HEALTH",
+        phone: "9876543224",
+        address: {
+          street: "Health Department Quarters",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110002",
         },
-        {
-          name: "Arjun Malhotra",
-          email: "arjun.malhotra@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543232",
-          address: {
-            street: "258 Model Town",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110013",
-          },
+      },
+      {
+        name: "Dr. Meera Joshi",
+        email: "meera.joshi@health.gov",
+        password: "officer123",
+        role: "officer",
+        department: "HEALTH",
+        phone: "9876543225",
+        address: {
+          street: "Government Hospital Campus",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110002",
         },
-        {
-          name: "Kavya Joshi",
-          email: "kavya.joshi@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543233",
-          address: {
-            street: "369 Lajpat Nagar",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110014",
-          },
+      },
+
+      // Education Officers
+      {
+        name: "Prof. Ramesh Agarwal",
+        email: "ramesh.agarwal@education.gov",
+        password: "officer123",
+        role: "officer",
+        department: "EDUCATION",
+        phone: "9876543226",
+        address: {
+          street: "Education Department Housing",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110003",
         },
-        {
-          name: "Sanjay Verma",
-          email: "sanjay.verma@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543234",
-          address: {
-            street: "741 Karol Bagh",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110015",
-          },
+      },
+      {
+        name: "Kavita Desai",
+        email: "kavita.desai@education.gov",
+        password: "officer123",
+        role: "officer",
+        department: "EDUCATION",
+        phone: "9876543227",
+        address: {
+          street: "Teachers Colony Block D",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110003",
         },
-        {
-          name: "Pooja Desai",
-          email: "pooja.desai@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543235",
-          address: {
-            street: "852 Connaught Place",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110016",
-          },
+      },
+      {
+        name: "Suresh Yadav",
+        email: "suresh.yadav@education.gov",
+        password: "officer123",
+        role: "officer",
+        department: "EDUCATION",
+        phone: "9876543228",
+        address: {
+          street: "Academic Staff Quarters",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110003",
         },
-        {
-          name: "Rahul Yadav",
-          email: "rahul.yadav@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543236",
-          address: {
-            street: "963 Janakpuri",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110017",
-          },
+      },
+
+      // Transport Officers
+      {
+        name: "Ravi Malhotra",
+        email: "ravi.malhotra@transport.gov",
+        password: "officer123",
+        role: "officer",
+        department: "TRANSPORT",
+        phone: "9876543229",
+        address: {
+          street: "Transport Authority Housing",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110004",
         },
-        {
-          name: "Nisha Kapoor",
-          email: "nisha.kapoor@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543237",
-          address: {
-            street: "159 Rohini",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110018",
-          },
+      },
+      {
+        name: "Neha Kapoor",
+        email: "neha.kapoor@transport.gov",
+        password: "officer123",
+        role: "officer",
+        department: "TRANSPORT",
+        phone: "9876543230",
+        address: {
+          street: "Traffic Control Center Quarters",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110004",
         },
-        {
-          name: "Sunil Thakur",
-          email: "sunil.thakur@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543238",
-          address: {
-            street: "357 Dwarka",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110019",
-          },
+      },
+      {
+        name: "Deepak Verma",
+        email: "deepak.verma@transport.gov",
+        password: "officer123",
+        role: "officer",
+        department: "TRANSPORT",
+        phone: "9876543231",
+        address: {
+          street: "Highway Authority Residence",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110004",
         },
-        {
-          name: "Meera Nair",
-          email: "meera.nair@email.com",
-          password: "citizen123",
-          role: "citizen",
-          phone: "+91-9876543239",
-          address: {
-            street: "468 Vasant Kunj",
-            city: "New Delhi",
-            state: "Delhi",
-            zipCode: "110020",
-          },
+      },
+
+      // Police Officers
+      {
+        name: "Inspector Arjun Thakur",
+        email: "arjun.thakur@police.gov",
+        password: "officer123",
+        role: "officer",
+        department: "POLICE",
+        phone: "9876543232",
+        address: {
+          street: "Police Lines Sector 1",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110005",
         },
-      ],
-    };
+      },
+      {
+        name: "Sub-Inspector Pooja Nair",
+        email: "pooja.nair@police.gov",
+        password: "officer123",
+        role: "officer",
+        department: "POLICE",
+        phone: "9876543233",
+        address: {
+          street: "Police Housing Complex",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110005",
+        },
+      },
+      {
+        name: "Constable Manoj Kumar",
+        email: "manoj.kumar@police.gov",
+        password: "officer123",
+        role: "officer",
+        department: "POLICE",
+        phone: "9876543234",
+        address: {
+          street: "Police Barracks Block C",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110005",
+        },
+      },
+
+      // Revenue Officers
+      {
+        name: "CA Rohit Sharma",
+        email: "rohit.sharma@revenue.gov",
+        password: "officer123",
+        role: "officer",
+        department: "REVENUE",
+        phone: "9876543235",
+        address: {
+          street: "Revenue Department Quarters",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110006",
+        },
+      },
+      {
+        name: "Sanjana Gupta",
+        email: "sanjana.gupta@revenue.gov",
+        password: "officer123",
+        role: "officer",
+        department: "REVENUE",
+        phone: "9876543236",
+        address: {
+          street: "Tax Office Housing",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110006",
+        },
+      },
+
+      // Citizens
+      {
+        name: "Anita Sharma",
+        email: "anita.sharma@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432100",
+        address: {
+          street: "123 Residential Area",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110007",
+        },
+      },
+      {
+        name: "Rohit Gupta",
+        email: "rohit.gupta@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432101",
+        address: {
+          street: "456 Housing Society",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110008",
+        },
+      },
+      {
+        name: "Sneha Patel",
+        email: "sneha.patel@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432102",
+        address: {
+          street: "789 Apartment Complex",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110009",
+        },
+      },
+      {
+        name: "Vikash Singh",
+        email: "vikash.singh@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432103",
+        address: {
+          street: "321 Colony Road",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110010",
+        },
+      },
+      {
+        name: "Ritu Agarwal",
+        email: "ritu.agarwal@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432104",
+        address: {
+          street: "654 Park View",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110011",
+        },
+      },
+      {
+        name: "Manish Kumar",
+        email: "manish.kumar@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432105",
+        address: {
+          street: "987 Green Valley",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110012",
+        },
+      },
+      {
+        name: "Deepika Reddy",
+        email: "deepika.reddy@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432106",
+        address: {
+          street: "147 Sunrise Apartments",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110013",
+        },
+      },
+      {
+        name: "Arjun Malhotra",
+        email: "arjun.malhotra@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432107",
+        address: {
+          street: "258 Tech City",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110014",
+        },
+      },
+      {
+        name: "Kavya Joshi",
+        email: "kavya.joshi@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432108",
+        address: {
+          street: "369 Metro View",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110015",
+        },
+      },
+      {
+        name: "Sanjay Verma",
+        email: "sanjay.verma@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432109",
+        address: {
+          street: "741 Business District",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110016",
+        },
+      },
+      {
+        name: "Pooja Desai",
+        email: "pooja.desai@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432110",
+        address: {
+          street: "852 Garden Estate",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110017",
+        },
+      },
+      {
+        name: "Rahul Yadav",
+        email: "rahul.yadav@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432111",
+        address: {
+          street: "963 Lake View",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110018",
+        },
+      },
+      {
+        name: "Nisha Kapoor",
+        email: "nisha.kapoor@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432112",
+        address: {
+          street: "159 Hill Station",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110019",
+        },
+      },
+      {
+        name: "Sunil Thakur",
+        email: "sunil.thakur@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432113",
+        address: {
+          street: "357 River Side",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110020",
+        },
+      },
+      {
+        name: "Meera Nair",
+        email: "meera.nair@email.com",
+        password: "citizen123",
+        role: "citizen",
+        phone: "8765432114",
+        address: {
+          street: "468 Sunset Boulevard",
+          city: "New Delhi",
+          state: "Delhi",
+          zipCode: "110021",
+        },
+      },
+    ];
 
     this.grievanceTemplates = {
       infrastructure: [
@@ -816,23 +878,193 @@ class ComprehensiveSeeder {
     };
   }
 
-  // Helper method to get department by category
-  getDepartmentByCategory(category) {
-    const categoryDepartmentMap = {
-      infrastructure: "MUNICIPAL",
-      sanitation: "MUNICIPAL",
-      water_supply: "MUNICIPAL",
-      electricity: "MUNICIPAL",
-      transportation: "TRANSPORT",
-      healthcare: "HEALTH",
-      education: "EDUCATION",
-      police: "POLICE",
-      other: "MUNICIPAL"
-    };
-    return categoryDepartmentMap[category] || "MUNICIPAL";
+  async seedAll() {
+    try {
+      console.log("🧹 Clearing existing data...");
+      await this.clearExistingData();
+      console.log("✅ Existing data cleared");
+
+      console.log("🏢 Creating departments...");
+      const createdDepartments = await this.seedDepartments();
+      console.log(`✅ Created ${createdDepartments.length} departments`);
+
+      console.log("👥 Creating users...");
+      const createdUsers = await this.seedUsers();
+      console.log(`✅ Created ${createdUsers.length} users`);
+
+      console.log("🔗 Linking officers to departments...");
+      await this.linkOfficersToDepartments(createdDepartments, createdUsers);
+      console.log("✅ Officers linked to departments");
+
+      console.log("📋 Creating realistic grievances...");
+      const createdGrievances = await this.seedGrievances(createdUsers);
+      console.log(`✅ Created ${createdGrievances.length} grievances`);
+
+      console.log("📊 Updating department statistics...");
+      await this.updateDepartmentStatistics(createdDepartments);
+      console.log("✅ Department statistics updated");
+
+      return {
+        departments: createdDepartments.length,
+        users: createdUsers.length,
+        grievances: createdGrievances.length,
+      };
+    } catch (error) {
+      console.error("❌ Seeding failed:", error);
+      throw error;
+    }
   }
 
-  // Helper method to get random address
+  async clearExistingData() {
+    await Promise.all([
+      Grievance.deleteMany({}),
+      User.deleteMany({}),
+      Department.deleteMany({}),
+    ]);
+  }
+
+  async seedDepartments() {
+    return await Department.insertMany(this.departments);
+  }
+
+  async seedUsers() {
+    return await User.insertMany(this.users);
+  }
+
+  async linkOfficersToDepartments(departments, users) {
+    for (const department of departments) {
+      const officers = users.filter(
+        (user) => user.role === "officer" && user.department === department.code
+      );
+
+      if (officers.length > 0) {
+        department.officers = officers.map((officer) => officer._id);
+        department.head = officers[0]._id; // Set first officer as head
+        await department.save();
+      }
+    }
+  }
+
+  async seedGrievances(users) {
+    const citizens = users.filter((user) => user.role === "citizen");
+    const officers = users.filter((user) => user.role === "officer");
+    const grievances = [];
+    const statuses = ["pending", "assigned", "in_progress", "resolved", "closed"];
+
+    let grievanceCounter = 0;
+
+    for (const [category, templates] of Object.entries(this.grievanceTemplates)) {
+      for (const template of templates) {
+        // Create 3-5 grievances per template
+        const grievancesToCreate = Math.floor(Math.random() * 3) + 3;
+
+        for (let i = 0; i < grievancesToCreate; i++) {
+          const citizen = citizens[Math.floor(Math.random() * citizens.length)];
+          const status = statuses[Math.floor(Math.random() * statuses.length)];
+
+          // Create date in the past (last 6 months)
+          const createdDate = new Date();
+          createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 180));
+
+          const grievanceData = {
+            title: template.title,
+            description: template.description,
+            category: category,
+            priority: template.priority,
+            status: status,
+            citizen: citizen._id,
+            department: this.getDepartmentByCategory(category).toUpperCase(),
+            location: {
+              address: this.getRandomAddress(),
+              coordinates: {
+                latitude: 28.6139 + (Math.random() - 0.5) * 0.2,
+                longitude: 77.2090 + (Math.random() - 0.5) * 0.2
+              },
+              landmark: `Landmark ${grievanceCounter + 1}`
+            },
+            createdAt: createdDate,
+            updatedAt: createdDate,
+            aiAnalysis: {
+              sentiment: template.sentiment,
+              urgencyScore: template.urgencyScore + Math.floor(Math.random() * 10 - 5),
+              keywords: template.keywords,
+              suggestedDepartment: this.getDepartmentByCategory(category),
+              confidence: 0.75 + Math.random() * 0.25
+            },
+            isAnonymous: Math.random() > 0.8
+          };
+
+          // Assign officer if not pending
+          if (status !== "pending") {
+            const departmentOfficers = officers.filter(o => 
+              o.department === this.getDepartmentByCategory(category).toUpperCase()
+            );
+            if (departmentOfficers.length > 0) {
+              grievanceData.assignedOfficer = departmentOfficers[
+                Math.floor(Math.random() * departmentOfficers.length)
+              ]._id;
+            }
+          }
+
+          // Add resolution data if resolved/closed
+          if (status === "resolved" || status === "closed") {
+            const resolutionDate = new Date(createdDate);
+            const resolutionHours = 12 + Math.floor(Math.random() * 168);
+            resolutionDate.setHours(resolutionDate.getHours() + resolutionHours);
+            
+            grievanceData.actualResolutionDate = resolutionDate;
+            grievanceData.resolutionTime = resolutionHours;
+            grievanceData.updatedAt = resolutionDate;
+            
+            // Add feedback for resolved cases (70% chance)
+            if (status === "resolved" && Math.random() > 0.3) {
+              grievanceData.feedback = {
+                rating: Math.floor(Math.random() * 3) + 3,
+                comment: this.getRandomFeedback(),
+                submittedAt: new Date(resolutionDate.getTime() + 24 * 60 * 60 * 1000)
+              };
+            }
+          }
+
+          // Generate status updates
+          grievanceData.updates = this.generateStatusUpdates(
+            status, 
+            createdDate, 
+            grievanceData.assignedOfficer
+          );
+
+          grievances.push(grievanceData);
+          grievanceCounter++;
+        }
+      }
+    }
+
+    return await Grievance.insertMany(grievances);
+  }
+
+  async updateDepartmentStatistics(departments) {
+    for (const department of departments) {
+      await department.updateStatistics();
+    }
+  }
+
+  // Helper methods
+  getDepartmentByCategory(category) {
+    const categoryDepartmentMap = {
+      infrastructure: "municipal",
+      sanitation: "municipal",
+      water_supply: "municipal",
+      electricity: "municipal",
+      transportation: "transport",
+      healthcare: "health",
+      education: "education",
+      police: "police",
+      revenue: "revenue",
+      other: "municipal"
+    };
+    return categoryDepartmentMap[category] || "municipal";
+  }
+
   getRandomAddress() {
     const addresses = [
       "123 Main Street, Sector 12, New Delhi",
@@ -849,7 +1081,6 @@ class ComprehensiveSeeder {
     return addresses[Math.floor(Math.random() * addresses.length)];
   }
 
-  // Helper method to get random feedback
   getRandomFeedback() {
     const feedbacks = [
       "Very satisfied with the resolution. The officer was professional and efficient.",
@@ -866,7 +1097,6 @@ class ComprehensiveSeeder {
     return feedbacks[Math.floor(Math.random() * feedbacks.length)];
   }
 
-  // Helper method to generate status updates
   generateStatusUpdates(finalStatus, createdDate, assignedOfficer) {
     const updates = [];
     const statusFlow = {
@@ -888,7 +1118,7 @@ class ComprehensiveSeeder {
     };
 
     flow.forEach((status) => {
-      currentDate = new Date(currentDate.getTime() + (Math.random() * 48 + 12) * 60 * 60 * 1000); // 12-60 hours later
+      currentDate = new Date(currentDate.getTime() + (Math.random() * 48 + 12) * 60 * 60 * 1000);
       
       updates.push({
         message: updateMessages[status] || `Status updated to ${status}`,
@@ -899,339 +1129,6 @@ class ComprehensiveSeeder {
     });
 
     return updates;
-  }
-
-  async clearExistingData() {
-    console.log("🧹 Clearing existing data...");
-    await Promise.all([
-      Grievance.deleteMany({}),
-      User.deleteMany({}),
-      Department.deleteMany({})
-    ]);
-    console.log("✅ Existing data cleared");
-  }
-
-  async createDepartments() {
-    console.log("🏢 Creating departments...");
-    const createdDepartments = await Department.insertMany(this.departments);
-    console.log(`✅ Created ${createdDepartments.length} departments`);
-    return createdDepartments;
-  }
-
-  async createUsers() {
-    console.log("👥 Creating users...");
-    
-    // Create admin
-    const admin = new User(this.users.admin);
-    await admin.save();
-    
-    // Create officers
-    const officers = [];
-    for (const officerData of this.users.officers) {
-      const officer = new User(officerData);
-      await officer.save();
-      officers.push(officer);
-    }
-    
-    // Create citizens
-    const citizens = [];
-    for (const citizenData of this.users.citizens) {
-      const citizen = new User(citizenData);
-      await citizen.save();
-      citizens.push(citizen);
-    }
-
-    console.log(`✅ Created 1 admin, ${officers.length} officers, ${citizens.length} citizens`);
-    return { admin, officers, citizens };
-  }
-
-  async assignOfficersToDepartments(departments, officers) {
-    console.log("🔗 Assigning officers to departments...");
-    
-    for (const department of departments) {
-      const departmentOfficers = officers.filter(officer => officer.department === department.code);
-      
-      if (departmentOfficers.length > 0) {
-        department.officers = departmentOfficers.map(officer => officer._id);
-        department.head = departmentOfficers[0]._id; // First officer as head
-        await department.save();
-        console.log(`   • ${department.name}: ${departmentOfficers.length} officers`);
-      }
-    }
-    
-    console.log("✅ Officers assigned to departments");
-  }
-
-  async createGrievances(citizens, officers) {
-    console.log("📋 Creating grievances with AI analysis...");
-    
-    let totalCreated = 0;
-    const statuses = ["pending", "assigned", "in_progress", "resolved", "closed"];
-    
-    // Create grievances for each category and template
-    for (const [category, templates] of Object.entries(this.grievanceTemplates)) {
-      console.log(`  Creating grievances for category: ${category}`);
-      
-      for (const template of templates) {
-        // Create 3-5 grievances per template with different statuses
-        const grievancesToCreate = Math.floor(Math.random() * 3) + 3; // 3-5 grievances
-        
-        for (let i = 0; i < grievancesToCreate; i++) {
-          const citizen = citizens[Math.floor(Math.random() * citizens.length)];
-          const status = statuses[Math.floor(Math.random() * statuses.length)];
-          
-          // Create date in the past (last 6 months)
-          const createdDate = new Date();
-          createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 180));
-          
-          const grievanceData = {
-            title: template.title,
-            description: template.description,
-            category: category,
-            priority: template.priority,
-            status: status,
-            citizen: citizen._id,
-            department: this.getDepartmentByCategory(category), // This will return uppercase values
-            location: {
-              address: this.getRandomAddress(),
-              coordinates: {
-                latitude: 28.6139 + (Math.random() - 0.5) * 0.2, // Delhi area
-                longitude: 77.2090 + (Math.random() - 0.5) * 0.2
-              },
-              landmark: `Landmark ${totalCreated + 1}`
-            },
-            createdAt: createdDate,
-            updatedAt: createdDate,
-            aiAnalysis: {
-              sentiment: template.sentiment,
-              urgencyScore: template.urgencyScore + Math.floor(Math.random() * 10 - 5),
-              keywords: template.keywords,
-              suggestedDepartment: this.getDepartmentByCategory(category).toLowerCase(),
-              confidence: 0.75 + Math.random() * 0.25
-            },
-            isAnonymous: Math.random() > 0.8 // 20% anonymous
-          };
-
-          // Assign officer if not pending
-          if (status !== "pending") {
-            const departmentOfficers = officers.filter(o => 
-              o.department === this.getDepartmentByCategory(category)
-            );
-            if (departmentOfficers.length > 0) {
-              grievanceData.assignedOfficer = departmentOfficers[
-                Math.floor(Math.random() * departmentOfficers.length)
-              ]._id;
-            }
-          }
-
-          // Add resolution data if resolved/closed
-          if (status === "resolved" || status === "closed") {
-            const resolutionDate = new Date(createdDate);
-            const resolutionHours = 12 + Math.floor(Math.random() * 168); // 12 hours to 7 days
-            resolutionDate.setHours(resolutionDate.getHours() + resolutionHours);
-            
-            grievanceData.actualResolutionDate = resolutionDate;
-            grievanceData.resolutionTime = resolutionHours;
-            grievanceData.updatedAt = resolutionDate;
-            
-            // Add feedback for resolved cases (70% chance)
-            if (status === "resolved" && Math.random() > 0.3) {
-              grievanceData.feedback = {
-                rating: Math.floor(Math.random() * 3) + 3, // 3-5 stars
-                comment: this.getRandomFeedback(),
-                submittedAt: new Date(resolutionDate.getTime() + 24 * 60 * 60 * 1000)
-              };
-            }
-          }
-
-          // Generate status updates
-          grievanceData.updates = this.generateStatusUpdates(
-            status, 
-            createdDate, 
-            grievanceData.assignedOfficer
-          );
-
-          try {
-            const grievance = new Grievance(grievanceData);
-            await grievance.save();
-            totalCreated++;
-          } catch (error) {
-            console.error(`Error creating grievance: ${error.message}`);
-            console.error("Grievance data:", grievanceData);
-            throw error;
-          }
-        }
-      }
-    }
-
-    console.log(`✅ Created ${totalCreated} realistic grievances`);
-    return totalCreated;
-  }
-
-  async updateDepartmentStatistics(departments) {
-    console.log("📊 Updating department statistics...");
-    
-    for (const department of departments) {
-      await department.updateStatistics();
-    }
-    
-    console.log("✅ Department statistics updated");
-  }
-
-  async generateSummaryReport() {
-    console.log("\n📊 SEEDING SUMMARY REPORT");
-    console.log("=" * 50);
-    
-    // User statistics
-    const userStats = await User.aggregate([
-      {
-        $group: {
-          _id: "$role",
-          count: { $sum: 1 },
-          active: { $sum: { $cond: ["$isActive", 1, 0] } }
-        }
-      }
-    ]);
-    
-    console.log("\n👥 USER STATISTICS:");
-    userStats.forEach(stat => {
-      console.log(`   • ${stat._id}: ${stat.count} total (${stat.active} active)`);
-    });
-
-    // Department statistics
-    const deptStats = await Department.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "officers",
-          foreignField: "_id",
-          as: "officerDetails"
-        }
-      },
-      {
-        $project: {
-          name: 1,
-          code: 1,
-          officerCount: { $size: "$officerDetails" },
-          categories: 1
-        }
-      }
-    ]);
-    
-    console.log("\n🏢 DEPARTMENT STATISTICS:");
-    deptStats.forEach(dept => {
-      console.log(`   • ${dept.name} (${dept.code}): ${dept.officerCount} officers`);
-      console.log(`     Categories: ${dept.categories.join(", ")}`);
-    });
-
-    // Grievance statistics
-    const grievanceStats = await Grievance.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 },
-          byStatus: {
-            $push: {
-              status: "$status",
-              count: 1
-            }
-          },
-          byCategory: {
-            $push: {
-              category: "$category",
-              count: 1
-            }
-          },
-          byDepartment: {
-            $push: {
-              department: "$department",
-              count: 1
-            }
-          },
-          avgUrgency: { $avg: "$aiAnalysis.urgencyScore" },
-          withFeedback: { $sum: { $cond: [{ $ne: ["$feedback.rating", null] }, 1, 0] } }
-        }
-      }
-    ]);
-
-    if (grievanceStats.length > 0) {
-      const stats = grievanceStats[0];
-      console.log("\n📋 GRIEVANCE STATISTICS:");
-      console.log(`   • Total Grievances: ${stats.total}`);
-      console.log(`   • Average Urgency Score: ${Math.round(stats.avgUrgency)}`);
-      console.log(`   • With Feedback: ${stats.withFeedback}`);
-    }
-
-    // Category breakdown
-    const categoryStats = await Grievance.aggregate([
-      {
-        $group: {
-          _id: "$category",
-          count: { $sum: 1 },
-          avgUrgency: { $avg: "$aiAnalysis.urgencyScore" }
-        }
-      },
-      { $sort: { count: -1 } }
-    ]);
-    
-    console.log("\n📊 CATEGORY BREAKDOWN:");
-    categoryStats.forEach(stat => {
-      console.log(`   • ${stat._id}: ${stat.count} grievances (avg urgency: ${Math.round(stat.avgUrgency)})`);
-    });
-
-    // Status breakdown
-    const statusStats = await Grievance.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { count: -1 } }
-    ]);
-    
-    console.log("\n📈 STATUS BREAKDOWN:");
-    statusStats.forEach(stat => {
-      console.log(`   • ${stat._id}: ${stat.count} grievances`);
-    });
-
-    console.log("\n🎯 QUICK ACCESS CREDENTIALS:");
-    console.log("   • Admin: admin@govintel.gov / admin123");
-    console.log("   • Officer: rajesh.singh@municipal.gov / officer123");
-    console.log("   • Citizen: anita.sharma@email.com / citizen123");
-    console.log("   • Officer Passcode: OFFICER2024");
-    
-    console.log("\n" + "=" * 50);
-    console.log("✅ COMPREHENSIVE SEEDING COMPLETED SUCCESSFULLY!");
-  }
-
-  async seedAll() {
-    try {
-      // Clear existing data
-      await this.clearExistingData();
-      
-      // Create departments
-      const departments = await this.createDepartments();
-      
-      // Create users
-      const { admin, officers, citizens } = await this.createUsers();
-      
-      // Assign officers to departments
-      await this.assignOfficersToDepartments(departments, officers);
-      
-      // Create grievances
-      await this.createGrievances(citizens, officers);
-      
-      // Update department statistics
-      await this.updateDepartmentStatistics(departments);
-      
-      // Generate summary report
-      await this.generateSummaryReport();
-      
-    } catch (error) {
-      console.error("❌ Seeding failed:", error);
-      throw error;
-    }
   }
 }
 
@@ -1246,9 +1143,21 @@ const seedComprehensiveData = async () => {
     });
     console.log("📡 Connected to MongoDB");
 
-    // Create seeder instance and run
     const seeder = new ComprehensiveSeeder();
-    await seeder.seedAll();
+    const results = await seeder.seedAll();
+
+    console.log("\n🎉 Comprehensive seeding completed successfully!");
+    console.log("📊 Summary:");
+    console.log(`   • Departments: ${results.departments}`);
+    console.log(`   • Users: ${results.users}`);
+    console.log(`   • Grievances: ${results.grievances}`);
+
+    // Display test accounts
+    console.log("\n🔐 Test Accounts:");
+    console.log("   Admin: admin@govintel.gov / admin123");
+    console.log("   Officer: rajesh.singh@municipal.gov / officer123");
+    console.log("   Citizen: anita.sharma@email.com / citizen123");
+    console.log("   Officer Passcode: OFFICER2024");
 
   } catch (error) {
     console.error("❌ Seeding process failed:", error);
@@ -1261,15 +1170,10 @@ const seedComprehensiveData = async () => {
 
 // Run if called directly
 if (require.main === module) {
-  seedComprehensiveData()
-    .then(() => {
-      console.log("🎉 Seeding completed successfully!");
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error("💥 Seeding failed:", error);
-      process.exit(1);
-    });
+  seedComprehensiveData().catch((error) => {
+    console.error("💥 Seeding failed:", error);
+    process.exit(1);
+  });
 }
 
 module.exports = seedComprehensiveData;
