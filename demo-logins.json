@@ -236,16 +236,18 @@
   ],
   "quick_access": {
     "admin_login": {
-      "email": "admin@govintel.gov",
-      "password": "admin123"
+      "email": "admin@gmail.com",
+      "password": "123456"
     },
     "officer_login": {
       "email": "rajesh.singh@municipal.gov", 
-      "password": "officer123"
+      "password": "officer123",
+      "role": "officer"
     },
     "citizen_login": {
       "email": "anita.sharma@email.com",
-      "password": "citizen123"
+      "password": "citizen123",
+      "role": "citizen"
     }
   },
   "departments": [

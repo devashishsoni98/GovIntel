@@ -63,6 +63,13 @@ router.post("/test-password", async (req, res) => {
       })
     }
 
+    console.log("Debug password test:", {
+      email,
+      providedPassword: password,
+      storedPasswordExists: !!user.password,
+      storedPasswordLength: user.password ? user.password.length : 0,
+      storedPasswordSample: user.password ? user.password.substring(0, 10) + "..." : "none"
+    });
     const isMatch = await user.comparePassword(password)
 
     res.json({
@@ -72,6 +79,7 @@ router.post("/test-password", async (req, res) => {
         role: user.role,
         hasPassword: !!user.password,
         passwordMatch: isMatch,
+        passwordLength: user.password ? user.password.length : 0
       },
     })
   } catch (error) {
@@ -79,6 +87,7 @@ router.post("/test-password", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error testing password",
+      error: error.message
     })
   }
 })

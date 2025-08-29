@@ -179,6 +179,15 @@ const createDefaultAdmin = async () => {
 
     if (adminExists) {
       console.log("✅ Default admin user already exists")
+      
+      // Test password for debugging
+      try {
+        const testPassword = await adminExists.comparePassword("123456");
+        console.log("Admin password test result:", testPassword);
+      } catch (error) {
+        console.error("Admin password test error:", error);
+      }
+      
       return
     }
 

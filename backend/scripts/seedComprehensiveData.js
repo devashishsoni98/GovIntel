@@ -928,7 +928,19 @@ class ComprehensiveSeeder {
   }
 
   async seedUsers() {
-    return await User.insertMany(this.users);
+    // Create users one by one to ensure password hashing
+    const createdUsers = [];
+    for (const userData of this.users) {
+      try {
+        const user = new User(userData);
+        await user.save(); // This triggers the pre-save middleware for password hashing
+        createdUsers.push(user);
+        console.log(`✅ Created user: ${user.email} (${user.role})`);
+      } catch (error) {
+        console.error(`❌ Failed to create user ${userData.email}:`, error.message);
+      }
+    }
+    return createdUsers;
   }
 
   async linkOfficersToDepartments(departments, users) {

@@ -106,8 +106,21 @@ userSchema.pre("save", async function (next) {
 
 // Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-  };
+  try {
+    console.log("Comparing passwords:", {
+      candidatePassword: candidatePassword,
+      hasStoredPassword: !!this.password,
+      storedPasswordLength: this.password ? this.password.length : 0
+    });
+    
+    const result = await bcrypt.compare(candidatePassword, this.password);
+    console.log("Password comparison result:", result);
+    return result;
+  } catch (error) {
+    console.error("Password comparison error:", error);
+    return false;
+  }
+};
 
 // Update last login
 userSchema.methods.updateLastLogin = function () {
