@@ -971,4 +971,86 @@ class ComprehensiveSeeder {
   }
 
   getGrievancesByCategory() {
-    return this.
+    return this.createdGrievances.reduce((acc, g) => {
+      acc[g.category] = (acc[g.category] || 0) + 1;
+      return acc;
+    }, {});
+  }
+
+  getGrievancesByPriority() {
+    return this.createdGrievances.reduce((acc, g) => {
+      acc[g.priority] = (acc[g.priority] || 0) + 1;
+      return acc;
+    }, {});
+  }
+
+  displaySummary() {
+    console.log("\n" + "=".repeat(60));
+    console.log("🎉 COMPREHENSIVE SEEDING COMPLETED SUCCESSFULLY!");
+    console.log("=".repeat(60));
+    
+    console.log("\n📊 SUMMARY STATISTICS:");
+    console.log(`   • Departments: ${this.createdDepartments.length}`);
+    console.log(`   • Officers: ${this.createdOfficers.length}`);
+    console.log(`   • Citizens: ${this.createdUsers.length}`);
+    console.log(`   • Grievances: ${this.createdGrievances.length}`);
+    
+    console.log("\n🏢 DEPARTMENTS CREATED:");
+    this.createdDepartments.forEach(dept => {
+      const officerCount = this.createdOfficers.filter(o => o.department === dept.code).length;
+      console.log(`   • ${dept.name} (${dept.code}): ${officerCount} officers`);
+    });
+    
+    console.log("\n📋 GRIEVANCES BY STATUS:");
+    const statusStats = this.getGrievancesByStatus();
+    Object.entries(statusStats).forEach(([status, count]) => {
+      console.log(`   • ${status}: ${count}`);
+    });
+    
+    console.log("\n📂 GRIEVANCES BY CATEGORY:");
+    const categoryStats = this.getGrievancesByCategory();
+    Object.entries(categoryStats).forEach(([category, count]) => {
+      console.log(`   • ${category}: ${count}`);
+    });
+    
+    console.log("\n🔐 DEMO LOGIN CREDENTIALS:");
+    console.log("   Admin:");
+    console.log(`     Email: ${this.demoLogins.admins[0]?.email || 'admin@govintel.gov'}`);
+    console.log(`     Password: admin123`);
+    
+    console.log("   Sample Officer:");
+    console.log(`     Email: ${this.demoLogins.officers[0]?.email || 'municipal.officer1@govintel.gov'}`);
+    console.log(`     Password: officer123`);
+    
+    console.log("   Sample Citizen:");
+    console.log(`     Email: ${this.demoLogins.citizens[0]?.email || 'rajesh.kumar@email.com'}`);
+    console.log(`     Password: citizen123`);
+    
+    console.log("\n" + "=".repeat(60));
+    console.log("🚀 Ready to start the application!");
+    console.log("   Backend: npm run dev");
+    console.log("   Frontend: npm run dev");
+    console.log("=".repeat(60));
+  }
+}
+
+// Main execution function
+const seedComprehensiveData = async () => {
+  const seeder = new ComprehensiveSeeder();
+  await seeder.seedAll();
+};
+
+// Run if called directly
+if (require.main === module) {
+  seedComprehensiveData()
+    .then(() => {
+      console.log("✅ Seeding process completed successfully!");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("❌ Seeding process failed:", error);
+      process.exit(1);
+    });
+}
+
+module.exports = seedComprehensiveData;
