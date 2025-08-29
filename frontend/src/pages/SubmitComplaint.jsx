@@ -36,15 +36,10 @@ const SubmitComplaint = () => {
   const [success, setSuccess] = useState("")
 
   const categories = [
-    { value: "infrastructure", label: "Infrastructure", icon: "🏗️" },
-    { value: "sanitation", label: "Sanitation", icon: "🧹" },
-    { value: "water_supply", label: "Water Supply", icon: "💧" },
-    { value: "electricity", label: "Electricity", icon: "⚡" },
     { value: "transportation", label: "Transportation", icon: "🚌" },
     { value: "healthcare", label: "Healthcare", icon: "🏥" },
     { value: "education", label: "Education", icon: "🎓" },
     { value: "police", label: "Police", icon: "👮" },
-    { value: "other", label: "Other", icon: "📋" },
   ]
 
   const priorities = [
