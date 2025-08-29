@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { Upload, X, MapPin, FileText, ImageIcon, Video, Mic, Send, Loader } from 'lucide-react'
