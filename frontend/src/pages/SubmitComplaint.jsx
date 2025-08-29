@@ -32,15 +32,75 @@ const SubmitComplaint = () => {
   })
 
   const [attachments, setAttachments] = useState([])
+  const [departments, setDepartments] = useState([])
+  const [loadingDepartments, setLoadingDepartments] = useState(true)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  const categories = [
-    { value: "transportation", label: "Transportation", icon: "🚌" },
-    { value: "healthcare", label: "Healthcare", icon: "🏥" },
-    { value: "education", label: "Education", icon: "🎓" },
-    { value: "police", label: "Police", icon: "👮" },
-  ]
+  // Fetch departments on component mount
+  useEffect(() => {
+    fetchDepartments()
+  }, [])
+
+  const fetchDepartments = async () => {
+    try {
+      setLoadingDepartments(true)
+      const response = await fetch("/api/departments/active", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setDepartments(data.data || [])
+      } else {
+        console.error("Failed to fetch departments")
+        setError("Failed to load departments")
+      }
+    } catch (error) {
+      console.error("Error fetching departments:", error)
+      setError("Network error while loading departments")
+    } finally {
+      setLoadingDepartments(false)
+    }
+  }
+
+  // Generate categories from departments
+  const getCategories = () => {
+    const categoryMap = {
+      MUNICIPAL: [
+        { value: "infrastructure", label: "Infrastructure", icon: "🏗️" },
+        { value: "sanitation", label: "Sanitation", icon: "🧹" },
+        { value: "water_supply", label: "Water Supply", icon: "💧" },
+        { value: "electricity", label: "Electricity", icon: "⚡" },
+        { value: "other", label: "Other Municipal", icon: "🏛️" },
+      ],
+      HEALTH: [
+        { value: "healthcare", label: "Healthcare", icon: "🏥" },
+      ],
+      EDUCATION: [
+        { value: "education", label: "Education", icon: "🎓" },
+      ],
+      TRANSPORT: [
+        { value: "transportation", label: "Transportation", icon: "🚌" },
+      ],
+      POLICE: [
+        { value: "police", label: "Police", icon: "👮" },
+      ],
+      REVENUE: [
+        { value: "revenue", label: "Revenue & Tax", icon: "💰" },
+      ],
+    }
+
+    const allCategories = []
+    departments.forEach(dept => {
+      const deptCategories = categoryMap[dept.code] || []
+      allCategories.push(...deptCategories)
+    })
+
+    return allCategories
+  }
 
   const priorities = [
     { value: "low", label: "Low", color: "text-green-400" },
@@ -351,21 +411,28 @@ const SubmitComplaint = () => {
                 <label htmlFor="category" className="block text-sm font-medium text-slate-300 mb-2">
                   Category *
                 </label>
-                <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
-                  required
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.icon} {category.label}
-                    </option>
-                  ))}
-                </select>
+                {loadingDepartments ? (
+                  <div className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 flex items-center gap-2">
+                    <Loader className="w-4 h-4 animate-spin" />
+                    Loading categories...
+                  </div>
+                ) : (
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {getCategories().map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.icon} {category.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Priority */}

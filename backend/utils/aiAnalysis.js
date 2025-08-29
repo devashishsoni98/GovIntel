@@ -318,6 +318,7 @@ class AIAnalysisEngine {
       sanitation: 'municipal',
       water_supply: 'municipal',
       electricity: 'municipal',
+      revenue: 'revenue',
       transportation: 'transport',
       healthcare: 'health',
       education: 'education',

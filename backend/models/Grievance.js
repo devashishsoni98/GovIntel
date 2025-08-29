@@ -194,13 +194,14 @@ grievanceSchema.pre("save", function (next) {
       sanitation: "municipal",
       water_supply: "municipal",
       electricity: "municipal",
+      revenue: "revenue",
       transportation: "transport",
       healthcare: "health",
       education: "education",
       police: "police",
       other: "municipal",
     }
-    this.department = (categoryDepartmentMap[this.category] || "municipal").toUpperCase()
+    this.department = categoryDepartmentMap[this.category]?.toUpperCase() || "MUNICIPAL"
   }
   next()
 })

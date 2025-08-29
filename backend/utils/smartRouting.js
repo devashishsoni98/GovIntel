@@ -71,11 +71,11 @@ class SmartRoutingEngine {
       sanitation: "municipal", 
       water_supply: "municipal",
       electricity: "municipal",
+      revenue: "revenue",
       transportation: "transport",
       healthcare: "health",
       education: "education",
       police: "police",
-      revenue: "revenue",
       other: "municipal"
     }
 
@@ -91,11 +91,16 @@ class SmartRoutingEngine {
    * Get available officers in department
    */
   static async getAvailableOfficers(departmentCode) {
-    return await User.find({
+    const officers = await User.find({
       role: "officer",
       department: departmentCode,
       isActive: true
     })
+    
+    console.log(`Found ${officers.length} officers in department ${departmentCode}:`, 
+      officers.map(o => ({ name: o.name, email: o.email })))
+    
+    return officers
   }
 
   /**
@@ -138,7 +143,7 @@ class SmartRoutingEngine {
 
     // Factor 2: Experience (20% weight)
     const experience = await this.getOfficerExperience(officer._id)
-    factors.experience = Math.min(experience / 100, 1) * 20
+    factors.experience = Math.min(experience / 50, 1) * 20 // Reduced threshold for better distribution
     reasoning.push(`Experience: ${experience} resolved cases`)
 
     // Factor 3: Performance (25% weight)
@@ -206,7 +211,7 @@ class SmartRoutingEngine {
       }
     ])
 
-    if (performanceData.length === 0) return 0.7 // Default neutral rating
+    if (performanceData.length === 0) return 0.8 // Default good rating for new officers
 
     const avgRating = performanceData[0].avgRating
     return Math.min(avgRating / 5, 1) // Normalize to 0-1 scale
@@ -216,12 +221,20 @@ class SmartRoutingEngine {
    * Check if officer is currently available
    */
   static async checkOfficerAvailability(officerId) {
-    // Simple availability check - can be enhanced with calendar integration
+    // Enhanced availability check
     const now = new Date()
     const hour = now.getHours()
+    const day = now.getDay() // 0 = Sunday, 1 = Monday, etc.
     
-    // Assume working hours are 9 AM to 5 PM
-    return hour >= 9 && hour < 17
+    // Check if it's a working day (Monday to Friday)
+    const isWorkingDay = day >= 1 && day <= 5
+    
+    // Check working hours (9 AM to 5 PM)
+    const isWorkingHours = hour >= 9 && hour < 17
+    
+    // For urgent cases, officers are considered available 24/7
+    // For others, only during working hours
+    return isWorkingDay && isWorkingHours
   }
 
   /**
@@ -244,10 +257,13 @@ class SmartRoutingEngine {
     ])
 
     const totalResolved = categoryExperience.reduce((sum, cat) => sum + cat.count, 0)
-    if (totalResolved === 0) return 0.5 // Default neutral specialization
+    if (totalResolved === 0) return 0.7 // Default good specialization for new officers
 
     const categoryCount = categoryExperience.find(cat => cat._id === category)?.count || 0
-    return Math.min(categoryCount / totalResolved, 1)
+    const specialization = categoryCount / totalResolved
+    
+    // Boost specialization if officer has handled this category before
+    return categoryCount > 0 ? Math.min(specialization + 0.2, 1) : specialization
   }
 
   /**
@@ -258,7 +274,18 @@ class SmartRoutingEngine {
       throw new Error("No officers available for assignment")
     }
 
-    return officerScores[0] // Already sorted by score (highest first)
+    // Log all officer scores for debugging
+    console.log("Officer scores:", officerScores.map(os => ({
+      name: os.officer.name,
+      score: os.score,
+      reasoning: os.reasoning
+    })))
+
+    // Return the highest scoring officer
+    const bestOfficer = officerScores[0] // Already sorted by score (highest first)
+    console.log("Selected best officer:", bestOfficer.officer.name, "with score:", bestOfficer.score)
+    
+    return bestOfficer
   }
 
   /**
@@ -271,14 +298,17 @@ class SmartRoutingEngine {
       const grievance = await Grievance.findById(grievanceId)
       if (!grievance) {
         console.log("Grievance not found:", grievanceId)
-        throw new Error("Grievance not found")
+        return {
+          success: false,
+          error: "Grievance not found"
+        }
       }
 
       if (grievance.assignedOfficer) {
         console.log("Grievance already assigned to:", grievance.assignedOfficer)
         return {
           success: false,
-          message: "Grievance already assigned",
+          error: "Grievance already assigned",
           grievance
         }
       }
@@ -291,10 +321,8 @@ class SmartRoutingEngine {
         // Update grievance with assigned officer
         grievance.assignedOfficer = routingResult.assignedOfficer._id
         
-        // Only update department if it's different
-        if (grievance.department !== routingResult.department.code) {
-          grievance.department = routingResult.department.code
-        }
+        // Ensure department is set correctly
+        grievance.department = routingResult.department.code
         
         // Update status to assigned
         if (grievance.status === "pending") {
@@ -320,7 +348,11 @@ class SmartRoutingEngine {
         }
       } else {
         console.log("Routing failed:", routingResult.error)
-        return routingResult
+        return {
+          success: false,
+          error: routingResult.error || "Failed to find suitable officer",
+          grievance
+        }
       }
 
     } catch (error) {
@@ -328,7 +360,6 @@ class SmartRoutingEngine {
       return {
         success: false,
         error: error.message,
-        stack: error.stack
       }
     }
   }

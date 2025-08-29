@@ -16,13 +16,14 @@ const getCategoryDepartment = (category) => {
     sanitation: "municipal",
     water_supply: "municipal",
     electricity: "municipal",
+    revenue: "revenue",
     transportation: "transport",
     healthcare: "health",
     education: "education",
     police: "police",
     other: "municipal",
   }
-  return (categoryDepartmentMap[category] || "municipal").toLowerCase()
+  return (categoryDepartmentMap[category] || "municipal").toUpperCase()
 }
 
 // Configure multer for file uploads
@@ -277,13 +278,13 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       });
     }
     // Auto-determine department based on category
-    const determinedDepartment = getCategoryDepartment(category);
+    const determinedDepartment = getCategoryDepartment(category)
 
     console.log("Validation passed, creating grievance with:", {
       title: title.trim(),
       description: description.trim(),
       category,
-      department: determinedDepartment.toUpperCase(),
+      department: determinedDepartment,
       priority: priority || "medium",
       location: parsedLocation,
       isAnonymous: isAnonymous === "true" || isAnonymous === true,
@@ -294,7 +295,7 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       title: title.trim(),
       description: description.trim(),
       category,
-      department: determinedDepartment.toUpperCase(),
+      department: determinedDepartment,
       priority: priority || "medium",
       location: parsedLocation,
       isAnonymous: isAnonymous === "true" || isAnonymous === true,
@@ -363,11 +364,16 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       
       if (routingResult.success) {
         console.log("Auto-assignment successful:", routingResult.routing?.assignedOfficer?.name)
-        // Reload the grievance to get the updated assignment
-        await grievance.populate([
-          { path: "citizen", select: "name email" },
-          { path: "assignedOfficer", select: "name email department" }
-        ])
+        // The grievance is already updated by the routing engine
+        // Reload the grievance to get the updated data
+        const updatedGrievance = await Grievance.findById(grievance._id)
+          .populate([
+            { path: "citizen", select: "name email" },
+            { path: "assignedOfficer", select: "name email department" }
+          ])
+        
+        // Update our local grievance object
+        Object.assign(grievance, updatedGrievance.toObject())
       } else {
         console.log("Auto-assignment failed:", routingResult.error)
         // Continue without assignment - grievance will remain unassigned
@@ -378,13 +384,14 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       // Continue without AI analysis if it fails
     }
 
-    // Ensure grievance is populated for response
-    if (!grievance.populated('citizen')) {
+    // Ensure final population for response
+    if (!grievance.populated('citizen') || !grievance.populated('assignedOfficer')) {
       await grievance.populate([
         { path: "citizen", select: "name email" },
         { path: "assignedOfficer", select: "name email department" }
       ])
     }
+    
     res.status(201).json({
       success: true,
       message: "Grievance created successfully",
