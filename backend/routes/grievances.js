@@ -22,7 +22,7 @@ const getCategoryDepartment = (category) => {
     police: "police",
     other: "municipal",
   }
-  return categoryDepartmentMap[category] || "municipal"
+  return (categoryDepartmentMap[category] || "municipal").toLowerCase()
 }
 
 // Configure multer for file uploads
@@ -230,7 +230,7 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!title || !description || !category || !department) {
+    if (!title || !description || !category) {
       return res.status(400).json({
         success: false,
         message: "Title, description, and category are required",
@@ -238,14 +238,24 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       });
     }
 
+    // Additional validation for empty strings
+    if (!title.trim() || !description.trim() || !category.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, description, and category cannot be empty",
+        received: { title: title.trim(), description: description.trim(), category: category.trim() }
+      });
+    }
     // Parse location if it's a string
     let parsedLocation;
     try {
       parsedLocation = typeof location === "string" ? JSON.parse(location) : location;
     } catch (error) {
+      console.error("Location parsing error:", error);
       return res.status(400).json({
         success: false,
         message: "Invalid location format",
+        locationReceived: location
       });
     }
 
@@ -254,12 +264,31 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Location with address is required",
+        locationReceived: parsedLocation
       });
     }
 
+    // Additional validation for empty address
+    if (!parsedLocation.address.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Location address cannot be empty",
+        locationReceived: parsedLocation
+      });
+    }
     // Auto-determine department based on category
     const determinedDepartment = getCategoryDepartment(category);
 
+    console.log("Validation passed, creating grievance with:", {
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      department: determinedDepartment.toUpperCase(),
+      priority: priority || "medium",
+      location: parsedLocation,
+      isAnonymous: isAnonymous === "true" || isAnonymous === true,
+      citizen: req.user.id,
+    });
     // Create grievance data
     const grievanceData = {
       title: title.trim(),

@@ -259,17 +259,25 @@ const SubmitComplaint = () => {
       }
       console.log("=== END DEBUG ===")
 
-      // Dispatch Redux action
-      const result = await dispatch(createGrievance(submitData))
-      
-      if (createGrievance.fulfilled.match(result)) {
+      // Make direct API call instead of using Redux
+      const response = await fetch("/api/grievances", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: submitData,
+      })
+
+      const result = await response.json()
+      console.log("API Response:", result)
+
+      if (response.ok && result.success) {
         setSuccess("Complaint submitted successfully!")
         setTimeout(() => {
-          dispatch(reset())
           navigate("/my-grievances")
         }, 2000)
       } else {
-        setError(result.payload || "Failed to submit complaint")
+        setError(result.message || "Failed to submit complaint")
       }
     } catch (error) {
       console.error("Submit error:", error)

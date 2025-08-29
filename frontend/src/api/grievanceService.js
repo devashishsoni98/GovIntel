@@ -15,41 +15,17 @@ export const grievanceService = {
 
   // Create a new grievance
   createGrievance: async (grievanceData) => {
-    // Check if grievanceData is already a FormData object
-    if (grievanceData instanceof FormData) {
-      // Use the FormData directly
-      const response = await api.post("/grievances", grievanceData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      return response.data.data
-    } else {
-      // Handle regular object data
-      const formData = new FormData()
-
-      // Add text fields
-      Object.keys(grievanceData).forEach((key) => {
-        if (key !== "attachments") {
-          formData.append(key, grievanceData[key])
-        }
-      })
-
-      // Add attachments if any
-      if (grievanceData.attachments && grievanceData.attachments.length) {
-        grievanceData.attachments.forEach((file) => {
-          formData.append("attachments", file)
-        })
-      }
-
-      const response = await api.post("/grievances", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-
-      return response.data.data
-    }
+    console.log("GrievanceService: Creating grievance with data:", grievanceData)
+    
+    // Always expect FormData from the frontend
+    const response = await api.post("/grievances", grievanceData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    
+    console.log("GrievanceService: Response:", response.data)
+    return response.data.data
   },
 
   // Update a grievance
