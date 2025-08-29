@@ -26,8 +26,23 @@ export const createGrievance = createAsyncThunk(
   "grievances/createGrievance",
   async (grievanceData, { rejectWithValue }) => {
     try {
+      console.log("Redux: Creating grievance with FormData")
+      
+      // Log FormData contents for debugging
+      if (grievanceData instanceof FormData) {
+        console.log("FormData entries:")
+        for (let [key, value] of grievanceData.entries()) {
+          if (value instanceof File) {
+            console.log(key, `File: ${value.name} (${value.size} bytes)`)
+          } else {
+            console.log(key, value)
+          }
+        }
+      }
+      
       return await grievanceService.createGrievance(grievanceData)
     } catch (error) {
+      console.error("Redux createGrievance error:", error)
       return rejectWithValue(error.response?.data?.message || "Failed to create grievance")
     }
   },

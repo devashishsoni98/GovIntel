@@ -321,7 +321,14 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
 
     // Create and save the grievance
     const grievance = new Grievance(grievanceData);
-    await grievance.save();
+    
+    try {
+      await grievance.save();
+      console.log("Grievance saved successfully:", grievance._id);
+    } catch (saveError) {
+      console.error("Grievance save error:", saveError);
+      throw saveError;
+    }
 
     // Perform AI analysis and smart routing
     try {

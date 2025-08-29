@@ -273,11 +273,32 @@ const SubmitComplaint = () => {
 
       if (response.ok && result.success) {
         setSuccess("Complaint submitted successfully!")
+        
+        // Reset form
+        setFormData({
+          title: "",
+          description: "",
+          category: "",
+          priority: "medium",
+          location: {
+            address: "",
+            coordinates: {
+              latitude: "",
+              longitude: "",
+            },
+            landmark: "",
+          },
+          isAnonymous: false,
+          expectedResolutionDate: "",
+        })
+        setAttachments([])
+        
         setTimeout(() => {
           navigate("/my-grievances")
         }, 2000)
       } else {
-        setError(result.message || "Failed to submit complaint")
+        console.error("Submission failed:", result)
+        setError(result.message || result.error || "Failed to submit complaint")
       }
     } catch (error) {
       console.error("Submit error:", error)
