@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { Search, Calendar, MapPin, Clock, CheckCircle, AlertCircle, XCircle, Eye, Plus, FileText, Star, MessageSquare } from 'lucide-react'
+import { Calendar, MapPin, Clock, CheckCircle, AlertCircle, XCircle, Eye, Plus, FileText, Star, MessageSquare } from 'lucide-react'
 
 const MyGrievances = () => {
   const [grievances, setGrievances] = useState([])
@@ -12,7 +12,6 @@ const MyGrievances = () => {
     status: "",
     category: "",
     priority: "",
-    search: "",
   })
   const [pagination, setPagination] = useState({
     current: 1,
@@ -63,7 +62,7 @@ const MyGrievances = () => {
       const queryParams = new URLSearchParams({
         page: pagination.current.toString(),
         limit: pagination.limit.toString(),
-        sortBy: "createdAt",
+        sortBy: "updatedAt",
         sortOrder: "desc",
         ...Object.fromEntries(Object.entries(filters).filter(([_, value]) => value)),
       })
@@ -186,18 +185,7 @@ const MyGrievances = () => {
 
         {/* Filters */}
         <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 animate-slide-up">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search grievances..."
-                value={filters.search}
-                onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
-              />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
             {/* Status Filter */}
             <select
@@ -278,7 +266,7 @@ const MyGrievances = () => {
               </Link>
               {Object.values(filters).some((f) => f) && (
                 <button
-                  onClick={() => setFilters({ status: "", category: "", priority: "", search: "" })}
+                  onClick={() => setFilters({ status: "", category: "", priority: "" })}
                   className="px-6 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all duration-300 hover:scale-105"
                 >
                   Clear Filters

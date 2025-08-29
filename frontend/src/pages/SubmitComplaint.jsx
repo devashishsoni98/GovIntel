@@ -54,22 +54,6 @@ const SubmitComplaint = () => {
     { value: "urgent", label: "Urgent", color: "text-red-400" },
   ]
 
-  // Add this function to map category to department
-  const getCategoryDepartment = (category) => {
-    const categoryDepartmentMap = {
-      infrastructure: "municipal",
-      sanitation: "municipal",
-      water_supply: "municipal",
-      electricity: "municipal",
-      transportation: "transport",
-      healthcare: "health",
-      education: "education",
-      police: "police",
-      other: "municipal",
-    }
-    return categoryDepartmentMap[category] || "municipal"
-  }
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
 
@@ -231,16 +215,12 @@ const SubmitComplaint = () => {
       submitData.append("priority", formData.priority)
       submitData.append("isAnonymous", formData.isAnonymous.toString())
 
-      // Add department based on category
-      const department = getCategoryDepartment(formData.category)
-      submitData.append("department", department)
-
       // Format location to match backend expectations
       const locationData = {
         address: formData.location.address.trim(),
         coordinates: {
-          lat: parseFloat(formData.location.coordinates.latitude) || 0,
-          lng: parseFloat(formData.location.coordinates.longitude) || 0,
+          latitude: parseFloat(formData.location.coordinates.latitude) || 0,
+          longitude: parseFloat(formData.location.coordinates.longitude) || 0,
         }
       }
       
@@ -266,7 +246,6 @@ const SubmitComplaint = () => {
       // ENHANCED DEBUG: Log the FormData contents
       console.log("=== FORM DATA DEBUG ===")
       console.log("Form state:", formData)
-      console.log("Department:", department)
       console.log("Location data:", locationData)
       console.log("Attachments:", attachments)
       

@@ -207,7 +207,9 @@ router.get("/analytics/dashboard", auth, async (req, res) => {
   }
 });
 
-// Create a new grievance
+// @route   POST /api/grievances
+// @desc    Create a new grievance
+// @access  Private (Citizens)
 router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
   try {
     console.log("=== BACKEND ROUTE DEBUG ===");
@@ -231,8 +233,8 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
     if (!title || !description || !category || !department) {
       return res.status(400).json({
         success: false,
-        message: "Title, description, category, and department are required",
-        received: { title, description, category, department }
+        message: "Title, description, and category are required",
+        received: { title, description, category }
       });
     }
 
@@ -255,12 +257,15 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       });
     }
 
+    // Auto-determine department based on category
+    const determinedDepartment = getCategoryDepartment(category);
+
     // Create grievance data
     const grievanceData = {
       title: title.trim(),
       description: description.trim(),
       category,
-      department: department.toUpperCase(),
+      department: determinedDepartment.toUpperCase(),
       priority: priority || "medium",
       location: parsedLocation,
       isAnonymous: isAnonymous === "true" || isAnonymous === true,
@@ -520,7 +525,7 @@ router.get("/", auth, async (req, res) => {
       priority,
       page = 1,
       limit = 10,
-      sortBy = "createdAt",
+      sortBy = "updatedAt",
       sortOrder = "desc",
     } = req.query;
 

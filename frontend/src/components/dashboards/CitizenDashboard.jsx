@@ -67,7 +67,7 @@ const CitizenDashboard = () => {
 
       // If we don't have recent grievances from analytics, fetch them separately
       if (recentGrievances.length === 0) {
-        const grievancesResponse = await fetch("/api/grievances?limit=5&sortBy=createdAt&sortOrder=desc", {
+        const grievancesResponse = await fetch("/api/grievances?limit=5&sortBy=updatedAt&sortOrder=desc", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

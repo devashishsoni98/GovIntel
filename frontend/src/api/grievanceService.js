@@ -18,7 +18,7 @@ export const grievanceService = {
     // Check if grievanceData is already a FormData object
     if (grievanceData instanceof FormData) {
       // Use the FormData directly
-      const response = await api.post("/api/grievances", grievanceData, {
+      const response = await api.post("/grievances", grievanceData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

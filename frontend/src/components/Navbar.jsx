@@ -6,17 +6,10 @@ import {
   Menu,
   X,
   ChevronDown,
-  Search,
-  Bell,
   User,
-  Settings,
   LogOut,
   FileText,
-  Calendar,
-  HelpCircle,
-  Phone,
   Building,
-  Database,
   Users,
   BarChart3,
   MessageSquare,
@@ -32,8 +25,6 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
   const dropdownRef = useRef(null)
 
   useEffect(() => {
@@ -150,13 +141,6 @@ const Navbar = () => {
         },
       ]
 
-  const userMenuItems = [
-    { name: "Profile", href: "/profile", icon: <User className="w-4 h-4" /> },
-    { name: "Settings", href: "/settings", icon: <Settings className="w-4 h-4" /> },
-    { name: "Help Center", href: "/help", icon: <HelpCircle className="w-4 h-4" /> },
-    { name: "Contact Support", href: "/contact", icon: <Phone className="w-4 h-4" /> },
-  ]
-
   return (
     <>
       <nav
@@ -235,32 +219,6 @@ const Navbar = () => {
             {/* Right Side Items (only ≥xl: 1280px) */}
             {isAuthenticated && (
               <div className="hidden lg:flex items-center gap-x-3 2xl:gap-x-4 min-w-0">
-                {/* Search Bar */}
-                <div className="relative min-w-0">
-                  <div
-                    className={`flex items-center bg-slate-700/50 border border-slate-600/50 rounded-xl transition-all duration-300 ${
-                      isSearchFocused ? "ring-2 ring-purple-500/50 border-purple-500/50 w-56 lg:w-80" : "w-40 lg:w-64"
-                    }`}
-                  >
-                    <Search className="w-5 h-5 text-slate-400 ml-3" />
-                    <input
-                      type="text"
-                      placeholder="Search grievances, reports..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onFocus={() => setIsSearchFocused(true)}
-                      onBlur={() => setIsSearchFocused(false)}
-                      className="w-full px-2 py-2 bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Notifications */}
-                <button className="relative p-2 text-slate-400 hover:text-white transition-colors duration-300 hover:bg-slate-700/50 rounded-lg">
-                  <Bell className="w-6 h-6" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                </button>
-
                 {/* User Profile Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
@@ -282,27 +240,6 @@ const Navbar = () => {
                     className={`absolute top-full right-0 mt-2 w-56 bg-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl transition-all duration-300 z-50 ${
                       activeDropdown === "user"
                         ? "opacity-100 visible transform translate-y-0"
-                        : "opacity-0 invisible transform -translate-y-2"
-                    }`}
-                  >
-                    <div className="py-2">
-                      <div className="px-4 py-2 border-b border-slate-700/50">
-                        <p className="text-white font-medium text-sm">{user?.name || "User"}</p>
-                        <p className="text-slate-400 text-xs">{getRoleDisplayName(user?.role)}</p>
-                        {user?.department && (
-                          <p className="text-slate-400 text-xs capitalize">{user.department} Department</p>
-                        )}
-                      </div>
-                      {userMenuItems.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.href}
-                          className="flex items-center gap-x-3 px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 text-sm"
-                        >
-                          {item.icon}
-                          <span>{item.name}</span>
-                        </Link>
-                      ))}
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-x-3 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 text-sm"
@@ -372,16 +309,7 @@ const Navbar = () => {
 
             {/* Mobile Search */}
             {isAuthenticated && (
-              <div className="p-3 border-b border-slate-700/50">
-                <div className="flex items-center bg-slate-700/50 border border-slate-600/50 rounded-xl">
-                  <Search className="w-5 h-5 text-slate-400 ml-2" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-full px-2 py-2 bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm"
-                  />
-                </div>
-              </div>
+              <div></div>
             )}
 
             {/* Mobile Navigation */}
