@@ -79,10 +79,10 @@ class SmartRoutingEngine {
       other: "municipal"
     }
 
-    const departmentCode = (categoryDepartmentMap[category] || "municipal").toUpperCase()
+    const departmentCode = categoryDepartmentMap[category] || "municipal"
     
     return await Department.findOne({ 
-      code: departmentCode, 
+      code: departmentCode.toUpperCase(), 
       isActive: true 
     }).populate("officers")
   }

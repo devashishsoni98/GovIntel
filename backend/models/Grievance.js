@@ -54,7 +54,7 @@ const grievanceSchema = new mongoose.Schema(
     },
     department: {
       type: String,
-      enum: ["municipal", "health", "education", "transport", "police", "revenue", "other"],
+      enum: ["MUNICIPAL", "HEALTH", "EDUCATION", "TRANSPORT", "POLICE", "REVENUE", "OTHER"],
       required: true,
     },
     location: {

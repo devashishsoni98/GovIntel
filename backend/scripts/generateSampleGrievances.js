@@ -433,7 +433,7 @@ function getDepartmentByCategory(category) {
     police: "police",
     other: "municipal"
   };
-  return categoryDepartmentMap[category] || "municipal";
+  return (categoryDepartmentMap[category] || "municipal").toUpperCase();
 }
 
 function getRandomAddress() {

@@ -22,7 +22,7 @@ const getCategoryDepartment = (category) => {
     police: "police",
     other: "municipal",
   }
-  return (categoryDepartmentMap[category] || "municipal").toUpperCase()
+  return categoryDepartmentMap[category] || "municipal"
 }
 
 // Configure multer for file uploads
@@ -260,7 +260,7 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       title: title.trim(),
       description: description.trim(),
       category,
-      department,
+      department: department.toUpperCase(),
       priority: priority || "medium",
       location: parsedLocation,
       isAnonymous: isAnonymous === "true" || isAnonymous === true,
