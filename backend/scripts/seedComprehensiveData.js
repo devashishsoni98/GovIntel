@@ -777,7 +777,7 @@ class ComprehensiveSeeder {
       police: "police",
       other: "municipal"
     };
-    return categoryDepartmentMap[category] || "municipal";
+    return (categoryDepartmentMap[category] || "municipal");
   }
 
   getRandomLandmark() {
@@ -824,23 +824,25 @@ class ComprehensiveSeeder {
     const updates = [];
     const statusFlow = {
       pending: [],
-      in_progress: ["in-progress"],
-      resolved: ["in-progress", "resolved"],
-      closed: ["in-progress", "resolved", "closed"]
+      in_progress: ["in_progress"],
+      resolved: ["in_progress", "resolved"],
+      closed: ["in_progress", "resolved", "closed"],
+      rejected: ["rejected"]
     };
 
     const flow = statusFlow[finalStatus] || [];
     let currentDate = new Date(createdDate);
 
     const updateMessages = {
-      "in-progress": "Officer has started working on the issue. Investigation and resolution in progress",
+      in_progress: "Officer has started working on the issue. Investigation and resolution in progress",
       resolved: "The reported issue has been successfully resolved. Please verify and provide feedback",
-      closed: "Case has been closed after successful resolution and citizen confirmation"
+      closed: "Case has been closed after successful resolution and citizen confirmation",
+      rejected: "Case has been reviewed and rejected due to insufficient information or invalid complaint"
     };
 
     flow.forEach((status) => {
       // Add realistic time gaps between status updates
-      const hoursToAdd = status === "in-progress" ? Math.random() * 24 + 2 : // 2-26 hours
+      const hoursToAdd = status === "in_progress" ? Math.random() * 24 + 2 : // 2-26 hours
                         status === "resolved" ? Math.random() * 72 + 24 : // 24-96 hours
                         Math.random() * 24 + 6; // 6-30 hours for closed
       
@@ -969,106 +971,4 @@ class ComprehensiveSeeder {
   }
 
   getGrievancesByCategory() {
-    return this.createdGrievances.reduce((acc, g) => {
-      acc[g.category] = (acc[g.category] || 0) + 1;
-      return acc;
-    }, {});
-  }
-
-  getGrievancesByPriority() {
-    return this.createdGrievances.reduce((acc, g) => {
-      acc[g.priority] = (acc[g.priority] || 0) + 1;
-      return acc;
-    }, {});
-  }
-
-  displaySummary() {
-    console.log("\n" + "=".repeat(70));
-    console.log("📊 COMPREHENSIVE SEEDING SUMMARY");
-    console.log("=".repeat(70));
-    
-    console.log(`\n🏢 DEPARTMENTS (${this.createdDepartments.length}):`);
-    this.createdDepartments.forEach(dept => {
-      const deptOfficers = this.demoLogins.officers.filter(o => o.department === dept.code);
-      console.log(`   • ${dept.name} (${dept.code}): ${deptOfficers.length} officers`);
-    });
-    
-    console.log(`\n👥 USERS CREATED:`);
-    console.log(`   • Admins: ${this.demoLogins.admins.length}`);
-    console.log(`   • Officers: ${this.demoLogins.officers.length}`);
-    console.log(`   • Citizens: ${this.demoLogins.citizens.length}`);
-    console.log(`   • Total: ${this.demoLogins.admins.length + this.demoLogins.officers.length + this.demoLogins.citizens.length}`);
-    
-    console.log(`\n📋 GRIEVANCES CREATED: ${this.createdGrievances.length}`);
-    
-    // Status breakdown
-    const statusCounts = this.getGrievancesByStatus();
-    console.log(`\n   📊 Status Distribution:`);
-    Object.entries(statusCounts).forEach(([status, count]) => {
-      const percentage = Math.round((count / this.createdGrievances.length) * 100);
-      console.log(`   • ${status.padEnd(12)}: ${String(count).padStart(3)} (${percentage}%)`);
-    });
-    
-    // Category breakdown
-    const categoryCounts = this.getGrievancesByCategory();
-    console.log(`\n   🏷️  Category Distribution:`);
-    Object.entries(categoryCounts).forEach(([category, count]) => {
-      const percentage = Math.round((count / this.createdGrievances.length) * 100);
-      console.log(`   • ${category.padEnd(15)}: ${String(count).padStart(3)} (${percentage}%)`);
-    });
-
-    // Priority breakdown
-    const priorityCounts = this.getGrievancesByPriority();
-    console.log(`\n   ⚡ Priority Distribution:`);
-    Object.entries(priorityCounts).forEach(([priority, count]) => {
-      const percentage = Math.round((count / this.createdGrievances.length) * 100);
-      console.log(`   • ${priority.padEnd(8)}: ${String(count).padStart(3)} (${percentage}%)`);
-    });
-    
-    console.log(`\n🔑 DEMO LOGIN CREDENTIALS:`);
-    console.log(`   🔴 Admin:    admin@govintel.gov / admin123`);
-    console.log(`   🔵 Officer:  ${this.demoLogins.officers[0]?.email} / officer123`);
-    console.log(`   🟢 Citizen:  ${this.demoLogins.citizens[0]?.email} / citizen123`);
-    
-    console.log(`\n📁 FILES CREATED:`);
-    console.log(`   • Demo logins: backend/demo-logins.json`);
-    console.log(`   • Contains all ${this.demoLogins.admins.length + this.demoLogins.officers.length + this.demoLogins.citizens.length} user credentials for testing`);
-    
-    console.log(`\n🎯 TESTING COVERAGE:`);
-    console.log(`   ✅ Dashboard Analytics (all roles)`);
-    console.log(`   ✅ Filtering & Search (status, category, priority)`);
-    console.log(`   ✅ Status Tracking (all possible states)`);
-    console.log(`   ✅ Officer Assignment & Workload`);
-    console.log(`   ✅ AI Analysis & Sentiment Scoring`);
-    console.log(`   ✅ Feedback & Rating System`);
-    console.log(`   ✅ Department Statistics`);
-    console.log(`   ✅ User Management (all roles)`);
-    
-    console.log("\n" + "=".repeat(70));
-    console.log("🚀 Ready for comprehensive testing!");
-    console.log("=".repeat(70));
-  }
-}
-
-// Main seeding function
-const seedComprehensiveData = async () => {
-  const seeder = new ComprehensiveSeeder();
-  
-  try {
-    await seeder.seedAll();
-  } catch (error) {
-    console.error("❌ Comprehensive seeding failed:", error);
-    process.exit(1);
-  } finally {
-    await mongoose.disconnect();
-    console.log("📡 Disconnected from MongoDB");
-    process.exit(0);
-  }
-};
-
-// Run seeding if called directly
-if (require.main === module) {
-  seedComprehensiveData();
-}
-
-module.exports = seedComprehensiveData;
+    return this.
