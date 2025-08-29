@@ -218,58 +218,25 @@ const createSampleData = async () => {
       return
     }
 
+    // Check if we should run comprehensive seeding
     const userCount = await User.countDocuments()
+    const grievanceCount = await Grievance.countDocuments()
 
-    // If we already have users (other than admin), skip sample data creation
-    if (userCount > 1) {
+    // If we already have comprehensive data, skip seeding
+    if (userCount > 5 && grievanceCount > 10) {
       console.log("Sample data already exists, skipping creation...")
       return
     }
 
-    console.log("Creating sample users for testing...")
+    console.log("🌱 Running comprehensive data seeding...")
+    
+    // Import and run comprehensive seeding
+    const seedComprehensiveData = require("./scripts/seedComprehensiveData")
+    await seedComprehensiveData()
+    
+    console.log("✅ Comprehensive seeding completed!")
+    return
 
-    // Create sample citizen
-    const citizenExists = await User.findOne({ email: "citizen@example.com" })
-    if (!citizenExists) {
-      const citizen = new User({
-        name: "John Citizen",
-        email: "citizen@example.com",
-        password: "password123", // PLAIN TEXT - will be hashed by the model
-        role: "citizen",
-        phone: "+919876543210", // Valid international format
-        address: {
-          street: "123 Main St",
-          city: "New York",
-          state: "NY",
-          zipCode: "10001",
-        },
-      })
-
-      await citizen.save()
-      console.log("✅ Sample citizen created: citizen@example.com / password123")
-    }
-
-    // Create sample officer
-    const officerExists = await User.findOne({ email: "officer@municipal.gov" })
-    if (!officerExists) {
-      const officer = new User({
-        name: "Jane Officer",
-        email: "officer@municipal.gov",
-        password: "password123", // PLAIN TEXT - will be hashed by the model
-        role: "officer",
-        phone: "+919123456789", // Valid international format
-        department: "municipal",
-        address: {
-          street: "456 Government Ave",
-          city: "New York",
-          state: "NY",
-          zipCode: "10002",
-        },
-      })
-
-      await officer.save()
-      console.log("✅ Sample officer created: officer@municipal.gov / password123")
-    }
   } catch (error) {
     console.error("❌ Error creating sample data:", error)
     console.error("Full error details:", error.message)
