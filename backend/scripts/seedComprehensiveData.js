@@ -659,7 +659,7 @@ class ComprehensiveSeeder {
   async seedGrievances() {
     console.log("📋 Creating grievances with AI analysis...");
     
-    const statuses = ["pending", "assigned", "in_progress", "resolved", "closed"];
+    const statuses = ["pending", "in-progress", "resolved", "closed"];
     let totalCreated = 0;
     
     // Create grievances for each category and template
@@ -824,26 +824,23 @@ class ComprehensiveSeeder {
     const updates = [];
     const statusFlow = {
       pending: [],
-      assigned: ["assigned"],
-      in_progress: ["assigned", "in_progress"],
-      resolved: ["assigned", "in_progress", "resolved"],
-      closed: ["assigned", "in_progress", "resolved", "closed"]
+      in_progress: ["in-progress"],
+      resolved: ["in-progress", "resolved"],
+      closed: ["in-progress", "resolved", "closed"]
     };
 
     const flow = statusFlow[finalStatus] || [];
     let currentDate = new Date(createdDate);
 
     const updateMessages = {
-      assigned: "Case has been assigned to a department officer for review and action",
-      in_progress: "Officer has started working on the issue. Investigation and resolution in progress",
+      "in-progress": "Officer has started working on the issue. Investigation and resolution in progress",
       resolved: "The reported issue has been successfully resolved. Please verify and provide feedback",
       closed: "Case has been closed after successful resolution and citizen confirmation"
     };
 
     flow.forEach((status) => {
       // Add realistic time gaps between status updates
-      const hoursToAdd = status === "assigned" ? Math.random() * 24 + 2 : // 2-26 hours
-                        status === "in_progress" ? Math.random() * 48 + 12 : // 12-60 hours
+      const hoursToAdd = status === "in-progress" ? Math.random() * 24 + 2 : // 2-26 hours
                         status === "resolved" ? Math.random() * 72 + 24 : // 24-96 hours
                         Math.random() * 24 + 6; // 6-30 hours for closed
       

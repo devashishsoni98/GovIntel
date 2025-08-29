@@ -1,0 +1,286 @@
+{
+  "admin": {
+    "email": "admin@govintel.gov",
+    "password": "admin123",
+    "role": "admin",
+    "name": "System Administrator"
+  },
+  "officers": [
+    {
+      "name": "Rajesh Kumar Singh",
+      "email": "rajesh.singh@municipal.gov",
+      "password": "officer123",
+      "department": "infrastructure",
+      "role": "officer",
+      "position": "Senior Municipal Engineer"
+    },
+    {
+      "name": "Priya Sharma",
+      "email": "priya.sharma@municipal.gov", 
+      "password": "officer123",
+      "department": "infrastructure",
+      "role": "officer",
+      "position": "Infrastructure Coordinator"
+    },
+    {
+      "name": "Amit Patel",
+      "email": "amit.patel@municipal.gov",
+      "password": "officer123", 
+      "department": "infrastructure",
+      "role": "officer",
+      "position": "Public Works Manager"
+    },
+    {
+      "name": "Dr. Sunita Reddy",
+      "email": "sunita.reddy@health.gov",
+      "password": "officer123",
+      "department": "health",
+      "role": "officer", 
+      "position": "Chief Medical Officer"
+    },
+    {
+      "name": "Dr. Vikram Gupta",
+      "email": "vikram.gupta@health.gov",
+      "password": "officer123",
+      "department": "health", 
+      "role": "officer",
+      "position": "Public Health Inspector"
+    },
+    {
+      "name": "Dr. Meera Joshi",
+      "email": "meera.joshi@health.gov",
+      "password": "officer123",
+      "department": "health",
+      "role": "officer",
+      "position": "Health Program Manager"
+    },
+    {
+      "name": "Prof. Ramesh Agarwal",
+      "email": "ramesh.agarwal@education.gov", 
+      "password": "officer123",
+      "department": "education",
+      "role": "officer",
+      "position": "Education Director"
+    },
+    {
+      "name": "Kavita Desai",
+      "email": "kavita.desai@education.gov",
+      "password": "officer123",
+      "department": "education",
+      "role": "officer",
+      "position": "School Inspector"
+    },
+    {
+      "name": "Suresh Yadav",
+      "email": "suresh.yadav@education.gov",
+      "password": "officer123", 
+      "department": "education",
+      "role": "officer",
+      "position": "Academic Coordinator"
+    },
+    {
+      "name": "Ravi Malhotra",
+      "email": "ravi.malhotra@transport.gov",
+      "password": "officer123",
+      "department": "transport",
+      "role": "officer",
+      "position": "Transport Commissioner"
+    },
+    {
+      "name": "Neha Kapoor",
+      "email": "neha.kapoor@transport.gov", 
+      "password": "officer123",
+      "department": "transport",
+      "role": "officer",
+      "position": "Traffic Controller"
+    },
+    {
+      "name": "Deepak Verma",
+      "email": "deepak.verma@transport.gov",
+      "password": "officer123",
+      "department": "transport", 
+      "role": "officer",
+      "position": "Road Safety Officer"
+    },
+    {
+      "name": "Inspector Arjun Thakur",
+      "email": "arjun.thakur@police.gov",
+      "password": "officer123",
+      "department": "police",
+      "role": "officer",
+      "position": "Police Inspector"
+    },
+    {
+      "name": "Sub-Inspector Pooja Nair",
+      "email": "pooja.nair@police.gov",
+      "password": "officer123", 
+      "department": "police",
+      "role": "officer",
+      "position": "Sub-Inspector"
+    },
+    {
+      "name": "Constable Manoj Kumar",
+      "email": "manoj.kumar@police.gov",
+      "password": "officer123",
+      "department": "police",
+      "role": "officer",
+      "position": "Police Constable"
+    }
+  ],
+  "citizens": [
+    {
+      "name": "Anita Sharma",
+      "email": "anita.sharma@email.com",
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543210"
+    },
+    {
+      "name": "Rohit Gupta", 
+      "email": "rohit.gupta@email.com",
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543211"
+    },
+    {
+      "name": "Sneha Patel",
+      "email": "sneha.patel@email.com", 
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543212"
+    },
+    {
+      "name": "Vikash Singh",
+      "email": "vikash.singh@email.com",
+      "password": "citizen123", 
+      "role": "citizen",
+      "phone": "+91-9876543213"
+    },
+    {
+      "name": "Ritu Agarwal",
+      "email": "ritu.agarwal@email.com",
+      "password": "citizen123",
+      "role": "citizen", 
+      "phone": "+91-9876543214"
+    },
+    {
+      "name": "Manish Kumar",
+      "email": "manish.kumar@email.com",
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543215"
+    },
+    {
+      "name": "Deepika Reddy",
+      "email": "deepika.reddy@email.com",
+      "password": "citizen123", 
+      "role": "citizen",
+      "phone": "+91-9876543216"
+    },
+    {
+      "name": "Arjun Malhotra",
+      "email": "arjun.malhotra@email.com",
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543217"
+    },
+    {
+      "name": "Kavya Joshi",
+      "email": "kavya.joshi@email.com", 
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543218"
+    },
+    {
+      "name": "Sanjay Verma",
+      "email": "sanjay.verma@email.com",
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543219"
+    },
+    {
+      "name": "Pooja Desai",
+      "email": "pooja.desai@email.com",
+      "password": "citizen123", 
+      "role": "citizen",
+      "phone": "+91-9876543220"
+    },
+    {
+      "name": "Rahul Yadav",
+      "email": "rahul.yadav@email.com",
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543221"
+    },
+    {
+      "name": "Nisha Kapoor",
+      "email": "nisha.kapoor@email.com",
+      "password": "citizen123", 
+      "role": "citizen",
+      "phone": "+91-9876543222"
+    },
+    {
+      "name": "Sunil Thakur",
+      "email": "sunil.thakur@email.com",
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543223"
+    },
+    {
+      "name": "Meera Nair",
+      "email": "meera.nair@email.com", 
+      "password": "citizen123",
+      "role": "citizen",
+      "phone": "+91-9876543224"
+    }
+  ],
+  "quick_access": {
+    "admin_login": {
+      "email": "admin@govintel.gov",
+      "password": "admin123"
+    },
+    "officer_login": {
+      "email": "rajesh.singh@municipal.gov", 
+      "password": "officer123"
+    },
+    "citizen_login": {
+      "email": "anita.sharma@email.com",
+      "password": "citizen123"
+    }
+  },
+  "departments": [
+    {
+      "name": "Municipal Corporation",
+      "code": "infrastructure",
+      "description": "Handles infrastructure, sanitation, water supply, and electricity"
+    },
+    {
+      "name": "Health Department", 
+      "code": "health",
+      "description": "Manages healthcare services and public health"
+    },
+    {
+      "name": "Education Department",
+      "code": "education", 
+      "description": "Oversees schools and educational institutions"
+    },
+    {
+      "name": "Transport Department",
+      "code": "transport",
+      "description": "Manages transportation and traffic systems"
+    },
+    {
+      "name": "Police Department",
+      "code": "police", 
+      "description": "Handles law enforcement and public safety"
+    }
+  ],
+  "statistics": {
+    "total_users": 31,
+    "total_officers": 15,
+    "total_citizens": 15,
+    "total_departments": 5,
+    "expected_grievances": "100+",
+    "data_coverage": "6 months of historical data"
+  }
+}
