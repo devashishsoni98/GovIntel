@@ -116,7 +116,7 @@ class ComprehensiveSeeder {
         name: "Revenue Department",
         code: "REVENUE",
         description: "Manages taxation, revenue collection, and financial administration",
-        categories: ["revenue"],
+        categories: ["other"],
         contactInfo: {
           email: "revenue@city.gov",
           phone: "9876543215",
@@ -949,7 +949,9 @@ class ComprehensiveSeeder {
     const citizens = users.filter((user) => user.role === "citizen");
     const officers = users.filter((user) => user.role === "officer");
     const grievances = [];
-    const statuses = ["pending", "assigned", "in_progress", "resolved", "closed"];
+    
+    // Use EXACT status values from the Grievance model enum
+    const validStatuses = ["pending", "in_progress", "resolved", "closed", "rejected"];
 
     let grievanceCounter = 0;
 
@@ -960,7 +962,7 @@ class ComprehensiveSeeder {
 
         for (let i = 0; i < grievancesToCreate; i++) {
           const citizen = citizens[Math.floor(Math.random() * citizens.length)];
-          const status = statuses[Math.floor(Math.random() * statuses.length)];
+          const status = validStatuses[Math.floor(Math.random() * validStatuses.length)];
 
           // Create date in the past (last 6 months)
           const createdDate = new Date();
@@ -1026,7 +1028,7 @@ class ComprehensiveSeeder {
             }
           }
 
-          // Generate status updates
+          // Generate status updates with VALID status values only
           grievanceData.updates = this.generateStatusUpdates(
             status, 
             createdDate, 
@@ -1059,7 +1061,6 @@ class ComprehensiveSeeder {
       healthcare: "health",
       education: "education",
       police: "police",
-      revenue: "revenue",
       other: "municipal"
     };
     return categoryDepartmentMap[category] || "municipal";
@@ -1099,22 +1100,24 @@ class ComprehensiveSeeder {
 
   generateStatusUpdates(finalStatus, createdDate, assignedOfficer) {
     const updates = [];
+    
+    // Use EXACT status values from Grievance model enum: ["pending", "in_progress", "resolved", "closed", "rejected"]
     const statusFlow = {
       pending: [],
-      assigned: ["assigned"],
-      in_progress: ["assigned", "in_progress"],
-      resolved: ["assigned", "in_progress", "resolved"],
-      closed: ["assigned", "in_progress", "resolved", "closed"]
+      in_progress: ["in_progress"],
+      resolved: ["in_progress", "resolved"],
+      closed: ["in_progress", "resolved", "closed"],
+      rejected: ["rejected"]
     };
 
     const flow = statusFlow[finalStatus] || [];
     let currentDate = new Date(createdDate);
 
     const updateMessages = {
-      assigned: "Case has been assigned to a department officer for review and action",
       in_progress: "Officer has started working on the issue. Investigation and resolution in progress",
       resolved: "The reported issue has been successfully resolved. Please verify and provide feedback",
-      closed: "Case has been closed after successful resolution and citizen confirmation"
+      closed: "Case has been closed after successful resolution and citizen confirmation",
+      rejected: "Case has been reviewed and rejected due to insufficient information or invalid complaint"
     };
 
     flow.forEach((status) => {
@@ -1122,7 +1125,7 @@ class ComprehensiveSeeder {
       
       updates.push({
         message: updateMessages[status] || `Status updated to ${status}`,
-        status: status,
+        status: status, // This should match the main grievance status
         updatedBy: assignedOfficer,
         timestamp: currentDate
       });
@@ -1158,6 +1161,37 @@ const seedComprehensiveData = async () => {
     console.log("   Officer: rajesh.singh@municipal.gov / officer123");
     console.log("   Citizen: anita.sharma@email.com / citizen123");
     console.log("   Officer Passcode: OFFICER2024");
+
+    // Display category breakdown
+    const categoryStats = await Grievance.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+          avgUrgency: { $avg: "$aiAnalysis.urgencyScore" }
+        }
+      }
+    ]);
+    
+    console.log("\n📊 Category Breakdown:");
+    categoryStats.forEach(stat => {
+      console.log(`   • ${stat._id}: ${stat.count} grievances (avg urgency: ${Math.round(stat.avgUrgency)})`);
+    });
+
+    // Display status breakdown
+    const statusStats = await Grievance.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    console.log("\n📈 Status Breakdown:");
+    statusStats.forEach(stat => {
+      console.log(`   • ${stat._id}: ${stat.count} grievances`);
+    });
 
   } catch (error) {
     console.error("❌ Seeding process failed:", error);
