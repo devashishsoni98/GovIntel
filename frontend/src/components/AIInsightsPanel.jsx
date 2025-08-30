@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { 
-  Brain, 
+  Activity, 
   TrendingUp, 
   Clock, 
   AlertTriangle, 
@@ -8,14 +8,14 @@ import {
   BarChart3, 
   Lightbulb,
   Target,
-  Activity,
+  BarChart,
   Zap,
   RefreshCw,
   Eye,
   X
 } from "lucide-react"
 
-const AIInsightsPanel = ({ grievance, onClose }) => {
+const AnalysisInsightsPanel = ({ grievance, onClose }) => {
   const [insights, setInsights] = useState(null)
   const [recommendations, setRecommendations] = useState(null)
   const [prediction, setPrediction] = useState(null)
@@ -34,8 +34,8 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
       setLoading(true)
       setError("")
 
-      // Fetch AI recommendations
-      const recommendationsResponse = await fetch("/api/ai/smart-recommendations", {
+      // Fetch smart recommendations
+      const recommendationsResponse = await fetch("/api/analysis/smart-recommendations", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,7 +50,7 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
       }
 
       // Fetch resolution time prediction
-      const predictionResponse = await fetch("/api/ai/predict-resolution-time", {
+      const predictionResponse = await fetch("/api/analysis/predict-resolution-time", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,8 +65,8 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
       }
 
     } catch (error) {
-      console.error("AI insights error:", error)
-      setError("Failed to load AI insights")
+      console.error("Analysis insights error:", error)
+      setError("Failed to load analysis insights")
     } finally {
       setLoading(false)
     }
@@ -93,8 +93,8 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-8 text-center">
-            <Brain className="w-12 h-12 text-purple-400 mx-auto mb-4 animate-pulse" />
-            <p className="text-white">AI is analyzing the grievance...</p>
+            <Activity className="w-12 h-12 text-purple-400 mx-auto mb-4 animate-pulse" />
+            <p className="text-white">Analyzing the grievance...</p>
           </div>
         </div>
       </div>
@@ -108,11 +108,11 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
         <div className="flex items-center justify-between p-6 border-b border-slate-700 sticky top-0 bg-slate-800 z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-              <Brain className="w-5 h-5 text-purple-400" />
+              <Activity className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">AI Insights & Recommendations</h2>
-              <p className="text-slate-400 text-sm">Powered by advanced machine learning</p>
+              <h2 className="text-xl font-bold text-white">Analysis Insights & Recommendations</h2>
+              <p className="text-slate-400 text-sm">Powered by advanced data analysis</p>
             </div>
           </div>
           <button
@@ -153,7 +153,7 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            AI Analysis
+            Data Analysis
           </button>
         </div>
 
@@ -314,40 +314,40 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
           )}
 
           {/* Analysis Tab */}
-          {activeTab === "analysis" && grievance.aiAnalysis && (
+          {activeTab === "analysis" && grievance.analysisData && (
             <div className="space-y-6">
               {/* Sentiment Analysis */}
               <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <Activity className="w-5 h-5 text-green-400" />
+                  <BarChart className="w-5 h-5 text-green-400" />
                   <h3 className="text-white font-semibold">Sentiment Analysis</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-slate-400 text-sm">Detected Sentiment:</span>
                     <p className={`font-medium ${
-                      grievance.aiAnalysis.sentiment === 'positive' ? 'text-green-400' :
-                      grievance.aiAnalysis.sentiment === 'negative' ? 'text-red-400' : 'text-yellow-400'
+                      grievance.analysisData?.sentiment === 'positive' ? 'text-green-400' :
+                      grievance.analysisData?.sentiment === 'negative' ? 'text-red-400' : 'text-yellow-400'
                     }`}>
-                      {grievance.aiAnalysis.sentiment.toUpperCase()}
+                      {grievance.analysisData?.sentiment?.toUpperCase() || 'NEUTRAL'}
                     </p>
                   </div>
                   <div>
                     <span className="text-slate-400 text-sm">Urgency Score:</span>
-                    <p className="font-medium text-white">{grievance.aiAnalysis.urgencyScore}/100</p>
+                    <p className="font-medium text-white">{grievance.analysisData?.urgencyScore || 50}/100</p>
                   </div>
                 </div>
               </div>
 
               {/* Keywords */}
-              {grievance.aiAnalysis.keywords && grievance.aiAnalysis.keywords.length > 0 && (
+              {grievance.analysisData?.keywords && grievance.analysisData.keywords.length > 0 && (
                 <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <Brain className="w-5 h-5 text-purple-400" />
+                    <Activity className="w-5 h-5 text-purple-400" />
                     <h3 className="text-white font-semibold">Extracted Keywords</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {grievance.aiAnalysis.keywords.map((keyword, index) => (
+                    {grievance.analysisData.keywords.map((keyword, index) => (
                       <span key={index} className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
                         {keyword}
                       </span>
@@ -366,13 +366,13 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
                   <div>
                     <span className="text-slate-400 text-sm">Suggested Department:</span>
                     <p className="font-medium text-orange-400 capitalize">
-                      {grievance.aiAnalysis.suggestedDepartment}
+                      {grievance.analysisData?.suggestedDepartment || 'Municipal'}
                     </p>
                   </div>
                   <div>
                     <span className="text-slate-400 text-sm">Confidence Level:</span>
                     <p className="font-medium text-white">
-                      {Math.round(grievance.aiAnalysis.confidence * 100)}%
+                      {Math.round((grievance.analysisData?.confidence || 0.5) * 100)}%
                     </p>
                   </div>
                 </div>
@@ -384,8 +384,8 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-slate-700 sticky bottom-0 bg-slate-800">
           <div className="flex items-center gap-2 text-sm text-slate-400">
-            <Brain className="w-4 h-4" />
-            <span>Powered by GovIntel AI Engine</span>
+            <Activity className="w-4 h-4" />
+            <span>Powered by GovIntel Analysis Engine</span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -408,4 +408,4 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
   )
 }
 
-export default AIInsightsPanel
+export default AnalysisInsightsPanel

@@ -17,9 +17,12 @@ import {
   TrendingUp,
   FileText,
   Star,
-  MessageSquare
+  MessageSquare,
+  BarChart3,
+  Activity
 } from 'lucide-react'
 import { selectUser } from "../redux/slices/authSlice"
+import AnalyticsWidget from "../components/AnalyticsWidget"
 
 const AssignedCases = () => {
   const user = useSelector(selectUser)
@@ -246,6 +249,16 @@ const AssignedCases = () => {
           </div>
         </div>
 
+
+        {/* Analytics Section */}
+        <div className="mb-6 sm:mb-8">
+          <AnalyticsWidget 
+            title="Case Analytics"
+            showCharts={true}
+            compact={true}
+            userRole="officer"
+          />
+        </div>
 
         {/* Error Message */}
         {error && (

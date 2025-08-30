@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import { FileText, Clock, CheckCircle, AlertTriangle, TrendingUp, Calendar, MapPin, User, Building } from "lucide-react"
+import { FileText, Clock, CheckCircle, AlertTriangle, TrendingUp, Calendar, MapPin, User, Building, BarChart3, Activity } from "lucide-react"
 import { selectUser } from "../../redux/slices/authSlice"
+import AnalyticsWidget from "../AnalyticsWidget"
+import MetricCard from "../charts/MetricCard"
 
 const OfficerDashboard = () => {
   const user = useSelector(selectUser)
@@ -243,8 +245,18 @@ const OfficerDashboard = () => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          {/* Analytics Widget */}
+          <div className="lg:col-span-3 mb-6">
+            <AnalyticsWidget 
+              title="Department Analytics Overview"
+              showCharts={true}
+              compact={false}
+              userRole="officer"
+            />
+          </div>
+
           {/* Assigned Cases */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
@@ -351,6 +363,31 @@ const OfficerDashboard = () => {
                     </div>
                   ))
                 )}
+              </div>
+            </div>
+            
+            {/* Performance Insights */}
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
+                <Activity className="w-6 h-6 text-blue-400" />
+                Your Performance
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <MetricCard
+                  title="Cases Handled"
+                  value={stats.total}
+                  icon={<FileText className="w-5 h-5" />}
+                  color="blue"
+                  subtitle="Total assigned cases"
+                />
+                
+                <MetricCard
+                  title="Success Rate"
+                  value={`${Math.round((stats.resolved / (stats.total || 1)) * 100)}%`}
+                  icon={<CheckCircle className="w-5 h-5" />}
+                  color="green"
+                  subtitle="Resolution success rate"
+                />
               </div>
             </div>
 

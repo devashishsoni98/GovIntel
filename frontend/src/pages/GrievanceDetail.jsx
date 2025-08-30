@@ -33,7 +33,7 @@ import { selectUser, USER_ROLES } from "../redux/slices/authSlice"
 import StatusUpdateModal from "../components/StatusUpdateModal"
 import FeedbackModal from "../components/FeedbackModal"
 import FilePreview from "../components/FilePreview"
-import AIInsightsPanel from "../components/AIInsightsPanel"
+import AnalysisInsightsPanel from "../components/AIInsightsPanel"
 import AdminAssignModal from "../components/AdminAssignModal"
 import AdminReassignModal from "../components/AdminReassignModal"
 
@@ -49,7 +49,7 @@ const GrievanceDetail = () => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [showFilePreview, setShowFilePreview] = useState(false)
   const [previewFile, setPreviewFile] = useState(null)
-  const [showAIInsights, setShowAIInsights] = useState(false)
+  const [showAnalysisInsights, setShowAnalysisInsights] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [showReassignModal, setShowReassignModal] = useState(false)
 
@@ -203,7 +203,7 @@ const GrievanceDetail = () => {
     )
   }
 
-  const canViewAIInsights = () => {
+  const canViewAnalysisInsights = () => {
     return user?.role === USER_ROLES.OFFICER || user?.role === USER_ROLES.ADMIN
   }
 
@@ -296,13 +296,13 @@ const GrievanceDetail = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-3">
-            {canViewAIInsights() && (
+            {canViewAnalysisInsights() && (
               <button
-                onClick={() => setShowAIInsights(true)}
+                onClick={() => setShowAnalysisInsights(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all hover:scale-105"
               >
-                <Brain className="w-4 h-4" />
-                AI Insights
+                <Activity className="w-4 h-4" />
+                Analysis Insights
               </button>
             )}
 
@@ -434,31 +434,31 @@ const GrievanceDetail = () => {
               )}
 
               {/* AI Analysis */}
-              {grievance.aiAnalysis && (
+              {grievance.analysisData && (
                 <div className="mt-6 pt-6 border-t border-slate-700/50">
                   <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-purple-400" />
-                    AI Analysis
+                    <Activity className="w-5 h-5 text-purple-400" />
+                    Data Analysis
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
                       <p className="text-slate-400 text-sm mb-1">Sentiment</p>
                       <p className={`font-medium capitalize ${
-                        grievance.aiAnalysis.sentiment === 'positive' ? 'text-green-400' :
-                        grievance.aiAnalysis.sentiment === 'negative' ? 'text-red-400' : 'text-yellow-400'
+                        grievance.analysisData?.sentiment === 'positive' ? 'text-green-400' :
+                        grievance.analysisData?.sentiment === 'negative' ? 'text-red-400' : 'text-yellow-400'
                       }`}>
-                        {grievance.aiAnalysis.sentiment}
+                        {grievance.analysisData?.sentiment || 'neutral'}
                       </p>
                     </div>
                     <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
                       <p className="text-slate-400 text-sm mb-1">Urgency Score</p>
-                      <p className="text-white font-medium">{grievance.aiAnalysis.urgencyScore}/100</p>
+                      <p className="text-white font-medium">{grievance.analysisData?.urgencyScore || 50}/100</p>
                     </div>
-                    {grievance.aiAnalysis.keywords && grievance.aiAnalysis.keywords.length > 0 && (
+                    {grievance.analysisData?.keywords && grievance.analysisData.keywords.length > 0 && (
                       <div className="sm:col-span-2 bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
                         <p className="text-slate-400 text-sm mb-2">Keywords</p>
                         <div className="flex flex-wrap gap-2">
-                          {grievance.aiAnalysis.keywords.map((keyword, index) => (
+                          {grievance.analysisData.keywords.map((keyword, index) => (
                             <span key={index} className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-sm">
                               {keyword}
                             </span>
@@ -703,10 +703,10 @@ const GrievanceDetail = () => {
           />
         )}
 
-        {showAIInsights && (
-          <AIInsightsPanel
+        {showAnalysisInsights && (
+          <AnalysisInsightsPanel
             grievance={grievance}
-            onClose={() => setShowAIInsights(false)}
+            onClose={() => setShowAnalysisInsights(false)}
           />
         )}
 

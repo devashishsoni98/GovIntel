@@ -17,8 +17,20 @@ import {
   CheckCircle,
   XCircle,
   PieChart,
-  LineChart
+  LineChart as LineChartIcon,
+  FileText,
+  Building,
+  Activity,
+  Zap
 } from "lucide-react"
+
+// Import chart components
+import BarChart from "../components/charts/BarChart"
+import PieChart from "../components/charts/PieChart"
+import LineChart from "../components/charts/LineChart"
+import DonutChart from "../components/charts/DonutChart"
+import MetricCard from "../components/charts/MetricCard"
+import ProgressBar from "../components/charts/ProgressBar"
 
 const Analytics = () => {
   const user = useSelector(selectUser)
@@ -94,23 +106,44 @@ const Analytics = () => {
     }
   }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "pending": return "text-yellow-400 bg-yellow-400/10"
-      case "in_progress": return "text-blue-400 bg-blue-400/10"
-      case "resolved": return "text-green-400 bg-green-400/10"
-      case "closed": return "text-gray-400 bg-gray-400/10"
-      case "rejected": return "text-red-400 bg-red-400/10"
-      default: return "text-gray-400 bg-gray-400/10"
-    }
-  }
-
   const formatTrendDate = (dateObj) => {
     if (timeframe === "week") {
       return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}-${String(dateObj.day).padStart(2, '0')}`
     }
     return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}`
   }
+
+  // Prepare chart data
+  const statusChartData = analytics.dashboard?.statusStats?.map(stat => ({
+    status: stat.status.replace('_', ' '),
+    count: stat.count,
+    percentage: stat.percentage || 0
+  })) || []
+
+  const categoryChartData = analytics.dashboard?.categoryStats?.map(stat => ({
+    category: stat.category.replace('_', ' '),
+    count: stat.count,
+    percentage: stat.percentage || 0
+  })) || []
+
+  const priorityChartData = analytics.dashboard?.priorityStats?.map(stat => ({
+    priority: stat.priority,
+    count: stat.count,
+    percentage: stat.percentage || 0
+  })) || []
+
+  const monthlyTrendData = analytics.dashboard?.monthlyTrend?.map(trend => ({
+    month: trend.month,
+    count: trend.count
+  })) || []
+
+  const trendsData = analytics.trends?.trends?.map(trend => ({
+    date: formatTrendDate(trend._id),
+    total: trend.total,
+    pending: trend.pending,
+    inProgress: trend.inProgress,
+    resolved: trend.resolved
+  })) || []
 
   if (loading) {
     return (
@@ -135,7 +168,9 @@ const Analytics = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
+            <h1 className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Analytics Dashboard
+            </h1>
             <p className="text-slate-400">Comprehensive insights and performance metrics</p>
           </div>
           
@@ -179,105 +214,108 @@ const Analytics = () => {
 
         {/* Key Metrics */}
         {analytics.dashboard && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10 animate-slide-up">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">Total Grievances</p>
-                  <p className="text-2xl font-bold text-white">{analytics.dashboard.summary.total}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-blue-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/10 animate-slide-up" style={{animationDelay: '0.1s'}}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">Resolution Rate</p>
-                  <p className="text-2xl font-bold text-green-400">{analytics.dashboard.summary.resolutionRate}%</p>
-                </div>
-                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Target className="w-6 h-6 text-green-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 animate-slide-up" style={{animationDelay: '0.2s'}}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">Avg Resolution Time</p>
-                  <p className="text-2xl font-bold text-purple-400">{analytics.dashboard.summary.avgResolutionTime}h</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-purple-400" />
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <MetricCard
+              title="Total Grievances"
+              value={analytics.dashboard.summary.total}
+              icon={<FileText className="w-6 h-6" />}
+              color="blue"
+              subtitle="All time"
+            />
+            
+            <MetricCard
+              title="Resolution Rate"
+              value={`${analytics.dashboard.summary.resolutionRate}%`}
+              icon={<Target className="w-6 h-6" />}
+              color="green"
+              change={analytics.dashboard.summary.resolutionRate > 70 ? "+5.2" : "-2.1"}
+              changeType={analytics.dashboard.summary.resolutionRate > 70 ? "positive" : "negative"}
+            />
+            
+            <MetricCard
+              title="Avg Resolution Time"
+              value={`${analytics.dashboard.summary.avgResolutionTime}h`}
+              icon={<Clock className="w-6 h-6" />}
+              color="purple"
+              subtitle="Hours to resolve"
+            />
 
             {user.role === "admin" && analytics.dashboard.userStats && (
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 hover:bg-slate-800/70 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/10 animate-slide-up" style={{animationDelay: '0.3s'}}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-400 text-sm">Active Users</p>
-                    <p className="text-2xl font-bold text-orange-400">{analytics.dashboard.userStats.total}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                    <Users className="w-6 h-6 text-orange-400" />
-                  </div>
-                </div>
-              </div>
+              <MetricCard
+                title="Active Users"
+                value={analytics.dashboard.userStats.total}
+                icon={<Users className="w-6 h-6" />}
+                color="yellow"
+                subtitle={`${analytics.dashboard.userStats.citizens} citizens, ${analytics.dashboard.userStats.officers} officers`}
+              />
             )}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
-          {/* Status Distribution */}
-          {analytics.dashboard?.statusStats && (
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-white mb-6">Status Distribution</h2>
-              <div className="space-y-4">
-                {analytics.dashboard.statusStats.map((stat) => (
-                  <div key={stat.status} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(stat.status)}`}>
-                        {stat.status.replace('_', ' ')}
-                      </span>
-                      <span className="text-slate-300">{stat.count} cases</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-slate-700 rounded-full h-2">
-                        <div 
-                          className="bg-purple-500 h-2 rounded-full" 
-                          style={{ width: `${stat.percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-slate-400 text-sm w-10">{stat.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Status Distribution Donut Chart */}
+          {statusChartData.length > 0 && (
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
+              <DonutChart
+                data={statusChartData}
+                title="Status Distribution"
+                labelKey="status"
+                valueKey="count"
+                colors={["#f59e0b", "#06b6d4", "#10b981", "#6b7280", "#ef4444"]}
+                centerText={{
+                  value: analytics.dashboard.summary.total,
+                  label: "Total Cases"
+                }}
+              />
             </div>
           )}
 
-          {/* Category Breakdown */}
-          {analytics.dashboard?.categoryStats && (
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.1s'}}>
-              <h2 className="text-xl font-bold text-white mb-6">Category Breakdown</h2>
+          {/* Category Breakdown Pie Chart */}
+          {categoryChartData.length > 0 && (
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
+              <PieChart
+                data={categoryChartData}
+                title="Category Breakdown"
+                labelKey="category"
+                valueKey="count"
+                colors={["#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#6366f1", "#84cc16"]}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Priority Analysis and Department Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Priority Analysis */}
+          {priorityChartData.length > 0 && (
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
+              <BarChart
+                data={priorityChartData}
+                title="Priority Distribution"
+                xKey="priority"
+                yKey="count"
+                color="#f59e0b"
+              />
+            </div>
+          )}
+
+          {/* Department Performance (Admin only) */}
+          {user.role === "admin" && analytics.dashboard?.departmentStats && (
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
+              <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+                <Building className="w-5 h-5 text-blue-400" />
+                Department Performance
+              </h3>
               <div className="space-y-4">
-                {analytics.dashboard.categoryStats.map((stat) => (
-                  <div key={stat.category} className="flex items-center justify-between">
-                    <span className="text-slate-300 capitalize">{stat.category.replace('_', ' ')}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-slate-700 rounded-full h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full" 
-                          style={{ width: `${stat.percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-white font-medium w-8">{stat.count}</span>
-                    </div>
+                {analytics.dashboard.departmentStats.map((dept, index) => (
+                  <div key={index}>
+                    <ProgressBar
+                      label={dept.department}
+                      value={dept.count}
+                      max={analytics.dashboard.summary.total}
+                      color={`hsl(${(index * 60) % 360}, 70%, 50%)`}
+                    />
                   </div>
                 ))}
               </div>
@@ -285,55 +323,112 @@ const Analytics = () => {
           )}
         </div>
 
-        {/* Trends Chart */}
-        {analytics.trends?.trends && (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 animate-fade-in" style={{animationDelay: '0.2s'}}>
+        {/* Trends Analysis */}
+        {monthlyTrendData.length > 0 && (
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8 animate-fade-in">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">Trends Analysis</h2>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <TrendingUp className="w-6 h-6 text-purple-400" />
+                Monthly Trends
+              </h2>
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <LineChart className="w-4 h-4" />
+                <LineChartIcon className="w-4 h-4" />
+                Last 6 months
+              </div>
+            </div>
+            
+            <LineChart
+              data={monthlyTrendData}
+              xKey="month"
+              yKey="count"
+              color="#8b5cf6"
+            />
+          </div>
+        )}
+
+        {/* Detailed Trends Table */}
+        {trendsData.length > 0 && (
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8 animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Activity className="w-6 h-6 text-blue-400" />
+                Detailed Trends Analysis
+              </h2>
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <BarChart3 className="w-4 h-4" />
                 {timeframe} view
               </div>
             </div>
             
-            <div className="space-y-4">
-              {analytics.trends.trends.map((trend, index) => (
-                <div key={index} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-300 hover:scale-[1.02]">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-300 font-medium">
-                      {formatTrendDate(trend._id)}
-                    </span>
-                    <span className="text-white font-bold">{trend.total} total</span>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                      <span className="text-slate-400">Pending: {trend.pending}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                      <span className="text-slate-400">In Progress: {trend.inProgress}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                      <span className="text-slate-400">Resolved: {trend.resolved}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-700/50">
+                    <th className="text-left py-3 px-4 text-slate-400 font-medium">Period</th>
+                    <th className="text-left py-3 px-4 text-slate-400 font-medium">Total</th>
+                    <th className="text-left py-3 px-4 text-slate-400 font-medium">Pending</th>
+                    <th className="text-left py-3 px-4 text-slate-400 font-medium">In Progress</th>
+                    <th className="text-left py-3 px-4 text-slate-400 font-medium">Resolved</th>
+                    <th className="text-left py-3 px-4 text-slate-400 font-medium">Resolution Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {trendsData.map((trend, index) => {
+                    const resolutionRate = trend.total > 0 ? ((trend.resolved / trend.total) * 100).toFixed(1) : 0
+                    
+                    return (
+                      <tr key={index} className="border-b border-slate-700/30 hover:bg-slate-700/20 transition-all">
+                        <td className="py-3 px-4 text-white font-medium">{trend.date}</td>
+                        <td className="py-3 px-4 text-white">{trend.total}</td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center gap-1 text-yellow-400">
+                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                            {trend.pending}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center gap-1 text-blue-400">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            {trend.inProgress}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center gap-1 text-green-400">
+                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                            {trend.resolved}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-medium">{resolutionRate}%</span>
+                            <div className="w-16 bg-slate-700 rounded-full h-2">
+                              <div 
+                                className="bg-green-500 h-2 rounded-full transition-all duration-500" 
+                                style={{ width: `${resolutionRate}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
 
         {/* Performance Metrics (Officer/Admin only) */}
-        {user.role !== "citizen" && analytics.performance && (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.3s'}}>
-            <h2 className="text-xl font-bold text-white mb-6">Performance Metrics</h2>
-            <div className="space-y-4">
+        {user.role !== "citizen" && analytics.performance && analytics.performance.length > 0 && (
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <Zap className="w-6 h-6 text-yellow-400" />
+              Performance Metrics
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {analytics.performance.map((perf, index) => (
                 <div key={index} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-300 hover:scale-[1.02]">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-3">
                     <div>
                       <p className="text-white font-medium">
                         {perf.officer?.[0]?.name || "Unassigned"}
@@ -351,8 +446,93 @@ const Analytics = () => {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Performance bar */}
+                  <ProgressBar
+                    value={perf.count}
+                    max={Math.max(...analytics.performance.map(p => p.count))}
+                    color="#8b5cf6"
+                    height="h-2"
+                    showPercentage={false}
+                  />
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Stats Summary */}
+        {analytics.dashboard && (
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <BarChart3 className="w-6 h-6 text-green-400" />
+              Quick Statistics
+            </h2>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">
+                  {analytics.dashboard.summary.pending}
+                </div>
+                <div className="text-slate-400 text-sm">Pending Cases</div>
+                <div className="mt-2">
+                  <ProgressBar
+                    value={analytics.dashboard.summary.pending}
+                    max={analytics.dashboard.summary.total}
+                    color="#f59e0b"
+                    height="h-1"
+                    showPercentage={false}
+                  />
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-400 mb-2">
+                  {analytics.dashboard.summary.inProgress}
+                </div>
+                <div className="text-slate-400 text-sm">In Progress</div>
+                <div className="mt-2">
+                  <ProgressBar
+                    value={analytics.dashboard.summary.inProgress}
+                    max={analytics.dashboard.summary.total}
+                    color="#06b6d4"
+                    height="h-1"
+                    showPercentage={false}
+                  />
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-400 mb-2">
+                  {analytics.dashboard.summary.resolved}
+                </div>
+                <div className="text-slate-400 text-sm">Resolved</div>
+                <div className="mt-2">
+                  <ProgressBar
+                    value={analytics.dashboard.summary.resolved}
+                    max={analytics.dashboard.summary.total}
+                    color="#10b981"
+                    height="h-1"
+                    showPercentage={false}
+                  />
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-400 mb-2">
+                  {analytics.dashboard.summary.closed}
+                </div>
+                <div className="text-slate-400 text-sm">Closed</div>
+                <div className="mt-2">
+                  <ProgressBar
+                    value={analytics.dashboard.summary.closed}
+                    max={analytics.dashboard.summary.total}
+                    color="#6b7280"
+                    height="h-1"
+                    showPercentage={false}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}
