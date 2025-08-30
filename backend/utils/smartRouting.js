@@ -364,8 +364,11 @@ class SmartRoutingEngine {
    */
   static async reassignGrievance(grievanceId, newOfficerId, reassignedBy) {
     try {
+      console.log("SmartRouting: Starting reassignment", { grievanceId, newOfficerId, reassignedBy })
+      
       const grievance = await Grievance.findById(grievanceId)
       if (!grievance) {
+        console.log("SmartRouting: Grievance not found")
         return {
           success: false,
           error: "Grievance not found"
@@ -374,16 +377,21 @@ class SmartRoutingEngine {
 
       const newOfficer = await User.findById(newOfficerId)
       if (!newOfficer || newOfficer.role !== "officer") {
+        console.log("SmartRouting: Invalid officer", { newOfficerId, officer: newOfficer })
         return {
           success: false,
           error: "Invalid officer for reassignment"
         }
       }
 
+      // Get old officer name for logging
       const oldOfficerName = grievance.assignedOfficer ? 
         (await User.findById(grievance.assignedOfficer))?.name || 'previous officer' : 
         'unassigned'
       
+      console.log("SmartRouting: Reassigning from", oldOfficerName, "to", newOfficer.name)
+      
+      // Update assignment
       grievance.assignedOfficer = newOfficerId
       
       // Update status to assigned if it was pending
@@ -399,7 +407,9 @@ class SmartRoutingEngine {
         timestamp: new Date()
       })
 
+      console.log("SmartRouting: Saving grievance...")
       await grievance.save()
+      console.log("SmartRouting: Grievance saved successfully")
 
       return {
         success: true,
@@ -431,7 +441,6 @@ class SmartRoutingEngine {
       }
       
       const officers = await User.find(filter).select("name email department")
-              status: { $in: ["pending", "assigned", "in_progress"] }
       // Get workload for each officer
       const officersWithWorkload = await Promise.all(
         officers.map(async (officer) => {

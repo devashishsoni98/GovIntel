@@ -1,12 +1,9 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { X, User, Building, AlertTriangle, CheckCircle, Loader } from "lucide-react"
 
 const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
   const [officers, setOfficers] = useState([])
   const [selectedOfficer, setSelectedOfficer] = useState("")
-  const [reason, setReason] = useState("")
   const [loading, setLoading] = useState(false)
   const [fetchingOfficers, setFetchingOfficers] = useState(true)
   const [error, setError] = useState("")
@@ -61,11 +58,6 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
       return
     }
 
-    if (!reason.trim()) {
-      setError("Please provide a reason for reassignment")
-      return
-    }
-
     try {
       setLoading(true)
       setError("")
@@ -78,7 +70,6 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
         },
         body: JSON.stringify({
           officerId: selectedOfficer,
-          reason: reason.trim()
         }),
       })
 
@@ -167,7 +158,9 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
               </div>
             ) : (
               <div className="space-y-4">
-                {Object.entries(groupedOfficers).map(([department, deptOfficers]) => (
+                {Object.entries(groupedOfficers)
+                  .filter(([department, deptOfficers]) => deptOfficers.length > 0)
+                  .map(([department, deptOfficers]) => (
                   <div key={department} className="space-y-2">
                     <h4 className="text-sm font-medium text-slate-400 flex items-center gap-2">
                       <Building className="w-4 h-4" />
@@ -180,7 +173,9 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
                           className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                             selectedOfficer === officer._id
                               ? "bg-purple-500/20 border-purple-500/50"
-                              : "bg-slate-700/30 border-slate-600/30 hover:bg-slate-700/50"
+                              : grievance.assignedOfficer?._id === officer._id
+                                ? "bg-orange-500/10 border-orange-500/30 opacity-75"
+                                : "bg-slate-700/30 border-slate-600/30 hover:bg-slate-700/50"
                           }`}
                         >
                           <input
@@ -189,6 +184,7 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
                             value={officer._id}
                             checked={selectedOfficer === officer._id}
                             onChange={(e) => setSelectedOfficer(e.target.value)}
+                            disabled={grievance.assignedOfficer?._id === officer._id}
                             className="w-4 h-4 text-purple-500 bg-slate-700 border-slate-600 focus:ring-purple-500"
                           />
                           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
@@ -199,31 +195,8 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
                             <p className="text-slate-400 text-sm">{officer.email}</p>
                           </div>
                           {grievance.assignedOfficer?._id === officer._id && (
-                            <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded">
-                              Current
-                            </span>
-                          )}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
-          </div>
-
-          {/* Reason */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Reason for Reassignment *
-            </label>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all resize-none"
-              placeholder="Explain why this reassignment is necessary..."
-            />
           </div>
 
           {/* Impact Assessment */}
@@ -260,7 +233,7 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
           </button>
           <button
             onClick={handleReassign}
-            disabled={loading || !selectedOfficer || !reason.trim()}
+            disabled={loading || !selectedOfficer}
             className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading ? (

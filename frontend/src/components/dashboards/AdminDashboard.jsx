@@ -7,6 +7,7 @@ import { Users, FileText, Building, Clock, CheckCircle, BarChart3, Calendar, Shi
 import { selectUser } from "../../redux/slices/authSlice"
 import DeleteConfirmationModal from "../DeleteConfirmationModal"
 import AdminAssignModal from "../AdminAssignModal"
+import AdminReassignModal from "../AdminReassignModal"
 
 const AdminDashboard = () => {
   const user = useSelector(selectUser)
@@ -33,6 +34,8 @@ const AdminDashboard = () => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [assigningGrievance, setAssigningGrievance] = useState(null)
+  const [showReassignModal, setShowReassignModal] = useState(false)
+  const [reassigningGrievance, setReassigningGrievance] = useState(null)
 
   useEffect(() => {
     fetchDashboardData()
@@ -133,6 +136,11 @@ const AdminDashboard = () => {
   const handleAssignSingle = (grievance) => {
     setAssigningGrievance(grievance)
     setShowAssignModal(true)
+  }
+
+  const handleReassignSingle = (grievance) => {
+    setReassigningGrievance(grievance)
+    setShowReassignModal(true)
   }
 
   const handleAutoAssignSingle = async (grievance) => {
@@ -418,6 +426,11 @@ const AdminDashboard = () => {
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-400/10 text-blue-400">
                               {grievance.department}
                             </span>
+                            {grievance.assignedOfficer && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-400/10 text-green-400">
+                                Assigned to {grievance.assignedOfficer.name}
+                              </span>
+                            )}
                           </div>
                           <p className="text-slate-400 text-sm mb-2">
                             Submitted by: {grievance.citizen?.name || "Anonymous"}
@@ -453,6 +466,15 @@ const AdminDashboard = () => {
                                 Assign
                               </button>
                             </>
+                          )}
+                          {grievance.assignedOfficer && (
+                            <button
+                              onClick={() => handleReassignSingle(grievance)}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 hover:bg-orange-500/30 transition-all duration-300 text-sm hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105"
+                            >
+                              <UserPlus className="w-3 h-3" />
+                              Reassign
+                            </button>
                           )}
                           <Link
                             to={`/grievance/${grievance._id}`}
@@ -587,6 +609,22 @@ const AdminDashboard = () => {
             onSuccess={() => {
               setShowAssignModal(false)
               setAssigningGrievance(null)
+              fetchDashboardData()
+            }}
+          />
+        )}
+
+        {/* Reassignment Modal */}
+        {showReassignModal && (
+          <AdminReassignModal
+            grievance={reassigningGrievance}
+            onClose={() => {
+              setShowReassignModal(false)
+              setReassigningGrievance(null)
+            }}
+            onSuccess={() => {
+              setShowReassignModal(false)
+              setReassigningGrievance(null)
               fetchDashboardData()
             }}
           />
