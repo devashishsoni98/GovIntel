@@ -4,6 +4,8 @@ const cors = require("cors")
 const dotenv = require("dotenv")
 const path = require("path")
 const multer = require("multer")
+const fs = require("fs")
+const mime = require("mime-types")
 
 // Import routes
 const authRoutes = require("./routes/auth")
@@ -16,6 +18,7 @@ const aiRoutes = require("./routes/ai")
 
 // Import models
 const User = require("./models/User")
+const Grievance = require("./models/Grievance")
 
 // Load environment variables
 dotenv.config()
