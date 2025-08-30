@@ -364,19 +364,32 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       
       if (routingResult.success) {
         console.log("Auto-assignment successful:", routingResult.routing?.assignedOfficer?.name)
-        // The grievance is already updated by the routing engine
-        // Reload the grievance to get the updated data
-        const updatedGrievance = await Grievance.findById(grievance._id)
-          .populate([
+        // Reload the grievance to get the updated assignment data
+        await grievance.populate([
+          { path: "citizen", select: "name email" },
+          { path: "assignedOfficer", select: "name email department" }
+        ])
+      } else {
+        console.log("Auto-assignment failed:", routingResult.error)
+        // If auto-assignment fails, try to assign to any available officer in the department
+        console.log("Attempting fallback assignment...")
+        const fallbackResult = await this.fallbackAssignment(grievance)
+        if (fallbackResult.success) {
+          console.log("Fallback assignment successful:", fallbackResult.officer.name)
+          grievance.assignedOfficer = fallbackResult.officer._id
+          grievance.status = "assigned"
+          grievance.updates.push({
+            message: `Auto-assigned to ${fallbackResult.officer.name} (fallback assignment)`,
+            updatedBy: fallbackResult.officer._id,
+            status: "assigned",
+            timestamp: new Date()
+          })
+          await grievance.save()
+          await grievance.populate([
             { path: "citizen", select: "name email" },
             { path: "assignedOfficer", select: "name email department" }
           ])
-        
-        // Update our local grievance object
-        Object.assign(grievance, updatedGrievance.toObject())
-      } else {
-        console.log("Auto-assignment failed:", routingResult.error)
-        // Continue without assignment - grievance will remain unassigned
+        }
       }
 
     } catch (aiError) {
@@ -384,14 +397,6 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       // Continue without AI analysis if it fails
     }
 
-    // Ensure final population for response
-    if (!grievance.populated('citizen') || !grievance.populated('assignedOfficer')) {
-      await grievance.populate([
-        { path: "citizen", select: "name email" },
-        { path: "assignedOfficer", select: "name email department" }
-      ])
-    }
-    
     res.status(201).json({
       success: true,
       message: "Grievance created successfully",
@@ -415,6 +420,44 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
     });
   }
 });
+
+// Fallback assignment function
+const fallbackAssignment = async (grievance) => {
+  try {
+    const User = require("../models/User")
+    
+    // Find any available officer in the grievance's department
+    const officers = await User.find({
+      role: "officer",
+      department: grievance.department,
+      isActive: true
+    })
+    
+    if (officers.length === 0) {
+      return { success: false, error: "No officers available in department" }
+    }
+    
+    // Get officer workloads
+    const officerWorkloads = await Promise.all(
+      officers.map(async (officer) => {
+        const workload = await Grievance.countDocuments({
+          assignedOfficer: officer._id,
+          status: { $in: ["pending", "in_progress"] }
+        })
+        return { officer, workload }
+      })
+    )
+    
+    // Sort by workload (ascending) and pick the officer with least workload
+    officerWorkloads.sort((a, b) => a.workload - b.workload)
+    const selectedOfficer = officerWorkloads[0].officer
+    
+    return { success: true, officer: selectedOfficer }
+  } catch (error) {
+    console.error("Fallback assignment error:", error)
+    return { success: false, error: error.message }
+  }
+}
 
 // @route   POST /api/grievances/:id/analyze
 // @desc    Re-run AI analysis on a grievance
@@ -549,6 +592,42 @@ router.post("/:id/auto-assign", auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to auto-assign grievance"
+    });
+  }
+});
+
+// @route   GET /api/grievances/officers/available
+// @desc    Get available officers for assignment
+// @access  Private (Admin only)
+router.get("/officers/available", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin privileges required."
+      });
+    }
+
+    const { department } = req.query;
+    const result = await SmartRoutingEngine.getAvailableOfficersForAssignment(department);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        data: result.officers
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error("Get available officers error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch available officers"
     });
   }
 });

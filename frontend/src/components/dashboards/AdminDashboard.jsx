@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import { Users, FileText, Building, Clock, CheckCircle, BarChart3, Calendar, Shield, Trash2, Eye } from "lucide-react"
+import { Users, FileText, Building, Clock, CheckCircle, BarChart3, Calendar, Shield, Trash2, Eye, UserPlus } from "lucide-react"
 import { selectUser } from "../../redux/slices/authSlice"
 import DeleteConfirmationModal from "../DeleteConfirmationModal"
+import AdminAssignModal from "../AdminAssignModal"
 
 const AdminDashboard = () => {
   const user = useSelector(selectUser)
@@ -30,6 +31,8 @@ const AdminDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletingGrievance, setDeletingGrievance] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [assigningGrievance, setAssigningGrievance] = useState(null)
 
   useEffect(() => {
     fetchDashboardData()
@@ -127,6 +130,32 @@ const AdminDashboard = () => {
     }
   }
 
+  const handleAssignSingle = (grievance) => {
+    setAssigningGrievance(grievance)
+    setShowAssignModal(true)
+  }
+
+  const handleAutoAssignSingle = async (grievance) => {
+    try {
+      const response = await fetch(`/api/grievances/${grievance._id}/auto-assign`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+
+      if (response.ok) {
+        // Refresh the recent activity to show updated assignment
+        fetchDashboardData()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Failed to auto-assign grievance")
+      }
+    } catch (error) {
+      console.error("Auto-assign error:", error)
+      setError("Network error during auto-assignment")
+    }
+  }
   const confirmDelete = async () => {
     try {
       setIsDeleting(true)
@@ -403,6 +432,24 @@ const AdminDashboard = () => {
                         
                         {/* Action Buttons */}
                         <div className="flex items-center gap-2">
+                          {!grievance.assignedOfficer && (
+                            <>
+                              <button
+                                onClick={() => handleAutoAssignSingle(grievance)}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all duration-300 text-sm hover:shadow-lg hover:shadow-green-500/25 hover:scale-105"
+                              >
+                                <UserPlus className="w-3 h-3" />
+                                Auto Assign
+                              </button>
+                              <button
+                                onClick={() => handleAssignSingle(grievance)}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all duration-300 text-sm hover:shadow-lg hover:shadow-purple-500/25 hover:scale-105"
+                              >
+                                <UserPlus className="w-3 h-3" />
+                                Assign
+                              </button>
+                            </>
+                          )}
                           <Link
                             to={`/grievance/${grievance._id}`}
                             className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all duration-300 text-sm hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105"
@@ -524,6 +571,22 @@ const AdminDashboard = () => {
           selectedCount={selectedGrievances.length}
           isLoading={isDeleting}
         />
+
+        {/* Assignment Modal */}
+        {showAssignModal && (
+          <AdminAssignModal
+            grievance={assigningGrievance}
+            onClose={() => {
+              setShowAssignModal(false)
+              setAssigningGrievance(null)
+            }}
+            onSuccess={() => {
+              setShowAssignModal(false)
+              setAssigningGrievance(null)
+              fetchDashboardData()
+            }}
+          />
+        )}
       </div>
     </div>
   )

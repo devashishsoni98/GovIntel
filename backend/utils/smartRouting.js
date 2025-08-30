@@ -221,20 +221,15 @@ class SmartRoutingEngine {
    * Check if officer is currently available
    */
   static async checkOfficerAvailability(officerId) {
-    // Enhanced availability check
-    const now = new Date()
-    const hour = now.getHours()
-    const day = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+    // For now, consider all active officers as available
+    // In a real system, this could check:
+    // - Working hours
+    // - Officer's current status
+    // - Leave/vacation status
+    // - Current workload capacity
     
-    // Check if it's a working day (Monday to Friday)
-    const isWorkingDay = day >= 1 && day <= 5
-    
-    // Check working hours (9 AM to 5 PM)
-    const isWorkingHours = hour >= 9 && hour < 17
-    
-    // For urgent cases, officers are considered available 24/7
-    // For others, only during working hours
-    return isWorkingDay && isWorkingHours
+    const officer = await User.findById(officerId)
+    return officer && officer.isActive
   }
 
   /**
@@ -257,13 +252,13 @@ class SmartRoutingEngine {
     ])
 
     const totalResolved = categoryExperience.reduce((sum, cat) => sum + cat.count, 0)
-    if (totalResolved === 0) return 0.7 // Default good specialization for new officers
+    if (totalResolved === 0) return 0.8 // Higher default for new officers to encourage assignment
 
     const categoryCount = categoryExperience.find(cat => cat._id === category)?.count || 0
     const specialization = categoryCount / totalResolved
     
     // Boost specialization if officer has handled this category before
-    return categoryCount > 0 ? Math.min(specialization + 0.2, 1) : specialization
+    return categoryCount > 0 ? Math.min(specialization + 0.3, 1) : Math.max(specialization, 0.5)
   }
 
   /**
@@ -371,22 +366,36 @@ class SmartRoutingEngine {
     try {
       const grievance = await Grievance.findById(grievanceId)
       if (!grievance) {
-        throw new Error("Grievance not found")
+        return {
+          success: false,
+          error: "Grievance not found"
+        }
       }
 
       const newOfficer = await User.findById(newOfficerId)
       if (!newOfficer || newOfficer.role !== "officer") {
-        throw new Error("Invalid officer for reassignment")
+        return {
+          success: false,
+          error: "Invalid officer for reassignment"
+        }
       }
 
-      const oldOfficer = grievance.assignedOfficer
+      const oldOfficerName = grievance.assignedOfficer ? 
+        (await User.findById(grievance.assignedOfficer))?.name || 'previous officer' : 
+        'unassigned'
+      
       grievance.assignedOfficer = newOfficerId
+      
+      // Update status to assigned if it was pending
+      if (grievance.status === "pending") {
+        grievance.status = "assigned"
+      }
 
       // Add reassignment note
       grievance.updates.push({
-        message: `Reassigned from ${oldOfficer ? 'previous officer' : 'unassigned'} to ${newOfficer.name}`,
+        message: `Reassigned from ${oldOfficerName} to ${newOfficer.name}`,
         updatedBy: reassignedBy,
-        status: grievance.status,
+        status: "assigned",
         timestamp: new Date()
       })
 
@@ -400,6 +409,53 @@ class SmartRoutingEngine {
 
     } catch (error) {
       console.error("Reassignment error:", error)
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
+  /**
+   * Get available officers for assignment
+   */
+  static async getAvailableOfficersForAssignment(departmentCode = null) {
+    try {
+      const filter = {
+        role: "officer",
+        isActive: true
+      }
+      
+      if (departmentCode) {
+        filter.department = departmentCode
+      }
+      
+      const officers = await User.find(filter).select("name email department")
+      
+      // Get workload for each officer
+      const officersWithWorkload = await Promise.all(
+        officers.map(async (officer) => {
+          const workload = await Grievance.countDocuments({
+            assignedOfficer: officer._id,
+            status: { $in: ["pending", "assigned", "in_progress"] }
+          })
+          
+          return {
+            ...officer.toObject(),
+            currentWorkload: workload
+          }
+        })
+      )
+      
+      // Sort by workload (ascending)
+      officersWithWorkload.sort((a, b) => a.currentWorkload - b.currentWorkload)
+      
+      return {
+        success: true,
+        officers: officersWithWorkload
+      }
+    } catch (error) {
+      console.error("Get available officers error:", error)
       return {
         success: false,
         error: error.message
