@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { X, User, Building, UserPlus, Loader, CheckCircle } from "lucide-react"
+import { X, User, Building, UserPlus, Loader, CheckCircle, FileText } from "lucide-react"
 
 const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
   const [officers, setOfficers] = useState([])
@@ -16,8 +16,8 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
     try {
       setFetchingOfficers(true)
       
-      // Fetch available officers for assignment
-      const response = await fetch(`/api/grievances/officers/available?department=${grievance.department}`, {
+      // Fetch all departments with officers
+      const response = await fetch("/api/departments", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -25,7 +25,23 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
 
       if (response.ok) {
         const data = await response.json()
-        setOfficers(data.data || [])
+        
+        // Extract all officers from all departments
+        const allOfficers = []
+        data.data.forEach(department => {
+          if (department.officers && department.officers.length > 0) {
+            department.officers.forEach(officer => {
+              allOfficers.push({
+                ...officer,
+                departmentName: department.name,
+                departmentCode: department.code,
+                currentWorkload: 0 // Will be calculated if needed
+              })
+            })
+          }
+        })
+        
+        setOfficers(allOfficers)
       } else {
         setError("Failed to fetch officers")
       }
@@ -47,6 +63,7 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
       setLoading(true)
       setError("")
 
+      console.log("Manual assign request:", { grievanceId: grievance._id, officerId: selectedOfficer })
       const response = await fetch(`/api/grievances/${grievance._id}/reassign`, {
         method: "POST",
         headers: {
@@ -55,14 +72,16 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
         },
         body: JSON.stringify({
           officerId: selectedOfficer,
-          reason: "Manual assignment from admin dashboard"
         }),
       })
 
       if (response.ok) {
+        const data = await response.json()
+        console.log("Manual assign successful:", data)
         onSuccess()
       } else {
         const errorData = await response.json()
+        console.error("Manual assign failed:", errorData)
         setError(errorData.message || "Failed to assign grievance")
       }
     } catch (error) {
@@ -78,6 +97,7 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
       setLoading(true)
       setError("")
 
+      console.log("Auto assign request for grievance:", grievance._id)
       const response = await fetch(`/api/grievances/${grievance._id}/auto-assign`, {
         method: "POST",
         headers: {
@@ -86,9 +106,12 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        console.log("Auto assign successful:", data)
         onSuccess()
       } else {
         const errorData = await response.json()
+        console.error("Auto assign failed:", errorData)
         setError(errorData.message || "Failed to auto-assign grievance")
       }
     } catch (error) {
@@ -187,7 +210,7 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
               </div>
             ) : (
               <div className="space-y-3">
-                {officers.map((officer) => (
+                {officers.filter(officer => officer.departmentCode === grievance.department || officer.department === grievance.department).map((officer) => (
                   <label
                     key={officer._id}
                     className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
@@ -213,7 +236,7 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
                       <div className="flex items-center gap-4 text-xs text-slate-500 mt-1">
                         <span className="flex items-center gap-1">
                           <Building className="w-3 h-3" />
-                          {officer.department}
+                          {officer.departmentName || officer.department}
                         </span>
                         <span className="flex items-center gap-1">
                           <FileText className="w-3 h-3" />
@@ -228,6 +251,15 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
                     )}
                   </label>
                 ))}
+                
+                {/* Show message if no officers in department */}
+                {officers.filter(officer => officer.departmentCode === grievance.department || officer.department === grievance.department).length === 0 && (
+                  <div className="text-center py-8">
+                    <User className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400">No officers available in {grievance.department} department</p>
+                    <p className="text-slate-500 text-sm mt-2">Try auto-assignment to find officers from other departments</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

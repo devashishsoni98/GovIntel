@@ -137,6 +137,7 @@ const AdminDashboard = () => {
 
   const handleAutoAssignSingle = async (grievance) => {
     try {
+      setError("") // Clear any previous errors
       const response = await fetch(`/api/grievances/${grievance._id}/auto-assign`, {
         method: "POST",
         headers: {
@@ -145,10 +146,13 @@ const AdminDashboard = () => {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        console.log("Auto-assign successful:", data)
         // Refresh the recent activity to show updated assignment
         fetchDashboardData()
       } else {
         const errorData = await response.json()
+        console.error("Auto-assign failed:", errorData)
         setError(errorData.message || "Failed to auto-assign grievance")
       }
     } catch (error) {

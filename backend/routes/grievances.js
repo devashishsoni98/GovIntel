@@ -373,7 +373,7 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
         console.log("Auto-assignment failed:", routingResult.error)
         // If auto-assignment fails, try to assign to any available officer in the department
         console.log("Attempting fallback assignment...")
-        const fallbackResult = await this.fallbackAssignment(grievance)
+        const fallbackResult = await fallbackAssignment(grievance)
         if (fallbackResult.success) {
           console.log("Fallback assignment successful:", fallbackResult.officer.name)
           grievance.assignedOfficer = fallbackResult.officer._id
@@ -442,7 +442,7 @@ const fallbackAssignment = async (grievance) => {
       officers.map(async (officer) => {
         const workload = await Grievance.countDocuments({
           assignedOfficer: officer._id,
-          status: { $in: ["pending", "in_progress"] }
+          status: { $in: ["pending", "assigned", "in_progress"] }
         })
         return { officer, workload }
       })
@@ -519,11 +519,13 @@ router.post("/:id/reassign", auth, async (req, res) => {
       });
     }
 
+    console.log("Reassign route called:", { grievanceId: req.params.id, officerId, adminId: req.user.id })
     const result = await SmartRoutingEngine.reassignGrievance(
       req.params.id,
       officerId,
       req.user.id
     );
+    console.log("Reassign result:", result)
 
     if (result.success) {
       await result.grievance.populate([
@@ -537,6 +539,7 @@ router.post("/:id/reassign", auth, async (req, res) => {
         data: result.grievance
       });
     } else {
+      console.error("Reassign failed:", result.error)
       res.status(400).json({
         success: false,
         message: result.error
@@ -564,7 +567,9 @@ router.post("/:id/auto-assign", auth, async (req, res) => {
       });
     }
 
+    console.log("Auto-assign route called for grievance:", req.params.id)
     const result = await SmartRoutingEngine.autoAssignGrievance(req.params.id);
+    console.log("Auto-assign result:", result)
     
     if (result.success) {
       await result.grievance.populate([
@@ -581,6 +586,7 @@ router.post("/:id/auto-assign", auth, async (req, res) => {
         }
       });
     } else {
+      console.error("Auto-assign failed:", result.error)
       res.status(400).json({
         success: false,
         message: result.error
@@ -824,7 +830,7 @@ router.patch("/:id/status", auth, async (req, res) => {
       });
     }
 
-    if (status === "in_progress" && !grievance.assignedOfficer) {
+    if ((status === "in_progress" || status === "assigned") && !grievance.assignedOfficer) {
       grievance.assignedOfficer = req.user.id;
     }
 

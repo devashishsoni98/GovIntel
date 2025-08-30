@@ -83,7 +83,9 @@ const GrievanceDetail = () => {
   const handleAutoAssign = async () => {
     try {
       setActionLoading(true)
+      setError("") // Clear any previous errors
       
+      console.log("Auto assign request for grievance:", id)
       const response = await fetch(`/api/grievances/${id}/auto-assign`, {
         method: "POST",
         headers: {
@@ -92,9 +94,12 @@ const GrievanceDetail = () => {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        console.log("Auto assign successful:", data)
         await fetchGrievanceDetail()
       } else {
         const errorData = await response.json()
+        console.error("Auto assign failed:", errorData)
         setError(errorData.message || "Failed to auto-assign grievance")
       }
     } catch (error) {

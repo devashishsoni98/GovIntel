@@ -176,7 +176,7 @@ class SmartRoutingEngine {
   static async getOfficerWorkload(officerId) {
     return await Grievance.countDocuments({
       assignedOfficer: officerId,
-      status: { $in: ["pending", "in_progress"] }
+      status: { $in: ["pending", "assigned", "in_progress"] }
     })
   }
 
@@ -431,7 +431,7 @@ class SmartRoutingEngine {
       }
       
       const officers = await User.find(filter).select("name email department")
-      
+              status: { $in: ["pending", "assigned", "in_progress"] }
       // Get workload for each officer
       const officersWithWorkload = await Promise.all(
         officers.map(async (officer) => {
