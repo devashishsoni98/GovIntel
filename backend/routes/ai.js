@@ -2,19 +2,19 @@ const express = require("express")
 const Grievance = require("../models/Grievance")
 const User = require("../models/User")
 const auth = require("../middleware/auth")
-const AIAnalysisEngine = require("../utils/aiAnalysis")
+const AnalysisEngine = require("../utils/aiAnalysis")
 
 const router = express.Router()
 
-// @route   POST /api/ai/analyze-grievance
-// @desc    Analyze a single grievance with AI
+// @route   POST /api/analysis/analyze-grievance
+// @desc    Analyze a single grievance with data analysis
 // @access  Private (Officer/Admin)
 router.post("/analyze-grievance", auth, async (req, res) => {
   try {
     if (req.user.role === "citizen") {
       return res.status(403).json({
         success: false,
-        message: "Access denied. Only officers and admins can use AI analysis."
+        message: "Access denied. Only officers and admins can use data analysis."
       })
     }
 
@@ -27,12 +27,12 @@ router.post("/analyze-grievance", auth, async (req, res) => {
       })
     }
 
-    const result = await AIAnalysisEngine.updateGrievanceWithAnalysis(grievanceId)
+    const result = await AnalysisEngine.updateGrievanceWithAnalysis(grievanceId)
     
     if (result.success) {
       res.json({
         success: true,
-        message: "AI analysis completed successfully",
+        message: "Data analysis completed successfully",
         data: {
           grievance: result.grievance,
           analysis: result.analysis
@@ -46,16 +46,16 @@ router.post("/analyze-grievance", auth, async (req, res) => {
     }
 
   } catch (error) {
-    console.error("AI analysis error:", error)
+    console.error("Data analysis error:", error)
     res.status(500).json({
       success: false,
-      message: "Failed to perform AI analysis"
+      message: "Failed to perform data analysis"
     })
   }
 })
 
-// @route   POST /api/ai/smart-recommendations
-// @desc    Get AI-powered recommendations for grievance handling
+// @route   POST /api/analysis/smart-recommendations
+// @desc    Get data-driven recommendations for grievance handling
 // @access  Private (Officer/Admin)
 router.post("/smart-recommendations", auth, async (req, res) => {
   try {
@@ -98,8 +98,8 @@ router.post("/smart-recommendations", auth, async (req, res) => {
   }
 })
 
-// @route   GET /api/ai/department-insights
-// @desc    Get AI-powered insights for department performance
+// @route   GET /api/analysis/department-insights
+// @desc    Get data-driven insights for department performance
 // @access  Private (Officer/Admin)
 router.get("/department-insights", auth, async (req, res) => {
   try {
@@ -139,8 +139,8 @@ router.get("/department-insights", auth, async (req, res) => {
   }
 })
 
-// @route   POST /api/ai/predict-resolution-time
-// @desc    Predict resolution time for a grievance using AI
+// @route   POST /api/analysis/predict-resolution-time
+// @desc    Predict resolution time for a grievance using data analysis
 // @access  Private (Officer/Admin)
 router.post("/predict-resolution-time", auth, async (req, res) => {
   try {
@@ -180,7 +180,7 @@ router.post("/predict-resolution-time", auth, async (req, res) => {
   }
 })
 
-// @route   GET /api/ai/sentiment-trends
+// @route   GET /api/analysis/sentiment-trends
 // @desc    Get sentiment analysis trends over time
 // @access  Private (Admin only)
 router.get("/sentiment-trends", auth, async (req, res) => {

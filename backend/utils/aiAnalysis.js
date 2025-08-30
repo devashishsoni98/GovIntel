@@ -1,4 +1,4 @@
-// Enhanced AI Analysis utility with more sophisticated algorithms
+// Enhanced Data Analysis utility with more sophisticated algorithms
 const natural = require('natural')
 const sentiment = require('sentiment')
 
@@ -8,7 +8,7 @@ const Sentiment = new sentiment()
 // Initialize TF-IDF
 const TfIdf = natural.TfIdf
 
-class AIAnalysisEngine {
+class AnalysisEngine {
   
   constructor() {
     // Category keywords for classification
@@ -405,8 +405,8 @@ class AIAnalysisEngine {
         grievance.category
       )
 
-      // Update grievance with AI analysis
-      grievance.aiAnalysis = {
+      // Update grievance with analysis data
+      grievance.analysisData = {
         sentiment: analysis.sentiment,
         urgencyScore: analysis.urgencyScore,
         keywords: analysis.keywords,
@@ -439,4 +439,4 @@ class AIAnalysisEngine {
   }
 }
 
-module.exports = new AIAnalysisEngine()
+module.exports = new AnalysisEngine()

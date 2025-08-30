@@ -335,15 +335,15 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
 
     // Perform AI analysis and smart routing
     try {
-      // AI Analysis
+      // Data Analysis
       const analysisResult = await AIAnalysisEngine.analyzeGrievance(
         grievance.title,
         grievance.description,
         grievance.category
       );
 
-      // Update grievance with AI analysis
-      grievance.aiAnalysis = {
+      // Update grievance with analysis data
+      grievance.analysisData = {
         sentiment: analysisResult.sentiment,
         urgencyScore: analysisResult.urgencyScore,
         keywords: analysisResult.keywords,
@@ -351,7 +351,7 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
         confidence: analysisResult.confidence
       };
 
-      // Update priority based on AI urgency analysis
+      // Update priority based on urgency analysis
       if (analysisResult.urgencyLevel === 'urgent' && grievance.priority !== 'urgent') {
         grievance.priority = 'urgent';
       } else if (analysisResult.urgencyLevel === 'high' && grievance.priority === 'medium') {
@@ -395,8 +395,8 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       }
 
     } catch (aiError) {
-      console.error("AI/Routing error (non-blocking):", aiError);
-      // Continue without AI analysis if it fails
+      console.error("Analysis/Routing error (non-blocking):", aiError);
+      // Continue without analysis if it fails
     }
 
     res.status(201).json({
@@ -462,7 +462,7 @@ const fallbackAssignment = async (grievance) => {
 }
 
 // @route   POST /api/grievances/:id/analyze
-// @desc    Re-run AI analysis on a grievance
+// @desc    Re-run data analysis on a grievance
 // @access  Private (Officer/Admin)
 router.post("/:id/analyze", auth, async (req, res) => {
   try {
@@ -478,7 +478,7 @@ router.post("/:id/analyze", auth, async (req, res) => {
     if (result.success) {
       res.json({
         success: true,
-        message: "AI analysis completed successfully",
+        message: "Data analysis completed successfully",
         data: {
           grievance: result.grievance,
           analysis: result.analysis
@@ -492,10 +492,10 @@ router.post("/:id/analyze", auth, async (req, res) => {
     }
 
   } catch (error) {
-    console.error("Manual AI analysis error:", error);
+    console.error("Manual data analysis error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to perform AI analysis"
+      message: "Failed to perform data analysis"
     });
   }
 });

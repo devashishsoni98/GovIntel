@@ -114,7 +114,7 @@ const grievanceSchema = new mongoose.Schema(
         timestamp: { type: Date, default: Date.now },
       },
     ],
-    aiAnalysis: {
+    analysisData: {
       sentiment: {
         type: String,
         enum: ["positive", "neutral", "negative"],

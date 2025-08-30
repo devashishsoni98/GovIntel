@@ -14,7 +14,7 @@ const userRoutes = require("./routes/users")
 const analyticsRoutes = require("./routes/analytics")
 const departmentRoutes = require("./routes/departments")
 const adminRoutes = require("./routes/admin")
-const aiRoutes = require("./routes/ai")
+const analysisRoutes = require("./routes/ai")
 
 // Import models
 const User = require("./models/User")
@@ -122,7 +122,7 @@ app.use("/api/users", userRoutes)
 app.use("/api/analytics", analyticsRoutes)
 app.use("/api/departments", departmentRoutes)
 app.use("/api/admin", adminRoutes)
-app.use("/api/ai", aiRoutes)
+app.use("/api/analysis", analysisRoutes)
 
 // Test route to verify API is working
 app.get("/api/test", (req, res) => {
