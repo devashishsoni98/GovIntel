@@ -384,6 +384,15 @@ class SmartRoutingEngine {
         }
       }
 
+      // Check if trying to reassign to the same officer
+      if (grievance.assignedOfficer && grievance.assignedOfficer.toString() === newOfficerId) {
+        console.log("SmartRouting: Attempting to reassign to same officer")
+        return {
+          success: false,
+          error: "Cannot reassign to the same officer"
+        }
+      }
+
       // Get old officer name for logging
       const oldOfficerName = grievance.assignedOfficer ? 
         (await User.findById(grievance.assignedOfficer))?.name || 'previous officer' : 

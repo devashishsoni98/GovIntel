@@ -181,4 +181,43 @@ const FeedbackModal = ({ grievance, onClose, onSuccess }) => {
   )
 }
 
+const handleSubmit = async () => {
+  if (rating === 0) {
+    setError("Please provide a rating")
+    return
+  }
+
+  try {
+    setLoading(true)
+    setError("")
+
+    const response = await fetch(`/api/grievances/${grievance._id}/feedback`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        rating,
+        comment: comment.trim() || ""
+      }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      console.log("Feedback submitted successfully:", data)
+      onSuccess()
+    } else {
+      const errorData = await response.json()
+      console.error("Feedback submission failed:", errorData)
+      setError(errorData.message || "Failed to submit feedback")
+    }
+  } catch (error) {
+    console.error("Feedback submission error:", error)
+    setError("Network error during feedback submission")
+  } finally {
+    setLoading(false)
+  }
+}
+
 export default FeedbackModal
