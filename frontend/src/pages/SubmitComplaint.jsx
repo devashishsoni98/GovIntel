@@ -157,6 +157,7 @@ const SubmitComplaint = () => {
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files)
+    setError("") // Clear any previous errors
 
     // Validate file types and sizes
     const validFiles = files.filter((file) => {
@@ -167,12 +168,13 @@ const SubmitComplaint = () => {
         "application/pdf",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain"
       ]
       const isValidType = validTypes.some((type) => file.type.startsWith(type))
       const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
 
       if (!isValidType) {
-        setError(`${file.name} is not a supported file type`)
+        setError(`${file.name} is not a supported file type. Supported: Images, Videos, Audio, PDF, Word documents, Text files`)
         return false
       }
 
@@ -184,13 +186,22 @@ const SubmitComplaint = () => {
       return true
     })
 
+    if (validFiles.length === 0 && files.length > 0) {
+      return // Error already set above
+    }
+
     if (attachments.length + validFiles.length > 5) {
       setError("Maximum 5 files allowed")
       return
     }
 
     setAttachments((prev) => [...prev, ...validFiles])
-    setError("")
+    
+    // Show success message for valid files
+    if (validFiles.length > 0) {
+      setSuccess(`${validFiles.length} file(s) added successfully`)
+      setTimeout(() => setSuccess(""), 3000)
+    }
   }
 
   const removeAttachment = (index) => {
@@ -201,6 +212,9 @@ const SubmitComplaint = () => {
     if (file.type.startsWith("image/")) return <ImageIcon className="w-4 h-4" />
     if (file.type.startsWith("video/")) return <Video className="w-4 h-4" />
     if (file.type.startsWith("audio/")) return <Mic className="w-4 h-4" />
+    if (file.type === "application/pdf") return <FileText className="w-4 h-4 text-red-400" />
+    if (file.type.includes("word")) return <FileText className="w-4 h-4 text-blue-400" />
+    if (file.type === "text/plain") return <FileText className="w-4 h-4 text-green-400" />
     return <FileText className="w-4 h-4" />
   }
 
@@ -569,18 +583,19 @@ const SubmitComplaint = () => {
             {/* File Upload Area */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-600 rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-purple-500/50 transition-all hover:bg-slate-700/20"
+              className="border-2 border-dashed border-slate-600 rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-purple-500/50 transition-all hover:bg-slate-700/20 group"
             >
-              <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+              <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4 group-hover:text-purple-400 group-hover:scale-110 transition-all" />
               <p className="text-slate-300 mb-2">Click to upload files</p>
-              <p className="text-slate-500 text-sm">Supports: Images, Videos, Audio, PDF, Word documents</p>
+              <p className="text-slate-500 text-sm">Supports: Images, Videos, Audio, PDF, Word documents, Text files</p>
+              <p className="text-slate-600 text-xs mt-2">Maximum 5 files, 10MB each</p>
             </div>
 
             <input
               ref={fileInputRef}
               type="file"
               multiple
-              accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+              accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -593,22 +608,36 @@ const SubmitComplaint = () => {
                   {attachments.map((file, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 hover:bg-slate-700/50 transition-all duration-300"
+                      className="flex items-center justify-between bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 hover:bg-slate-700/50 transition-all duration-300 group"
                     >
                       <div className="flex items-center gap-3">
                         {getFileIcon(file)}
                         <div>
                           <p className="text-white text-sm font-medium">{file.name}</p>
-                          <p className="text-slate-400 text-xs">{formatFileSize(file.size)}</p>
+                          <p className="text-slate-400 text-xs">{formatFileSize(file.size)} • {file.type}</p>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeAttachment(index)}
-                        className="text-red-400 hover:text-red-300 transition-all hover:scale-110"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {file.type.startsWith('image/') && (
+                          <div className="w-8 h-8 bg-slate-600/50 rounded overflow-hidden">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none'
+                              }}
+                            />
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeAttachment(index)}
+                          className="text-red-400 hover:text-red-300 transition-all hover:scale-110 opacity-70 group-hover:opacity-100"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -37,7 +37,80 @@ app.use(express.json({ limit: "50mb" }))
 app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 
 // Serve static files (uploaded files)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")))
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res, filePath) => {
+    console.log("Serving static file:", filePath)
+    // Set proper headers for file downloads
+    const mimeType = mime.lookup(filePath) || 'application/octet-stream'
+    
+    // Set content type
+    res.setHeader('Content-Type', mimeType)
+    
+    // Allow cross-origin requests
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  }
+}))
+
+// Add a specific route for file downloads with better error handling
+app.get("/api/files/:filename", (req, res) => {
+  try {
+    const filename = req.params.filename
+    const filePath = path.join(__dirname, "uploads", "grievances", filename)
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found"
+      })
+    }
+    
+    // Get file stats
+    const stats = fs.statSync(filePath)
+    const ext = path.extname(filename).toLowerCase()
+    
+    // Set appropriate headers
+    res.setHeader('Content-Length', stats.size)
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    
+    // Set content type
+    if (['.jpg', '.jpeg', '.png', '.gif'].includes(ext)) {
+      res.setHeader('Content-Type', 'image/' + ext.substring(1))
+    } else if (['.mp4', '.avi', '.mov'].includes(ext)) {
+      res.setHeader('Content-Type', 'video/' + ext.substring(1))
+    } else if (['.mp3', '.wav', '.m4a'].includes(ext)) {
+      res.setHeader('Content-Type', 'audio/' + ext.substring(1))
+    } else if (ext === '.pdf') {
+      res.setHeader('Content-Type', 'application/pdf')
+    } else {
+      res.setHeader('Content-Type', 'application/octet-stream')
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    }
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath)
+    fileStream.pipe(res)
+    
+    fileStream.on('error', (error) => {
+      console.error('File stream error:', error)
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: "Error reading file"
+        })
+      }
+    })
+    
+  } catch (error) {
+    console.error('File download error:', error)
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    })
+  }
+})
 
 // Routes
 app.use("/api/auth", authRoutes)

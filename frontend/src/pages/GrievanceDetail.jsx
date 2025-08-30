@@ -24,13 +24,229 @@ import {
   Mail,
   Tag,
   Activity,
-  Brain
+  Brain,
+  ImageIcon,
+  Video,
+  Mic,
+  Loader
 } from "lucide-react"
 import { selectUser, USER_ROLES } from "../redux/slices/authSlice"
 import AdminReassignModal from "../components/AdminReassignModal"
 import StatusUpdateModal from "../components/StatusUpdateModal"
 import FeedbackModal from "../components/FeedbackModal"
 import AIInsightsPanel from "../components/AIInsightsPanel"
+import FilePreview from "../components/FilePreview"
+
+// Attachment Card Component
+const AttachmentCard = ({ attachment }) => {
+  const [imageError, setImageError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  
+  const getFileIcon = (mimetype) => {
+    if (mimetype.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-blue-400" />
+    if (mimetype.startsWith('video/')) return <Video className="w-5 h-5 text-purple-400" />
+    if (mimetype.startsWith('audio/')) return <Mic className="w-5 h-5 text-green-400" />
+    if (mimetype.includes('pdf')) return <FileText className="w-5 h-5 text-red-400" />
+    return <FileText className="w-5 h-5 text-slate-400" />
+  }
+  
+  const getFileUrl = (attachment) => {
+    const baseUrl = import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'
+    // Use the relativePath if available, otherwise extract filename from path
+    const filename = attachment.relativePath || attachment.filename || attachment.path.split('/').pop()
+    return `${baseUrl}/uploads/grievances/${filename}`
+  }
+  
+  const handleDownload = async () => {
+    try {
+      const url = getFileUrl(attachment)
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error('Download failed')
+      }
+      
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = attachment.originalName || attachment.filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(downloadUrl)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Failed to download file')
+    }
+  }
+  
+  const isImage = attachment.mimetype.startsWith('image/')
+  const isVideo = attachment.mimetype.startsWith('video/')
+  const isAudio = attachment.mimetype.startsWith('audio/')
+  
+  return (
+    <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg overflow-hidden hover:bg-slate-700/50 transition-all duration-300 hover:scale-105">
+      {/* Preview Section */}
+      {isImage && !imageError && (
+        <div className="relative h-32 bg-slate-800/50">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader className="w-6 h-6 text-slate-400 animate-spin" />
+            </div>
+          )}
+          <img
+            src={getFileUrl(attachment)}
+            alt={attachment.originalName}
+            className="w-full h-full object-cover"
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setImageError(true)
+              setIsLoading(false)
+            }}
+          />
+        </div>
+      )}
+      
+      {isVideo && (
+        <div className="h-32 bg-slate-800/50 flex items-center justify-center">
+          <video
+            src={getFileUrl(attachment)}
+            className="w-full h-full object-cover"
+            controls
+            preload="metadata"
+          />
+        </div>
+      )}
+      
+      {isAudio && (
+        <div className="p-4 bg-slate-800/50">
+          <audio
+            src={getFileUrl(attachment)}
+            className="w-full"
+            controls
+            preload="metadata"
+          />
+        </div>
+      )}
+      
+      {/* File Info */}
+      <div className="p-3">
+        <div className="flex items-center gap-3">
+          {getFileIcon(attachment.mimetype)}
+// Enhanced Attachment Card Component
+const AttachmentCard = ({ attachment, onPreview }) => {
+  const [imageError, setImageError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  
+  const getFileIcon = (mimetype) => {
+    if (mimetype.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-blue-400" />
+    if (mimetype.startsWith('video/')) return <Video className="w-5 h-5 text-purple-400" />
+    if (mimetype.startsWith('audio/')) return <Mic className="w-5 h-5 text-green-400" />
+    if (mimetype.includes('pdf')) return <FileText className="w-5 h-5 text-red-400" />
+    if (mimetype.includes('word')) return <FileText className="w-5 h-5 text-blue-400" />
+    if (mimetype.includes('text')) return <FileText className="w-5 h-5 text-green-400" />
+    return <FileText className="w-5 h-5 text-slate-400" />
+  }
+  
+  const getFileUrl = (attachment) => {
+    const baseUrl = import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'
+    const filename = attachment.relativePath || attachment.filename || attachment.path.split('/').pop()
+    return `${baseUrl}/api/files/${filename}`
+  }
+  
+  const handleDownload = async () => {
+    try {
+      const url = getFileUrl(attachment)
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error('Download failed')
+      }
+      
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = attachment.originalName || attachment.filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(downloadUrl)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Failed to download file')
+    }
+  }
+  
+  const isImage = attachment.mimetype.startsWith('image/')
+  const canPreview = isImage || attachment.mimetype.startsWith('video/') || attachment.mimetype.startsWith('audio/')
+  
+  return (
+    <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg overflow-hidden hover:bg-slate-700/50 transition-all duration-300 hover:scale-105">
+      {/* Image Thumbnail */}
+      {isImage && (
+        <div className="relative h-24 bg-slate-800/50 cursor-pointer" onClick={() => onPreview(attachment)}>
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader className="w-4 h-4 text-slate-400 animate-spin" />
+            </div>
+          )}
+          {!imageError ? (
+            <img
+              src={getFileUrl(attachment)}
+              alt={attachment.originalName}
+              className="w-full h-full object-cover hover:opacity-80 transition-opacity"
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setImageError(true)
+                setIsLoading(false)
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-red-400" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
+            <Eye className="w-6 h-6 text-white" />
+          </div>
+        </div>
+      )}
+      
+      {/* File Info */}
+      <div className="p-3">
+        <div className="flex items-center gap-3">
+          {getFileIcon(attachment.mimetype)}
+          <div className="flex-1 min-w-0">
+            <p className="text-slate-300 text-sm font-medium truncate">{attachment.originalName}</p>
+            <p className="text-slate-500 text-xs">
+              {attachment.size ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            {canPreview && (
+              <button
+                onClick={() => onPreview(attachment)}
+                className="p-1 text-slate-400 hover:text-white hover:bg-slate-600/50 rounded transition-all hover:scale-110"
+                title="Preview file"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={handleDownload}
+              className="p-1 text-slate-400 hover:text-white hover:bg-slate-600/50 rounded transition-all hover:scale-110"
+              title="Download file"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const GrievanceDetail = () => {
   const { id } = useParams()
@@ -47,6 +263,8 @@ const GrievanceDetail = () => {
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [showAIInsights, setShowAIInsights] = useState(false)
+  const [showFilePreview, setShowFilePreview] = useState(false)
+  const [previewingFile, setPreviewingFile] = useState(null)
 
   useEffect(() => {
     fetchGrievanceDetail()
@@ -409,21 +627,14 @@ const GrievanceDetail = () => {
                   <h3 className="text-lg font-semibold text-white mb-3">Attachments</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {grievance.attachments.map((attachment, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-slate-700/30 border border-slate-600/30 rounded-lg hover:bg-slate-700/50 transition-all duration-300 hover:scale-105">
-                        <FileText className="w-5 h-5 text-slate-400" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-slate-300 text-sm font-medium truncate">{attachment.originalName}</p>
-                          <p className="text-slate-500 text-xs">{(attachment.size / 1024 / 1024).toFixed(2)} MB</p>
-                        </div>
-                        <a
-                          href={`/uploads/${attachment.path}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1 text-slate-400 hover:text-white transition-all hover:scale-110"
-                        >
-                          <Download className="w-4 h-4" />
-                        </a>
-                      </div>
+                      <AttachmentCard 
+                        key={index} 
+                        attachment={attachment} 
+                        onPreview={(file) => {
+                          setPreviewingFile(file)
+                          setShowFilePreview(true)
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
@@ -432,6 +643,20 @@ const GrievanceDetail = () => {
 
             {/* AI Analysis (Officer/Admin only) */}
             {(user?.role === "officer" || user?.role === "admin") && grievance.aiAnalysis && (
+                        <div className="flex-1 min-w-0">
+                          <p className="text-slate-300 text-sm font-medium truncate">{attachment.originalName}</p>
+                          <p className="text-slate-500 text-xs">
+                            {attachment.size ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'} • {attachment.mimetype}
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleDownload}
+                          className="p-2 text-slate-400 hover:text-white hover:bg-slate-600/50 rounded-lg transition-all hover:scale-110"
+                          title="Download file"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                      </div>
               <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.1s'}}>
                 <h2 className="text-xl font-bold text-white mb-4">AI Analysis</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -700,6 +925,16 @@ const GrievanceDetail = () => {
           <AIInsightsPanel
             grievance={grievance}
             onClose={() => setShowAIInsights(false)}
+          />
+        )}
+
+        {showFilePreview && previewingFile && (
+          <FilePreview
+            attachment={previewingFile}
+            onClose={() => {
+              setShowFilePreview(false)
+              setPreviewingFile(null)
+            }}
           />
         )}
       </div>

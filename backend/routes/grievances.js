@@ -29,7 +29,7 @@ const getCategoryDepartment = (category) => {
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = "uploads/grievances";
+    const uploadDir = path.join(__dirname, "..", "uploads", "grievances");
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -39,7 +39,8 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     // Generate unique filename
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+    const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    cb(null, file.fieldname + "-" + uniqueSuffix + "-" + sanitizedOriginalName);
   },
 });
 
@@ -50,14 +51,14 @@ const upload = multer({
   },
   fileFilter: function (req, file, cb) {
     // Check file types
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|mp4|mp3|wav/;
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|mp4|avi|mov|mp3|wav|m4a/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error("Invalid file type"));
+      cb(new Error(`Invalid file type: ${file.originalname}. Allowed types: images, videos, audio, PDF, Word documents`));
     }
   },
 });
@@ -312,7 +313,8 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
       grievanceData.attachments = req.files.map((file) => ({
         filename: file.filename,
         originalName: file.originalname,
-        path: file.path,
+        path: `uploads/grievances/${file.filename}`,
+        relativePath: file.filename,
         size: file.size,
         mimetype: file.mimetype,
       }));
@@ -408,7 +410,7 @@ router.post("/", auth, upload.array("attachments", 5), async (req, res) => {
     // Clean up uploaded files if grievance creation failed
     if (req.files) {
       req.files.forEach((file) => {
-        fs.unlink(file.path, (err) => {
+        fs.unlink(path.join(__dirname, "..", file.path), (err) => {
           if (err) console.error("Error deleting file:", err);
         });
       });
