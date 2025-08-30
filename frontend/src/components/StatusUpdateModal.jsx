@@ -11,6 +11,7 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
 
   const statusOptions = [
     { value: "pending", label: "Pending", icon: Clock, color: "text-yellow-400" },
+    { value: "assigned", label: "Assigned", icon: AlertTriangle, color: "text-blue-400" },
     { value: "in_progress", label: "In Progress", icon: AlertTriangle, color: "text-blue-400" },
     { value: "resolved", label: "Resolved", icon: CheckCircle, color: "text-green-400" },
     { value: "closed", label: "Closed", icon: CheckCircle, color: "text-gray-400" },
@@ -40,9 +41,12 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        console.log("Status update successful:", data)
         onSuccess()
       } else {
         const errorData = await response.json()
+        console.error("Status update failed:", errorData)
         setError(errorData.message || "Failed to update status")
       }
     } catch (error) {

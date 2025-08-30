@@ -4,8 +4,6 @@ import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import { 
-  Search, 
-  Filter, 
   Calendar, 
   MapPin, 
   Clock, 
@@ -28,13 +26,6 @@ const AssignedCases = () => {
   const [cases, setCases] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [filters, setFilters] = useState({
-    status: "",
-    priority: "",
-    category: "",
-    search: "",
-    dateRange: "all"
-  })
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -49,39 +40,10 @@ const AssignedCases = () => {
     limit: 10
   })
 
-  const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "pending", label: "Pending" },
-    { value: "in_progress", label: "In Progress" },
-    { value: "resolved", label: "Resolved" },
-    { value: "closed", label: "Closed" }
-  ]
-
-  const priorityOptions = [
-    { value: "", label: "All Priorities" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "urgent", label: "Urgent" }
-  ]
-
-  const categoryOptions = [
-    { value: "", label: "All Categories" },
-    { value: "infrastructure", label: "Infrastructure" },
-    { value: "sanitation", label: "Sanitation" },
-    { value: "water_supply", label: "Water Supply" },
-    { value: "electricity", label: "Electricity" },
-    { value: "transportation", label: "Transportation" },
-    { value: "healthcare", label: "Healthcare" },
-    { value: "education", label: "Education" },
-    { value: "police", label: "Police" },
-    { value: "other", label: "Other" }
-  ]
-
   useEffect(() => {
     fetchCases()
     fetchStats()
-  }, [filters, pagination.current])
+  }, [pagination.current])
 
   const fetchCases = async () => {
     try {
@@ -92,8 +54,7 @@ const AssignedCases = () => {
         page: pagination.current.toString(),
         limit: pagination.limit.toString(),
         sortBy: "createdAt",
-        sortOrder: "desc",
-        ...Object.fromEntries(Object.entries(filters).filter(([_, value]) => value))
+        sortOrder: "desc"
       })
 
       const response = await fetch(`/api/grievances?${queryParams}`, {
@@ -105,7 +66,11 @@ const AssignedCases = () => {
       if (response.ok) {
         const data = await response.json()
         setCases(data.data || [])
-        setPagination(data.pagination || { current: 1, pages: 1, total: 0 })
+        setPagination(prev => ({
+          ...prev,
+          pages: data.pagination?.pages || 1,
+          total: data.pagination?.total || 0
+        }))
       } else {
         const errorData = await response.json()
         setError(errorData.message || "Failed to fetch cases")
@@ -135,11 +100,6 @@ const AssignedCases = () => {
     } catch (error) {
       console.error("Fetch stats error:", error)
     }
-  }
-
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
-    setPagination(prev => ({ ...prev, current: 1 }))
   }
 
   const handlePageChange = (page) => {
@@ -286,73 +246,6 @@ const AssignedCases = () => {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 animate-slide-up">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search cases..."
-                value={filters.search}
-                onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
-              />
-            </div>
-
-            {/* Status Filter */}
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange("status", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Priority Filter */}
-            <select
-              value={filters.priority}
-              onChange={(e) => handleFilterChange("priority", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
-            >
-              {priorityOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Category Filter */}
-            <select
-              value={filters.category}
-              onChange={(e) => handleFilterChange("category", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
-            >
-              {categoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Date Range Filter */}
-            <select
-              value={filters.dateRange}
-              onChange={(e) => handleFilterChange("dateRange", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:bg-slate-700/70"
-            >
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-            </select>
-          </div>
-        </div>
 
         {/* Error Message */}
         {error && (
@@ -378,18 +271,8 @@ const AssignedCases = () => {
             <MessageSquare className="w-16 h-16 text-slate-600 mx-auto mb-6 animate-pulse" />
             <h3 className="text-xl font-bold text-white mb-4">No Cases Found</h3>
             <p className="text-slate-400 mb-8">
-              {Object.values(filters).some((f) => f)
-                ? "No cases match your current filters. Try adjusting your search criteria."
-                : "You don't have any assigned cases yet."}
+              You don't have any assigned cases yet.
             </p>
-            {Object.values(filters).some((f) => f) && (
-              <button
-                onClick={() => setFilters({ status: "", priority: "", category: "", search: "", dateRange: "all" })}
-                className="px-6 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all duration-300 hover:scale-105"
-              >
-                Clear Filters
-              </button>
-            )}
           </div>
         ) : (
           /* Cases List */
@@ -481,15 +364,13 @@ const AssignedCases = () => {
                       View Details
                     </Link>
 
-                    {grievance.status !== "resolved" && grievance.status !== "closed" && (
-                      <Link
-                        to={`/grievance/${grievance._id}`}
-                        className="inline-flex items-center gap-2 px-3 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all duration-300 text-center justify-center hover:shadow-lg hover:shadow-purple-500/25 hover:scale-105 text-sm"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Update Status
-                      </Link>
-                    )}
+                    <Link
+                      to={`/grievance/${grievance._id}`}
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all duration-300 text-center justify-center hover:shadow-lg hover:shadow-purple-500/25 hover:scale-105 text-sm"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Manage Case
+                    </Link>
                   </div>
                 </div>
 
@@ -512,7 +393,7 @@ const AssignedCases = () => {
             {pagination.pages > 1 && (
               <div className="flex flex-col sm:flex-row items-center justify-between bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 gap-4 animate-fade-in">
                 <div className="text-slate-400 text-sm">
-                  Showing {(pagination.current - 1) * pagination.limit + 1} to{" "}
+                  Showing {Math.min((pagination.current - 1) * pagination.limit + 1, pagination.total)} to{" "}
                   {Math.min(pagination.current * pagination.limit, pagination.total)} of {pagination.total} cases
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -535,10 +416,10 @@ const AssignedCases = () => {
                         <button
                           key={page}
                           onClick={() => handlePageChange(page)}
-                          className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+                          className={`px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 ${
                             page === pagination.current
                               ? "bg-purple-500 text-white"
-                              : "border border-slate-600 text-slate-300 hover:bg-slate-700/50"
+                              : "border border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white"
                           }`}
                         >
                           {page}

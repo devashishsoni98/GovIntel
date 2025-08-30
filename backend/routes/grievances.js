@@ -786,6 +786,12 @@ router.get("/:id", auth, async (req, res) => {
 // Update grievance status (only for officers and admins)
 router.patch("/:id/status", auth, async (req, res) => {
   try {
+    console.log("=== STATUS UPDATE DEBUG ===");
+    console.log("Grievance ID:", req.params.id);
+    console.log("Request body:", req.body);
+    console.log("User:", req.user);
+    console.log("=== END STATUS UPDATE DEBUG ===");
+
     // Check if user has permission to update status
     if (req.user.role === "citizen") {
       return res.status(403).json({
@@ -806,6 +812,12 @@ router.patch("/:id/status", auth, async (req, res) => {
       });
     }
 
+    console.log("Found grievance:", {
+      id: grievance._id,
+      currentStatus: grievance.status,
+      newStatus: status,
+      assignedOfficer: grievance.assignedOfficer
+    });
     // Check if officer has permission to update this grievance
     if (req.user.role === "officer") {
       const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
@@ -813,6 +825,15 @@ router.patch("/:id/status", auth, async (req, res) => {
       const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer.toString() === req.user.id;
       const isSameDepartment = userDepartment && grievanceDepartment === userDepartment;
       
+      console.log("Officer permission check:", {
+        userDepartment,
+        grievanceDepartment,
+        isAssignedToUser,
+        isSameDepartment,
+        userId: req.user.id,
+        assignedOfficerId: grievance.assignedOfficer?.toString()
+      });
+
       if (!isAssignedToUser && !isSameDepartment) {
         return res.status(403).json({
           success: false,
@@ -822,7 +843,9 @@ router.patch("/:id/status", auth, async (req, res) => {
     }
 
     // Update grievance
+    const oldStatus = grievance.status;
     grievance.status = status;
+    
     if (comment) {
       grievance.updates.push({
         message: comment,
@@ -836,13 +859,17 @@ router.patch("/:id/status", auth, async (req, res) => {
       grievance.assignedOfficer = req.user.id;
     }
 
+    console.log("Updating grievance status from", oldStatus, "to", status);
     await grievance.save();
+    console.log("Grievance saved successfully");
 
     await grievance.populate([
       { path: "citizen", select: "name email" },
       { path: "assignedOfficer", select: "name email department" },
       { path: "updates.updatedBy", select: "name email" }
     ]);
+
+    console.log("Status update completed successfully");
 
     res.json({
       success: true,
@@ -854,6 +881,7 @@ router.patch("/:id/status", auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to update grievance status",
+      error: error.message
     });
   }
 });
