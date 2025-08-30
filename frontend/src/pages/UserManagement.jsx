@@ -24,16 +24,33 @@ import {
 } from "lucide-react"
 import { selectUser } from "../redux/slices/authSlice"
 
+// Custom hook for debounced search
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
 const UserManagement = () => {
   const currentUser = useSelector(selectUser)
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [searchInput, setSearchInput] = useState("") // Local search input state
   const [filters, setFilters] = useState({
     role: "",
     department: "",
     status: "active", // Default to show only active users
-    search: ""
+    search: "" // This will be updated by debounced value
   })
   const [pagination, setPagination] = useState({
     current: 1,
@@ -44,6 +61,14 @@ const UserManagement = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [departments, setDepartments] = useState([])
 
+  // Debounce search input with 500ms delay
+  const debouncedSearch = useDebounce(searchInput, 500)
+
+  // Update filters when debounced search changes
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, search: debouncedSearch }))
+    setPagination(prev => ({ ...prev, current: 1 })) // Reset to first page on search
+  }, [debouncedSearch])
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -143,6 +168,14 @@ const UserManagement = () => {
     setPagination(prev => ({ ...prev, current: 1 }))
   }
 
+  const handleSearchChange = (e) => {
+    setSearchInput(e.target.value)
+  }
+
+  const clearSearch = () => {
+    setSearchInput("")
+    setFilters(prev => ({ ...prev, search: "" }))
+  }
   const handlePageChange = (page) => {
     setPagination(prev => ({ ...prev, current: page }))
   }
@@ -872,10 +905,24 @@ const UserManagement = () => {
               <input
                 type="text"
                 placeholder="Search users..."
-                value={filters.search}
-                onChange={(e) => handleFilterChange("search", e.target.value)}
+                value={searchInput}
+                onChange={handleSearchChange}
                 className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
               />
+              {searchInput && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              {/* Search indicator */}
+              {searchInput !== debouncedSearch && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Loader className="w-4 h-4 text-purple-400 animate-spin" />
+                </div>
+              )}
             </div>
 
             {/* Role Filter */}
@@ -920,12 +967,33 @@ const UserManagement = () => {
 
             {/* Clear Filters */}
             <button
-              onClick={() => setFilters({ role: "", department: "", status: "active", search: "" })}
+              onClick={() => {
+                setSearchInput("")
+                setFilters({ role: "", department: "", status: "active", search: "" })
+              }}
               className="px-4 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all hover:scale-105"
             >
               Clear Filters
             </button>
           </div>
+          
+          {/* Search Results Info */}
+          {filters.search && (
+            <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <p className="text-blue-300 text-sm">
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader className="w-4 h-4 animate-spin" />
+                    Searching for "{filters.search}"...
+                  </span>
+                ) : (
+                  <>
+                    Found {pagination.total} user{pagination.total !== 1 ? 's' : ''} matching "{filters.search}"
+                  </>
+                )}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Error Message */}
@@ -961,7 +1029,7 @@ const UserManagement = () => {
               <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">No Users Found</h3>
               <p className="text-slate-400 mb-6">
-                {Object.values(filters).some(f => f) 
+                {filters.search || filters.role || filters.department || (filters.status && filters.status !== "active")
                   ? "No users match your current filters."
                   : "No users have been created yet."
                 }
