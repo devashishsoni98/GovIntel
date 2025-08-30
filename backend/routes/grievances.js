@@ -842,21 +842,53 @@ router.patch("/:id/status", auth, async (req, res) => {
       }
     }
 
+    // Validate status transition (allow any valid status change)
+    const validStatuses = ["pending", "assigned", "in_progress", "resolved", "closed", "rejected"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status value",
+      });
+    }
+
+    // Prevent changing status from closed or rejected (optional business rule)
+    // Remove this block if you want to allow any status changes
+    // if (grievance.status === "closed" || grievance.status === "rejected") {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Cannot update status of closed or rejected grievances",
+    //   });
+    // }
     // Update grievance
     const oldStatus = grievance.status;
     grievance.status = status;
     
-    if (comment) {
+    // Always add an update entry for status changes
+    const updateMessage = comment || `Status changed from ${oldStatus} to ${status}`;
+    grievance.updates.push({
+      message: updateMessage,
+      status,
+      updatedBy: req.user.id,
+      timestamp: new Date(),
+    });
+
+    // Auto-assign officer if moving to in_progress or assigned and no officer assigned
+    if ((status === "in_progress" || status === "assigned") && !grievance.assignedOfficer) {
+      grievance.assignedOfficer = req.user.id;
       grievance.updates.push({
-        message: comment,
-        status,
+        message: `Auto-assigned to ${req.user.name || 'officer'} due to status change`,
+        status: "assigned",
         updatedBy: req.user.id,
         timestamp: new Date(),
       });
     }
 
-    if ((status === "in_progress" || status === "assigned") && !grievance.assignedOfficer) {
-      grievance.assignedOfficer = req.user.id;
+    // Set resolution date when status changes to resolved
+    if (status === "resolved" && oldStatus !== "resolved") {
+      grievance.actualResolutionDate = new Date();
+      // Calculate resolution time in hours
+      const resolutionTime = Math.round((grievance.actualResolutionDate - grievance.createdAt) / (1000 * 60 * 60));
+      grievance.resolutionTime = resolutionTime;
     }
 
     console.log("Updating grievance status from", oldStatus, "to", status);

@@ -326,7 +326,7 @@ const GrievanceDetail = () => {
               </button>
             )}
 
-            {canUpdateStatus() && (
+            {canUpdateStatus() && grievance.status !== "closed" && (
               <button
                 onClick={() => setShowStatusModal(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-all hover:scale-105"
