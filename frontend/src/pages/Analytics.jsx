@@ -26,7 +26,7 @@ import {
 
 // Import chart components
 import BarChart from "../components/charts/BarChart"
-import PieChart from "../components/charts/PieChart"
+// import PieChart from "../components/charts/PieChart"
 import LineChart from "../components/charts/LineChart"
 import DonutChart from "../components/charts/DonutChart"
 import MetricCard from "../components/charts/MetricCard"

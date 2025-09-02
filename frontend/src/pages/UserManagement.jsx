@@ -62,7 +62,7 @@ const UserManagement = () => {
   const [departments, setDepartments] = useState([])
 
   // Debounce search input with 500ms delay
-  const debouncedSearch = useDebounce(searchInput, 500)
+  const debouncedSearch = useDebounce(searchInput, 1000)
 
   // Update filters when debounced search changes
   useEffect(() => {
@@ -881,10 +881,7 @@ const UserManagement = () => {
               </div>
             )}
             
-            <button className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all hover:scale-105 text-sm">
-              <Download className="w-4 h-4" />
-              Export
-            </button>
+            
             
             <button 
               onClick={handleCreateUser}

@@ -183,57 +183,7 @@ const MyGrievances = () => {
           </Link>
         </div>
 
-        {/* Filters */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 animate-slide-up">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Status Filter */}
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange("status", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Category Filter */}
-            <select
-              value={filters.category}
-              onChange={(e) => handleFilterChange("category", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
-            >
-              {categoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Priority Filter */}
-            <select
-              value={filters.priority}
-              onChange={(e) => handleFilterChange("priority", e.target.value)}
-              className="px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:bg-slate-700/70"
-            >
-              {priorityOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Clear Filters */}
-            <button
-              onClick={() => setFilters({ status: "", category: "", priority: "" })}
-              className="px-4 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all hover:scale-105"
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
+        
         
 
         {/* Error Message */}
