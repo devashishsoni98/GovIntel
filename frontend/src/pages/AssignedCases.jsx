@@ -53,11 +53,16 @@ const AssignedCases = () => {
       setLoading(true)
       setError("")
 
+      // For officers, only fetch cases assigned to them
+      const isOfficer = user?.role === "officer"
+      const officerFilter = isOfficer ? `&assignedOfficer=${user.id}` : ""
+
       const queryParams = new URLSearchParams({
         page: pagination.current.toString(),
         limit: pagination.limit.toString(),
         sortBy: "createdAt",
-        sortOrder: "desc"
+        sortOrder: "desc",
+        ...(isOfficer && { assignedOfficer: user.id })
       })
 
       const response = await fetch(`/api/grievances?${queryParams}`, {

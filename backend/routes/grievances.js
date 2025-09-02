@@ -667,7 +667,22 @@ router.get("/", auth, async (req, res) => {
       filter.citizen = req.user.id;
     } else if (req.user.role === "officer") {
       // For officers, show only grievances assigned to them
-      filter.assignedOfficer = req.user.id;
+      // Check if there's an explicit assignedOfficer query parameter
+      if (req.query.assignedOfficer) {
+        // Only allow officers to filter by their own ID
+        if (req.query.assignedOfficer === req.user.id) {
+          filter.assignedOfficer = req.user.id;
+        } else {
+          // If trying to access another officer's cases, deny access
+          return res.status(403).json({
+            success: false,
+            message: "Access denied - you can only view cases assigned to you"
+          });
+        }
+      } else {
+        // Default behavior: show only cases assigned to this officer
+        filter.assignedOfficer = req.user.id;
+      }
     }
 
     // Apply additional filters
