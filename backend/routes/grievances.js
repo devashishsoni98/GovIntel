@@ -666,8 +666,11 @@ router.get("/", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id;
     } else if (req.user.role === "officer") {
-      // For officers, show only grievances assigned to them specifically
-      filter.assignedOfficer = req.user.id
+      // For officers, show all grievances in their department
+      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
+      if (userDepartment) {
+        filter.department = userDepartment;
+      }
     }
 
     // Apply additional filters

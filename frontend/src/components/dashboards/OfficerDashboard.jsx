@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import { FileText, Clock, CheckCircle, AlertTriangle, TrendingUp, Calendar, MapPin, User, Building, BarChart3, Activity } from "lucide-react"
+import { FileText, Clock, CheckCircle, AlertTriangle, TrendingUp, Calendar, MapPin, User, Building, BarChart3, Activity, UserPlus, XCircle } from "lucide-react"
 import { selectUser } from "../../redux/slices/authSlice"
 import AnalyticsWidget from "../AnalyticsWidget"
 import MetricCard from "../charts/MetricCard"
@@ -12,6 +12,7 @@ const OfficerDashboard = () => {
   const user = useSelector(selectUser)
   const [stats, setStats] = useState({
     total: 0,
+    assigned: 0,
     pending: 0,
     inProgress: 0,
     resolved: 0,
@@ -52,6 +53,7 @@ const OfficerDashboard = () => {
           setStats(
             analyticsData.data.summary || {
               total: 0,
+              assigned: 0,
               pending: 0,
               inProgress: 0,
               resolved: 0,
@@ -84,7 +86,6 @@ const OfficerDashboard = () => {
         const grievancesData = await grievancesResponse.json()
         console.log("Officer Grievances data:", grievancesData)
 
-        // Fix: Access grievancesData.data directly, not grievancesData.data.grievances
         if (grievancesData.success && grievancesData.data) {
           setAssignedGrievances(Array.isArray(grievancesData.data) ? grievancesData.data : [])
         }
@@ -185,7 +186,7 @@ const OfficerDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10 animate-slide-up">
             <div className="flex items-center justify-between">
               <div>
@@ -194,6 +195,18 @@ const OfficerDashboard = () => {
               </div>
               <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group hover:scale-105 hover:shadow-xl hover:shadow-gray-500/10 animate-slide-up" style={{animationDelay: '0.05s'}}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-xs sm:text-sm">Assigned</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-400 group-hover:text-gray-300 transition-colors duration-300">{stats.assigned || 0}</p>
+              </div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gray-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-400" />
               </div>
             </div>
           </div>
@@ -234,6 +247,18 @@ const OfficerDashboard = () => {
             </div>
           </div>
 
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group hover:scale-105 hover:shadow-xl hover:shadow-slate-500/10 animate-slide-up" style={{animationDelay: '0.35s'}}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-xs sm:text-sm">Closed</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-400 group-hover:text-slate-300 transition-colors duration-300">{stats.closed || 0}</p>
+              </div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-slate-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <XCircle className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-slate-400" />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 animate-slide-up" style={{animationDelay: '0.4s'}}>
             <div className="flex items-center justify-between">
               <div>
@@ -267,7 +292,7 @@ const OfficerDashboard = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  Recent Cases
+                  Department Cases
                 </h2>
                 <Link to="/assigned-cases" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-all duration-300 hover:scale-105">
                   View All
@@ -277,7 +302,7 @@ const OfficerDashboard = () => {
               {!assignedGrievances || assignedGrievances.length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="w-12 h-12 text-slate-600 mx-auto mb-4 animate-pulse" />
-                  <p className="text-slate-400">No cases assigned yet</p>
+                  <p className="text-slate-400">No cases in your department yet</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -300,6 +325,11 @@ const OfficerDashboard = () => {
                             >
                               {grievance.priority}
                             </span>
+                            {grievance.assignedOfficer && grievance.assignedOfficer._id === user?.id && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-400/10 text-blue-400 border border-blue-400/20">
+                                Assigned to You
+                              </span>
+                            )}
                           </div>
                           <p className="text-slate-400 text-sm mb-2 line-clamp-2 leading-relaxed">{grievance.description}</p>
                           <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -315,13 +345,19 @@ const OfficerDashboard = () => {
                               <MapPin className="w-3 h-3" />
                               {grievance.category.replace("_", " ")}
                             </div>
+                            {grievance.assignedOfficer && (
+                              <div className="flex items-center gap-1">
+                                <UserPlus className="w-3 h-3" />
+                                {grievance.assignedOfficer.name}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <Link
                           to={`/grievance/${grievance._id}`}
                           className="text-purple-400 hover:text-purple-300 text-sm font-medium ml-4 transition-all duration-300 hover:underline hover:scale-105"
                         >
-                          Handle Case
+                          View Details
                         </Link>
                       </div>
                     </div>
@@ -353,11 +389,19 @@ const OfficerDashboard = () => {
                 <div className="grid grid-cols-2 gap-3 mt-4">
                   <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
                     <div className="text-lg font-bold text-blue-400">{stats.total}</div>
-                    <div className="text-slate-400 text-xs">Total Cases</div>
+                    <div className="text-slate-400 text-xs">Dept Cases</div>
                   </div>
                   <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
                     <div className="text-lg font-bold text-green-400">{stats.resolutionRate}%</div>
                     <div className="text-slate-400 text-xs">Success Rate</div>
+                  </div>
+                  <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
+                    <div className="text-lg font-bold text-purple-400">{stats.assigned || 0}</div>
+                    <div className="text-slate-400 text-xs">Assigned to You</div>
+                  </div>
+                  <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
+                    <div className="text-lg font-bold text-yellow-400">{stats.pending || 0}</div>
+                    <div className="text-slate-400 text-xs">Pending</div>
                   </div>
                 </div>
               </div>
@@ -400,7 +444,7 @@ const OfficerDashboard = () => {
               {stats.total > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <MetricCard
-                    title="Cases Handled"
+                    title="Department Cases"
                     value={stats.total}
                     icon={<FileText className="w-5 h-5" />}
                     color="blue"
@@ -408,18 +452,34 @@ const OfficerDashboard = () => {
                   />
                   
                   <MetricCard
-                    title="Success Rate"
-                    value={`${Math.round((stats.resolved / (stats.total || 1)) * 100)}%`}
+                    title="Personal Cases"
+                    value={stats.assigned || 0}
+                    icon={<UserPlus className="w-5 h-5" />}
+                    color="purple"
+                    subtitle="Assigned to you"
+                  />
+                  
+                  <MetricCard
+                    title="Resolution Rate"
+                    value={`${stats.resolutionRate || 0}%`}
                     icon={<CheckCircle className="w-5 h-5" />}
                     color="green"
-                    subtitle="Resolution success rate"
+                    subtitle="Department success rate"
+                  />
+                  
+                  <MetricCard
+                    title="Avg Resolution"
+                    value={`${stats.avgResolutionTime || 0}h`}
+                    icon={<Clock className="w-5 h-5" />}
+                    color="yellow"
+                    subtitle="Average time to resolve"
                   />
                 </div>
               ) : (
                 <div className="text-center py-6">
                   <Activity className="w-10 h-10 text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-400 text-sm">Performance metrics will appear</p>
-                  <p className="text-slate-500 text-xs mt-1">when cases are assigned to your department</p>
+                  <p className="text-slate-500 text-xs mt-1">when cases are processed in your department</p>
                 </div>
               )}
             </div>
@@ -436,7 +496,7 @@ const OfficerDashboard = () => {
                 >
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5" />
-                    <span className="text-sm sm:text-base">View All Cases</span>
+                    <span className="text-sm sm:text-base">View Department Cases</span>
                   </div>
                 </Link>
               </div>

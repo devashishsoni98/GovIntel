@@ -236,8 +236,13 @@ router.get("/performance", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       return res.status(403).json({
         success: false,
-        message: "Access denied"
-      })
+      // For officers, show all grievances in their department
+      // For officers, show all grievances in their department
+      const userDepartment = department ? department.toUpperCase() : null;
+      if (userDepartment) {
+        filter.department = userDepartment;
+      }
+      }
     }
 
     const { role, department, id } = req.user
@@ -305,12 +310,10 @@ router.get("/trends", auth, async (req, res) => {
     if (role === "citizen") {
       filter.citizen = id
     } else if (role === "officer") {
+      // For officers, show all grievances in their department
       const userDepartment = department ? department.toUpperCase() : null;
       if (userDepartment) {
         filter.department = userDepartment;
-      }
-    }
-
     // Calculate date range based on timeframe
     const now = new Date()
     let startDate

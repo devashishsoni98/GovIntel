@@ -177,10 +177,10 @@ const AssignedCases = () => {
         {/* Header */}
         <div className="mb-6 sm:mb-8 animate-fade-in">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-            Assigned Cases
+            Department Cases
           </h1>
           <p className="text-slate-400 text-base sm:text-lg">
-            Manage and track your assigned grievances - {user?.department} Department
+            Manage and track all grievances in your department - {user?.department} Department
           </p>
         </div>
 
