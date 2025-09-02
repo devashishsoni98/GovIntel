@@ -26,7 +26,7 @@ import {
 
 // Import chart components
 import BarChart from "../components/charts/BarChart"
-import PieChart from "../components/charts/PieChart"
+// import PieChart from "../components/charts/PieChart"
 import LineChart from "../components/charts/LineChart"
 import DonutChart from "../components/charts/DonutChart"
 import MetricCard from "../components/charts/MetricCard"
@@ -184,25 +184,7 @@ const Analytics = () => {
           </div>
           
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 md:mt-0">
-            {/* Timeframe Selector */}
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-              className="px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 hover:bg-slate-700/70 transition-all text-sm"
-            >
-              <option value="week">Last Week</option>
-              <option value="month">Last Month</option>
-              <option value="year">Last Year</option>
-            </select>
-
-            {/* Export Button */}
-            <button
-              onClick={() => exportData('all')}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all hover:scale-105 text-sm"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
+            
 
             {/* Refresh Button */}
             <button
@@ -280,19 +262,8 @@ const Analytics = () => {
             </div>
           )}
 
-          {/* Category Breakdown Pie Chart */}
-          {hasCategoryData && (
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
-              <PieChart
-                data={categoryChartData}
-                title="Category Breakdown"
-                labelKey="category"
-                valueKey="count"
-                colors={["#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#6366f1", "#84cc16"]}
-              />
-            </div>
-          )}
-
+          
+        
           {/* Show message when no chart data is available */}
           {!hasStatusData && !hasCategoryData && (
             <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8 text-center animate-fade-in">
