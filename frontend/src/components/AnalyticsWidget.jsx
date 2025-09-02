@@ -86,6 +86,7 @@ const AnalyticsWidget = ({
   // Check if we have meaningful data
   const hasStatusData = statusChartData.length > 0 && statusChartData.some(item => item.count > 0)
   const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some(item => item.count > 0)
+  const hasRecentActivity = analytics.recentGrievances && analytics.recentGrievances.length > 0
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
@@ -173,7 +174,7 @@ const AnalyticsWidget = ({
       )}
 
       {/* Recent Activity Summary */}
-      {analytics.recentGrievances && analytics.recentGrievances.length > 0 && (
+      {hasRecentActivity && (
         <div className="mt-6 pt-6 border-t border-slate-700/50">
           <h3 className="text-white font-medium mb-3">Recent Activity</h3>
           <div className="space-y-2">
@@ -190,6 +191,14 @@ const AnalyticsWidget = ({
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Show message when no data is available */}
+      {!hasStatusData && !hasCategoryData && !hasRecentActivity && (
+        <div className="mt-6 pt-6 border-t border-slate-700/50 text-center">
+          <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+          <p className="text-slate-400 text-sm">Analytics will appear when cases are assigned to your department</p>
         </div>
       )}
     </div>

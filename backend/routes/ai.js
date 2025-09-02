@@ -439,9 +439,11 @@ async function predictResolutionTime(grievance) {
         if (grievanceCase.priority === grievance.priority) weight += 0.5
         if (grievanceCase.priority === "urgent") weight += 0.3
         
-        // Weight by urgency score similarity
-        if (grievanceCase.aiAnalysis?.urgencyScore && grievance.aiAnalysis?.urgencyScore) {
-          const scoreDiff = Math.abs(grievanceCase.aiAnalysis.urgencyScore - grievance.aiAnalysis.urgencyScore)
++        // Weight by urgency score similarity
++        if (grievanceCase.analysisData?.urgencyScore && grievance.analysisData?.urgencyScore) {
++          const scoreDiff = Math.abs(grievanceCase.analysisData.urgencyScore - grievance.analysisData.urgencyScore)
+          if (scoreDiff < 20) weight += 0.3
+        }
           if (scoreDiff < 20) weight += 0.3
         }
 
@@ -451,6 +453,11 @@ async function predictResolutionTime(grievance) {
 
       prediction.estimatedHours = Math.round(totalTime / totalWeight)
       prediction.confidence = Math.min(0.9, 0.5 + (similarCases.length * 0.1))
+      prediction.factors.push(`Based on ${similarCases.length} similar resolved cases`)
+    } else {
+      // No historical data available
+      prediction.factors.push("No historical data available for similar cases")
+      prediction.confidence = 0.3
     }
 
     // Adjust based on current factors
@@ -459,7 +466,7 @@ async function predictResolutionTime(grievance) {
       prediction.factors.push("Urgent priority reduces estimated time")
     }
 
-    if (grievance.aiAnalysis?.urgencyScore > 80) {
+    if (grievance.analysisData?.urgencyScore > 80) {
       prediction.estimatedHours = Math.max(8, prediction.estimatedHours * 0.7)
       prediction.factors.push("High urgency score detected")
     }
@@ -477,6 +484,7 @@ async function predictResolutionTime(grievance) {
 
   } catch (error) {
     console.error("Error predicting resolution time:", error)
+    prediction.factors.push("Prediction based on default estimates")
   }
 
   return prediction

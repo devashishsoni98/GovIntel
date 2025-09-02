@@ -19,18 +19,11 @@ router.get("/dashboard", auth, async (req, res) => {
     if (role === "citizen") {
       grievanceFilter.citizen = id
     } else if (role === "officer") {
-      // For officers, count grievances assigned to them OR unassigned in their department
+      // For officers, show all grievances in their department
       const userDepartment = department ? department.toUpperCase() : null;
-      grievanceFilter.$or = [
-        { assignedOfficer: id },
-        { 
-          department: userDepartment, 
-          $or: [
-            { assignedOfficer: null },
-            { assignedOfficer: { $exists: false } }
-          ]
-        }
-      ];
+      if (userDepartment) {
+        filter.department = userDepartment;
+      }
     }
     // Admin sees all data (no filter)
 
@@ -241,8 +234,8 @@ router.get("/performance", auth, async (req, res) => {
     
     if (role === "officer") {
       filter = { assignedOfficer: id }
-    } else if (department) {
-      filter = { department }
+    } else if (role === "officer" && department) {
+      filter = { department: department.toUpperCase() }
     }
 
     const performanceData = await Grievance.aggregate([
@@ -301,7 +294,10 @@ router.get("/trends", auth, async (req, res) => {
     if (role === "citizen") {
       filter.citizen = id
     } else if (role === "officer") {
-      filter.department = department
+      const userDepartment = department ? department.toUpperCase() : null;
+      if (userDepartment) {
+        filter.department = userDepartment;
+      }
     }
 
     // Calculate date range based on timeframe

@@ -43,13 +43,11 @@ const DonutChart = ({ data, title, labelKey, valueKey, colors = [], centerText =
         {title && (
           <h3 className="text-white font-medium mb-4">{title}</h3>
         )}
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-slate-500 text-2xl">📊</span>
-            </div>
-            <p className="text-slate-400">No data available for chart</p>
+        <div className="text-center py-8">
+          <div className="w-12 h-12 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span className="text-slate-500 text-xl">📊</span>
           </div>
+          <p className="text-slate-400 text-sm">No data available</p>
         </div>
       </div>
     )

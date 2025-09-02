@@ -61,7 +61,10 @@ const OfficerDashboard = () => {
           )
 
           // Set department stats from categoryStats
-          setDepartmentStats(analyticsData.data.categoryStats || [])
+          const categoryStats = analyticsData.data.categoryStats || []
+          // Only show categories that have data
+          const filteredCategoryStats = categoryStats.filter(cat => cat.count > 0)
+          setDepartmentStats(filteredCategoryStats)
         }
       } else {
         console.error("Analytics API error:", analyticsResponse.status)
@@ -350,20 +353,24 @@ const OfficerDashboard = () => {
                 <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
                 Category Distribution
               </h2>
-              <div className="space-y-3">
-                {!departmentStats || departmentStats.length === 0 ? (
-                  <p className="text-slate-400 text-sm">No category data available</p>
-                ) : (
-                  departmentStats.map((category, index) => (
+              {!departmentStats || departmentStats.length === 0 ? (
+                <div className="text-center py-6">
+                  <BarChart3 className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400 text-sm">No category data available yet</p>
+                  <p className="text-slate-500 text-xs mt-1">Data will appear when cases are processed</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {departmentStats.map((category, index) => (
                     <div key={category.category || index} className="flex items-center justify-between">
                       <span className="text-slate-300 text-sm capitalize">
                         {(category.category || category._id || "Unknown").replace("_", " ")}
                       </span>
                       <span className="text-white font-medium">{category.count || 0}</span>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
             
             {/* Performance Insights */}
@@ -372,23 +379,31 @@ const OfficerDashboard = () => {
                 <Activity className="w-6 h-6 text-blue-400" />
                 Your Performance
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <MetricCard
-                  title="Cases Handled"
-                  value={stats.total}
-                  icon={<FileText className="w-5 h-5" />}
-                  color="blue"
-                  subtitle="Total assigned cases"
-                />
-                
-                <MetricCard
-                  title="Success Rate"
-                  value={`${Math.round((stats.resolved / (stats.total || 1)) * 100)}%`}
-                  icon={<CheckCircle className="w-5 h-5" />}
-                  color="green"
-                  subtitle="Resolution success rate"
-                />
-              </div>
+              {stats.total > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <MetricCard
+                    title="Cases Handled"
+                    value={stats.total}
+                    icon={<FileText className="w-5 h-5" />}
+                    color="blue"
+                    subtitle="Total department cases"
+                  />
+                  
+                  <MetricCard
+                    title="Success Rate"
+                    value={`${Math.round((stats.resolved / (stats.total || 1)) * 100)}%`}
+                    icon={<CheckCircle className="w-5 h-5" />}
+                    color="green"
+                    subtitle="Resolution success rate"
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <Activity className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400 text-sm">Performance metrics will appear</p>
+                  <p className="text-slate-500 text-xs mt-1">when cases are assigned to your department</p>
+                </div>
+              )}
             </div>
 
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.4s'}}>
