@@ -122,22 +122,11 @@ const AnalyticsWidget = ({
           <div className="text-slate-400 text-sm">Total Cases</div>
         </div>
         
-        <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-400 mb-1">{analytics.summary.resolved || 0}</div>
-          <div className="text-slate-400 text-sm">Resolved</div>
-        </div>
+       
         
         {!compact && (
           <>
-            <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-400 mb-1">{analytics.summary.pending || 0}</div>
-              <div className="text-slate-400 text-sm">Pending</div>
-            </div>
             
-            <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400 mb-1">{analytics.summary.inProgress || 0}</div>
-              <div className="text-slate-400 text-sm">In Progress</div>
-            </div>
           </>
         )}
       </div>

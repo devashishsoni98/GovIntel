@@ -2,26 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
-import { selectUser, USER_ROLES } from "../redux/slices/authSlice"
+import { selectUser } from "../redux/slices/authSlice"
 import {
   BarChart3,
   TrendingUp,
   Users,
   Clock,
   Target,
-  Calendar,
-  Filter,
   Download,
   RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  PieChart,
-  LineChart as LineChartIcon,
+  LineChartIcon,
   FileText,
   Building,
   Activity,
-  Zap
 } from "lucide-react"
 
 // Import chart components
@@ -39,11 +32,12 @@ const Analytics = () => {
   const [analytics, setAnalytics] = useState({
     dashboard: null,
     trends: null,
-    performance: null
+    performance: null,
   })
 
   useEffect(() => {
     fetchAnalytics()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeframe])
 
   const fetchAnalytics = async () => {
@@ -53,28 +47,31 @@ const Analytics = () => {
 
       const [dashboardRes, trendsRes, performanceRes] = await Promise.all([
         fetch("/api/analytics/dashboard", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }),
         fetch(`/api/analytics/trends?timeframe=${timeframe}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }),
-        user.role !== "citizen" ? fetch("/api/analytics/performance", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-        }) : Promise.resolve({ ok: false })
+        user.role !== "citizen"
+          ? fetch("/api/analytics/performance", {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            })
+          : Promise.resolve({ ok: false }),
       ])
 
       const [dashboard, trends, performance] = await Promise.all([
         dashboardRes.ok ? dashboardRes.json() : null,
         trendsRes.ok ? trendsRes.json() : null,
-        performanceRes.ok ? performanceRes.json() : null
+        performanceRes.ok ? performanceRes.json() : null,
       ])
 
       setAnalytics({
-        dashboard: dashboard?.data,
-        trends: trends?.data,
-        performance: performance?.data
+        dashboard: dashboard?.data || null,
+        trends: trends?.data || null,
+        performance: performance?.data || null,
       })
-
     } catch (error) {
       console.error("Analytics fetch error:", error)
       setError("Failed to load analytics data")
@@ -86,13 +83,13 @@ const Analytics = () => {
   const exportData = async (type) => {
     try {
       const response = await fetch(`/api/analytics/export?type=${type}&timeframe=${timeframe}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      
+
       if (response.ok) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
+        const a = document.createElement("a")
         a.href = url
         a.download = `analytics-${type}-${timeframe}.csv`
         document.body.appendChild(a)
@@ -106,52 +103,77 @@ const Analytics = () => {
   }
 
   const formatTrendDate = (dateObj) => {
+    if (!dateObj) return "Unknown"
     if (timeframe === "week") {
-      return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}-${String(dateObj.day).padStart(2, '0')}`
+      return `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(dateObj.day).padStart(2, "0")}`
     }
-    return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}`
+    return `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}`
   }
 
   // Prepare chart data with null checks
-  const statusChartData = analytics.dashboard?.statusStats?.map(stat => ({
-    status: stat.status.replace('_', ' '),
-    count: stat.count,
-    percentage: stat.percentage || 0
-  })) || []
+  const statusChartData =
+    analytics.dashboard?.statusStats?.filter(Boolean).map((stat) => ({
+      status: String(stat?.status ?? "unknown").replaceAll("_", " "),
+      count: Number(stat?.count ?? 0),
+      percentage: Number(stat?.percentage ?? 0),
+    })) || []
 
-  const categoryChartData = analytics.dashboard?.categoryStats?.map(stat => ({
-    category: stat.category.replace('_', ' '),
-    count: stat.count,
-    percentage: stat.percentage || 0
-  })) || []
+  const categoryChartData =
+    analytics.dashboard?.categoryStats?.filter(Boolean).map((stat) => ({
+      category: String(stat?.category ?? "unknown").replaceAll("_", " "),
+      count: Number(stat?.count ?? 0),
+      percentage: Number(stat?.percentage ?? 0),
+    })) || []
 
-  const priorityChartData = analytics.dashboard?.priorityStats?.map(stat => ({
-    priority: stat.priority,
-    count: stat.count,
-    percentage: stat.percentage || 0
-  })) || []
+  const priorityChartData =
+    analytics.dashboard?.priorityStats?.filter(Boolean).map((stat) => ({
+      priority: String(stat?.priority ?? "unknown"),
+      count: Number(stat?.count ?? 0),
+      percentage: Number(stat?.percentage ?? 0),
+    })) || []
 
-  const monthlyTrendData = analytics.dashboard?.monthlyTrend?.map(trend => ({
-    month: trend.month,
-    count: trend.count
-  })) || []
+  const monthlyTrendData =
+    analytics.dashboard?.monthlyTrend?.filter(Boolean).map((trend) => ({
+      month: String(trend?.month ?? ""),
+      count: Number(trend?.count ?? 0),
+    })) || []
 
-  const trendsData = analytics.trends?.trends?.map(trend => ({
-    date: formatTrendDate(trend._id),
-    total: trend.total,
-    pending: trend.pending,
-    inProgress: trend.inProgress,
-    resolved: trend.resolved
-  })) || []
+  const trendsData =
+    analytics.trends?.trends?.filter(Boolean).map((trend) => ({
+      date: formatTrendDate(trend?._id),
+      total: Number(trend?.total ?? 0),
+      pending: Number(trend?.pending ?? 0),
+      inProgress: Number(trend?.inProgress ?? 0),
+      resolved: Number(trend?.resolved ?? 0),
+    })) || []
+
+  const monthMatchesAug2025 = (label) => {
+    const s = String(label ?? "").toLowerCase()
+    return s.includes("2025") && (s.includes("aug") || s.includes("-08") || s.includes("/08") || s.includes(" 08"))
+  }
+
+  let filteredMonthlyTrendData = (monthlyTrendData || []).filter((d) => monthMatchesAug2025(d?.month))
+
+  if (!filteredMonthlyTrendData.length) {
+    const augTrends = (trendsData || []).filter((t) => {
+      const s = String(t?.date ?? "").toLowerCase()
+      return s.includes("2025") && (s.includes("aug") || s.startsWith("2025-08") || s.includes("-08"))
+    })
+    const totalCount = augTrends.reduce((sum, t) => sum + (t?.total ?? 0), 0)
+    if (totalCount > 0) {
+      filteredMonthlyTrendData = [{ month: "2025-08", count: totalCount }]
+    }
+  }
 
   // Filter out empty data and ensure minimum data for charts
-  const hasStatusData = statusChartData.length > 0 && statusChartData.some(item => item.count > 0)
-  const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some(item => item.count > 0)
-  const hasPriorityData = priorityChartData.length > 0 && priorityChartData.some(item => item.count > 0)
-  const hasMonthlyData = monthlyTrendData.length > 0 && monthlyTrendData.some(item => item.count > 0)
-  const hasTrendsData = trendsData.length > 0 && trendsData.some(item => item.total > 0)
-  const hasDepartmentData = analytics.dashboard?.departmentStats?.length > 0 && 
-    analytics.dashboard.departmentStats.some(dept => dept.count > 0)
+  const hasStatusData = statusChartData.length > 0 && statusChartData.some((item) => item.count > 0)
+  const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some((item) => item.count > 0)
+  const hasPriorityData = priorityChartData.length > 0 && priorityChartData.some((item) => item.count > 0)
+  const hasMonthlyData = filteredMonthlyTrendData.length > 0 && filteredMonthlyTrendData.some((item) => item.count > 0)
+  const hasTrendsData = trendsData.length > 0 && trendsData.some((item) => item.total > 0)
+  const hasDepartmentData =
+    analytics.dashboard?.departmentStats?.length > 0 &&
+    analytics.dashboard.departmentStats.some((dept) => (dept?.count ?? 0) > 0)
 
   if (loading) {
     return (
@@ -179,30 +201,14 @@ const Analytics = () => {
             <h1 className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
               Analytics Dashboard
             </h1>
-            <p className="text-slate-400">Comprehensive insights and performance metrics</p>
+            <p className="text-slate-400 text-sm">
+              Overview of grievance analytics across status, categories, priority and trends.
+            </p>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 md:mt-0">
             {/* Timeframe Filter */}
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-              className="px-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm"
-            >
-              <option value="week">Last Week</option>
-              <option value="month">Last Month</option>
-              <option value="year">Last Year</option>
-            </select>
-
-            {/* Export Button */}
-            <button
-              onClick={() => exportData('dashboard')}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all hover:scale-105 text-sm"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-
+            
             {/* Refresh Button */}
             <button
               onClick={fetchAnalytics}
@@ -230,16 +236,16 @@ const Analytics = () => {
               color="blue"
               subtitle="All time"
             />
-            
+
             <MetricCard
               title="Resolution Rate"
               value={`${analytics.dashboard.summary.resolutionRate || 0}%`}
               icon={<Target className="w-6 h-6" />}
               color="green"
-              change={analytics.dashboard.summary.resolutionRate > 70 ? "+5.2" : "-2.1"}
-              changeType={analytics.dashboard.summary.resolutionRate > 70 ? "positive" : "negative"}
+              change={(analytics.dashboard.summary.resolutionRate || 0) > 70 ? "+5.2" : "-2.1"}
+              changeType={(analytics.dashboard.summary.resolutionRate || 0) > 70 ? "positive" : "negative"}
             />
-            
+
             <MetricCard
               title="Avg Resolution Time"
               value={`${Math.round(analytics.dashboard.summary.avgResolutionTime || 0)}h`}
@@ -254,7 +260,9 @@ const Analytics = () => {
                 value={analytics.dashboard.userStats.total || 0}
                 icon={<Users className="w-6 h-6" />}
                 color="yellow"
-                subtitle={`${analytics.dashboard.userStats.citizens || 0} citizens, ${analytics.dashboard.userStats.officers || 0} officers`}
+                subtitle={`${analytics.dashboard.userStats.citizens || 0} citizens, ${
+                  analytics.dashboard.userStats.officers || 0
+                } officers`}
               />
             )}
           </div>
@@ -273,7 +281,7 @@ const Analytics = () => {
                 colors={["#f59e0b", "#06b6d4", "#10b981", "#6b7280", "#ef4444"]}
                 centerText={{
                   value: analytics.dashboard.summary.total || 0,
-                  label: "Total Cases"
+                  label: "Total Cases",
                 }}
               />
             </div>
@@ -291,15 +299,13 @@ const Analytics = () => {
               />
             </div>
           )}
-        
+
           {/* Show message when no chart data is available */}
           {!hasStatusData && !hasCategoryData && (
             <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8 text-center animate-fade-in">
               <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">No Chart Data Available</h3>
-              <p className="text-slate-400">
-                Charts will appear here once grievances are submitted and processed.
-              </p>
+              <p className="text-slate-400">Charts will appear here once grievances are submitted and processed.</p>
             </div>
           )}
         </div>
@@ -330,9 +336,9 @@ const Analytics = () => {
                 {analytics.dashboard.departmentStats.map((dept, index) => (
                   <div key={index}>
                     <ProgressBar
-                      label={dept.department || dept._id}
-                      value={dept.count}
-                      max={analytics.dashboard.summary.total}
+                      label={dept?.department || dept?._id || "Unknown"}
+                      value={Number(dept?.count ?? 0)}
+                      max={Number(analytics.dashboard.summary.total || 1)}
                       color={`hsl(${(index * 60) % 360}, 70%, 50%)`}
                     />
                   </div>
@@ -353,28 +359,7 @@ const Analytics = () => {
           )}
         </div>
 
-        {/* Trends Analysis */}
-        {hasMonthlyData && (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8 animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <TrendingUp className="w-6 h-6 text-purple-400" />
-                Monthly Trends
-              </h2>
-              <div className="flex items-center gap-2 text-sm text-slate-400">
-                <LineChartIcon className="w-4 h-4" />
-                Last 6 months
-              </div>
-            </div>
-            
-            <LineChart
-              data={monthlyTrendData}
-              xKey="month"
-              yKey="count"
-              color="#8b5cf6"
-            />
-          </div>
-        )}
+       
 
         {/* Detailed Trends Table */}
         {hasTrendsData && (
@@ -389,7 +374,7 @@ const Analytics = () => {
                 {timeframe} view
               </div>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -405,7 +390,7 @@ const Analytics = () => {
                 <tbody>
                   {trendsData.map((trend, index) => {
                     const resolutionRate = trend.total > 0 ? ((trend.resolved / trend.total) * 100).toFixed(1) : 0
-                    
+
                     return (
                       <tr key={index} className="border-b border-slate-700/30 hover:bg-slate-700/20 transition-all">
                         <td className="py-3 px-4 text-white font-medium">{trend.date}</td>
@@ -432,8 +417,8 @@ const Analytics = () => {
                           <div className="flex items-center gap-2">
                             <span className="text-white font-medium">{resolutionRate}%</span>
                             <div className="w-16 bg-slate-700 rounded-full h-2">
-                              <div 
-                                className="bg-green-500 h-2 rounded-full transition-all duration-500" 
+                              <div
+                                className="bg-green-500 h-2 rounded-full transition-all duration-500"
                                 style={{ width: `${resolutionRate}%` }}
                               ></div>
                             </div>
@@ -448,49 +433,6 @@ const Analytics = () => {
           </div>
         )}
 
-        {/* Performance Metrics (Officer/Admin only) */}
-        {user.role !== "citizen" && analytics.performance && Array.isArray(analytics.performance) && analytics.performance.length > 0 && (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Zap className="w-6 h-6 text-yellow-400" />
-              Performance Metrics
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {analytics.performance.map((perf, index) => (
-                <div key={index} className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-300 hover:scale-[1.02]">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-white font-medium">
-                        {perf.officer?.[0]?.name || "Unassigned"}
-                      </p>
-                      <p className="text-slate-400 text-sm">
-                        {perf._id.status}: {perf.count} cases
-                      </p>
-                    </div>
-                    {perf.avgResolutionTime && (
-                      <div className="text-right">
-                        <p className="text-purple-400 font-medium">
-                          {Math.round(perf.avgResolutionTime)}h
-                        </p>
-                        <p className="text-slate-400 text-sm">avg resolution</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Performance bar */}
-                  <ProgressBar
-                    value={perf.count}
-                    max={Math.max(...analytics.performance.map(p => p.count))}
-                    color="#8b5cf6"
-                    height="h-2"
-                    showPercentage={false}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Quick Stats Summary */}
         {analytics.dashboard && analytics.dashboard.summary && (
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
@@ -498,7 +440,7 @@ const Analytics = () => {
               <BarChart3 className="w-6 h-6 text-green-400" />
               Quick Statistics
             </h2>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-yellow-400 mb-2">
@@ -515,7 +457,7 @@ const Analytics = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-400 mb-2">
                   {analytics.dashboard.summary.inProgress || 0}
@@ -531,7 +473,7 @@ const Analytics = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">
                   {analytics.dashboard.summary.resolved || 0}
@@ -547,11 +489,9 @@ const Analytics = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="text-center">
-                <div className="text-3xl font-bold text-gray-400 mb-2">
-                  {analytics.dashboard.summary.closed || 0}
-                </div>
+                <div className="text-3xl font-bold text-gray-400 mb-2">{analytics.dashboard.summary.closed || 0}</div>
                 <div className="text-slate-400 text-sm">Closed</div>
                 <div className="mt-2">
                   <ProgressBar
