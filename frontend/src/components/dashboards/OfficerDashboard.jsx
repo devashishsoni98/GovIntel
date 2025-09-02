@@ -207,7 +207,7 @@ const OfficerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group hover:scale-105 hover:shadow-xl hover:shadow-gray-500/10 animate-slide-up" style={{animationDelay: '0.05s'}}>
+          {/* <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group hover:scale-105 hover:shadow-xl hover:shadow-gray-500/10 animate-slide-up" style={{animationDelay: '0.05s'}}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-400 text-xs sm:text-sm">Assigned</p>
@@ -279,7 +279,7 @@ const OfficerDashboard = () => {
                 <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-400" />
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Main Content */}
@@ -399,49 +399,12 @@ const OfficerDashboard = () => {
                     <div className="text-lg font-bold text-blue-400">{stats.total}</div>
                     <div className="text-slate-400 text-xs">Your Cases</div>
                   </div>
-                  <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
-                    <div className="text-lg font-bold text-green-400">{stats.resolutionRate}%</div>
-                    <div className="text-slate-400 text-xs">Your Success Rate</div>
-                  </div>
-                  <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
-                    <div className="text-lg font-bold text-purple-400">{stats.inProgress || 0}</div>
-                    <div className="text-slate-400 text-xs">In Progress</div>
-                  </div>
-                  <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
-                    <div className="text-lg font-bold text-yellow-400">{stats.resolved || 0}</div>
-                    <div className="text-slate-400 text-xs">Resolved</div>
-                  </div>
+                  
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.3s'}}>
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                Your Cases by Category
-              </h2>
-              {!departmentStats || departmentStats.length === 0 ? (
-                <div className="text-center py-6">
-                  <BarChart3 className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400 text-sm">No category data available yet</p>
-                  <p className="text-slate-500 text-xs mt-1">Data will appear when cases are assigned to you</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {departmentStats.map((category, index) => (
-                    <div key={category.category || category._id || index} className="flex items-center justify-between">
-                      <span className="text-slate-300 text-sm capitalize">
-                        {(category.category || category._id || "Unknown").replace("_", " ")}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-white font-medium">{category.count || 0}</span>
-                        <span className="text-slate-400 text-xs">({category.percentage || 0}%)</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+           
             
             {/* Performance Insights */}
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in">
@@ -459,29 +422,10 @@ const OfficerDashboard = () => {
                     subtitle="Cases assigned to you"
                   />
                   
-                  <MetricCard
-                    title="In Progress"
-                    value={stats.inProgress || 0}
-                    icon={<UserPlus className="w-5 h-5" />}
-                    color="purple"
-                    subtitle="Currently working on"
-                  />
                   
-                  <MetricCard
-                    title="Resolution Rate"
-                    value={`${stats.resolutionRate || 0}%`}
-                    icon={<CheckCircle className="w-5 h-5" />}
-                    color="green"
-                    subtitle="Your success rate"
-                  />
                   
-                  <MetricCard
-                    title="Avg Resolution"
-                    value={`${stats.avgResolutionTime || 0}h`}
-                    icon={<Clock className="w-5 h-5" />}
-                    color="yellow"
-                    subtitle="Your average time"
-                  />
+                  
+                 
                 </div>
               ) : (
                 <div className="text-center py-6">

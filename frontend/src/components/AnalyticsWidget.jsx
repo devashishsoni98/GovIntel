@@ -122,81 +122,20 @@ const AnalyticsWidget = ({
           <div className="text-slate-400 text-sm">Total Cases</div>
         </div>
         
-        <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-400 mb-1">{analytics.summary.resolutionRate}%</div>
-          <div className="text-slate-400 text-sm">Resolution Rate</div>
-        </div>
+        
         
         {!compact && (
           <>
-            <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-400 mb-1">{analytics.summary.pending}</div>
-              <div className="text-slate-400 text-sm">Pending</div>
-            </div>
             
-            <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-purple-400 mb-1">{analytics.summary.avgResolutionTime}h</div>
-              <div className="text-slate-400 text-sm">Avg Resolution</div>
-            </div>
           </>
         )}
-      </div>
+      
 
-      {/* Charts */}
-      {showCharts && (
-        <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} gap-6`}>
-          {/* Status Distribution */}
-          {hasStatusData && (
-            <div>
-              <DonutChart
-                data={statusChartData}
-                title="Status Distribution"
-                labelKey="status"
-                valueKey="count"
-                colors={["#f59e0b", "#06b6d4", "#10b981", "#6b7280", "#ef4444"]}
-                centerText={{
-                  value: analytics.summary.total,
-                  label: "Total"
-                }}
-              />
-            </div>
-          )}
+     
 
-          {/* Category Breakdown */}
-          {hasCategoryData && !compact && (
-            <div>
-              <BarChart
-                data={categoryChartData.slice(0, 6)} // Show top 6 categories
-                title="Top Categories"
-                xKey="category"
-                yKey="count"
-                color="#8b5cf6"
-              />
-            </div>
-          )}
-
-          {/* Show message when no chart data */}
-          {!hasStatusData && !hasCategoryData && (
-            <div className={`${compact ? 'col-span-1' : 'lg:col-span-2'} text-center py-6 bg-slate-700/20 rounded-lg border border-slate-600/30`}>
-              <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400 text-sm mb-2">
-                {analytics.summary?.total > 0 
-                  ? "Processing chart data..." 
-                  : "No chart data available"
-                }
-              </p>
-              <p className="text-slate-500 text-xs">
-                {userRole === "officer" 
-                  ? "Charts will appear when cases are assigned to you"
-                  : userRole === "citizen"
-                  ? "Charts will appear when you submit grievances"
-                  : "Charts will appear when data is available"
-                }
-              </p>
-            </div>
-          )}
+          
         </div>
-      )}
+      
 
       {/* Recent Activity Summary */}
       {hasRecentActivity && (
