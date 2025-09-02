@@ -95,7 +95,9 @@ const AnalyticsWidget = ({
     hasStatusData,
     hasCategoryData,
     hasRecentActivity,
-    totalGrievances: analytics.summary?.total
+    totalGrievances: analytics.summary?.total,
+    userRole,
+    analytics
   })
 
   return (
@@ -175,12 +177,19 @@ const AnalyticsWidget = ({
 
           {/* Show message when no chart data */}
           {!hasStatusData && !hasCategoryData && (
-            <div className={`${compact ? 'col-span-1' : 'lg:col-span-2'} text-center py-8 bg-slate-700/20 rounded-lg border border-slate-600/30`}>
+            <div className={`${compact ? 'col-span-1' : 'lg:col-span-2'} text-center py-6 bg-slate-700/20 rounded-lg border border-slate-600/30`}>
               <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400 text-sm mb-2">No chart data available</p>
+              <p className="text-slate-400 text-sm mb-2">
+                {analytics.summary?.total > 0 
+                  ? "Processing chart data..." 
+                  : "No chart data available"
+                }
+              </p>
               <p className="text-slate-500 text-xs">
                 {userRole === "officer" 
                   ? "Charts will appear when cases are assigned to you"
+                  : userRole === "citizen"
+                  ? "Charts will appear when you submit grievances"
                   : "Charts will appear when data is available"
                 }
               </p>
@@ -211,7 +220,7 @@ const AnalyticsWidget = ({
       )}
 
       {/* Show message when no data is available */}
-      {!hasStatusData && !hasCategoryData && !hasRecentActivity && (
+      {!hasStatusData && !hasCategoryData && !hasRecentActivity && analytics.summary?.total === 0 && (
         <div className="mt-6 pt-6 border-t border-slate-700/50 text-center bg-slate-700/20 rounded-lg p-6">
           <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <p className="text-slate-400 text-sm mb-2">No analytics data available</p>

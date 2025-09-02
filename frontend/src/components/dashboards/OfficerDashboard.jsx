@@ -64,10 +64,18 @@ const OfficerDashboard = () => {
             },
           )
 
-          // Set department stats from categoryStats
+          // Set department stats from categoryStats with proper data
           const categoryStats = analyticsData.data.categoryStats || []
           console.log("Officer: Category stats received:", categoryStats)
-          setDepartmentStats(categoryStats)
+          
+          // Add percentage calculation for category stats
+          const totalCases = analyticsData.data.summary?.total || 0
+          const categoryStatsWithPercentage = categoryStats.map(cat => ({
+            ...cat,
+            percentage: totalCases > 0 ? Math.round((cat.count / totalCases) * 100) : 0
+          }))
+          
+          setDepartmentStats(categoryStatsWithPercentage)
         }
       } else {
         console.error("Analytics API error:", analyticsResponse.status)
@@ -412,7 +420,7 @@ const OfficerDashboard = () => {
                 <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
                 Your Cases by Category
               </h2>
-              {!departmentStats || departmentStats.length === 0 || !departmentStats.some(cat => cat.count > 0) ? (
+              {!departmentStats || departmentStats.length === 0 ? (
                 <div className="text-center py-6">
                   <BarChart3 className="w-10 h-10 text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-400 text-sm">No category data available yet</p>
@@ -420,8 +428,8 @@ const OfficerDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {departmentStats.filter(cat => cat.count > 0).map((category, index) => (
-                    <div key={category.category || index} className="flex items-center justify-between">
+                  {departmentStats.map((category, index) => (
+                    <div key={category.category || category._id || index} className="flex items-center justify-between">
                       <span className="text-slate-300 text-sm capitalize">
                         {(category.category || category._id || "Unknown").replace("_", " ")}
                       </span>
