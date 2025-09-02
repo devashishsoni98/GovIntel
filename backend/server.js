@@ -124,6 +124,12 @@ app.use("/api/departments", departmentRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/analysis", analysisRoutes)
 
+// Add debug routes for development
+if (process.env.NODE_ENV === "development") {
+  const debugRoutes = require("./routes/debug")
+  app.use("/api/debug", debugRoutes)
+}
+
 // Test route to verify API is working
 app.get("/api/test", (req, res) => {
   res.json({
@@ -132,61 +138,6 @@ app.get("/api/test", (req, res) => {
     timestamp: new Date().toISOString()
   })
 })
-
-// Debug route to test password (REMOVE IN PRODUCTION)
-app.post("/api/debug/test-password", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    // Find user with password field included
-    const user = await User.findOne({ email }).select('+password');
-    
-    if (!user) {
-      return res.json({ 
-        success: false, 
-        message: "User not found" 
-      });
-    }
-    
-    const passwordMatch = await user.comparePassword(password);
-    
-    return res.json({
-      success: true,
-      user: {
-        email: user.email,
-        role: user.role,
-        hasPassword: !!user.password,
-        passwordMatch
-      }
-    });
-  } catch (error) {
-    console.error("Password test error:", error);
-    return res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-});
-
-// Debug route to view users (REMOVE IN PRODUCTION)
-app.get("/api/debug/users", async (req, res) => {
-  try {
-    const users = await User.find().select('-password');
-    return res.json({ success: true, count: users.length, users });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Debug route to clear users (REMOVE IN PRODUCTION)
-app.delete('/api/debug/clear-users', async (req, res) => {
-  try {
-    await User.deleteMany({});
-    res.json({ success: true, message: 'All users deleted' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
 // Health check route
 app.get("/api/health", (req, res) => {

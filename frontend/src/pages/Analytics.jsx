@@ -26,7 +26,6 @@ import {
 
 // Import chart components
 import BarChart from "../components/charts/BarChart"
-// import PieChart from "../components/charts/PieChart"
 import LineChart from "../components/charts/LineChart"
 import DonutChart from "../components/charts/DonutChart"
 import MetricCard from "../components/charts/MetricCard"
@@ -113,7 +112,7 @@ const Analytics = () => {
     return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}`
   }
 
-  // Prepare chart data
+  // Prepare chart data with null checks
   const statusChartData = analytics.dashboard?.statusStats?.map(stat => ({
     status: stat.status.replace('_', ' '),
     count: stat.count,
@@ -184,7 +183,25 @@ const Analytics = () => {
           </div>
           
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 md:mt-0">
-            
+            {/* Timeframe Filter */}
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value)}
+              className="px-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm"
+            >
+              <option value="week">Last Week</option>
+              <option value="month">Last Month</option>
+              <option value="year">Last Year</option>
+            </select>
+
+            {/* Export Button */}
+            <button
+              onClick={() => exportData('dashboard')}
+              className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-all hover:scale-105 text-sm"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
 
             {/* Refresh Button */}
             <button
@@ -204,11 +221,11 @@ const Analytics = () => {
         )}
 
         {/* Key Metrics */}
-        {analytics.dashboard && (
+        {analytics.dashboard && analytics.dashboard.summary && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             <MetricCard
               title="Total Grievances"
-              value={analytics.dashboard.summary.total}
+              value={analytics.dashboard.summary.total || 0}
               icon={<FileText className="w-6 h-6" />}
               color="blue"
               subtitle="All time"
@@ -216,7 +233,7 @@ const Analytics = () => {
             
             <MetricCard
               title="Resolution Rate"
-              value={`${analytics.dashboard.summary.resolutionRate}%`}
+              value={`${analytics.dashboard.summary.resolutionRate || 0}%`}
               icon={<Target className="w-6 h-6" />}
               color="green"
               change={analytics.dashboard.summary.resolutionRate > 70 ? "+5.2" : "-2.1"}
@@ -225,7 +242,7 @@ const Analytics = () => {
             
             <MetricCard
               title="Avg Resolution Time"
-              value={`${analytics.dashboard.summary.avgResolutionTime}h`}
+              value={`${Math.round(analytics.dashboard.summary.avgResolutionTime || 0)}h`}
               icon={<Clock className="w-6 h-6" />}
               color="purple"
               subtitle="Hours to resolve"
@@ -234,10 +251,10 @@ const Analytics = () => {
             {user.role === "admin" && analytics.dashboard.userStats && (
               <MetricCard
                 title="Active Users"
-                value={analytics.dashboard.userStats.total}
+                value={analytics.dashboard.userStats.total || 0}
                 icon={<Users className="w-6 h-6" />}
                 color="yellow"
-                subtitle={`${analytics.dashboard.userStats.citizens} citizens, ${analytics.dashboard.userStats.officers} officers`}
+                subtitle={`${analytics.dashboard.userStats.citizens || 0} citizens, ${analytics.dashboard.userStats.officers || 0} officers`}
               />
             )}
           </div>
@@ -255,14 +272,25 @@ const Analytics = () => {
                 valueKey="count"
                 colors={["#f59e0b", "#06b6d4", "#10b981", "#6b7280", "#ef4444"]}
                 centerText={{
-                  value: analytics.dashboard.summary.total,
+                  value: analytics.dashboard.summary.total || 0,
                   label: "Total Cases"
                 }}
               />
             </div>
           )}
 
-          
+          {/* Category Distribution */}
+          {hasCategoryData && (
+            <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
+              <DonutChart
+                data={categoryChartData}
+                title="Category Distribution"
+                labelKey="category"
+                valueKey="count"
+                colors={["#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899"]}
+              />
+            </div>
+          )}
         
           {/* Show message when no chart data is available */}
           {!hasStatusData && !hasCategoryData && (
@@ -302,7 +330,7 @@ const Analytics = () => {
                 {analytics.dashboard.departmentStats.map((dept, index) => (
                   <div key={index}>
                     <ProgressBar
-                      label={dept.department}
+                      label={dept.department || dept._id}
                       value={dept.count}
                       max={analytics.dashboard.summary.total}
                       color={`hsl(${(index * 60) % 360}, 70%, 50%)`}
@@ -474,13 +502,13 @@ const Analytics = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-yellow-400 mb-2">
-                  {analytics.dashboard.summary.pending}
+                  {analytics.dashboard.summary.pending || 0}
                 </div>
                 <div className="text-slate-400 text-sm">Pending Cases</div>
                 <div className="mt-2">
                   <ProgressBar
-                    value={analytics.dashboard.summary.pending}
-                    max={analytics.dashboard.summary.total}
+                    value={analytics.dashboard.summary.pending || 0}
+                    max={analytics.dashboard.summary.total || 1}
                     color="#f59e0b"
                     height="h-1"
                     showPercentage={false}
@@ -490,13 +518,13 @@ const Analytics = () => {
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-400 mb-2">
-                  {analytics.dashboard.summary.inProgress}
+                  {analytics.dashboard.summary.inProgress || 0}
                 </div>
                 <div className="text-slate-400 text-sm">In Progress</div>
                 <div className="mt-2">
                   <ProgressBar
-                    value={analytics.dashboard.summary.inProgress}
-                    max={analytics.dashboard.summary.total}
+                    value={analytics.dashboard.summary.inProgress || 0}
+                    max={analytics.dashboard.summary.total || 1}
                     color="#06b6d4"
                     height="h-1"
                     showPercentage={false}
@@ -506,13 +534,13 @@ const Analytics = () => {
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">
-                  {analytics.dashboard.summary.resolved}
+                  {analytics.dashboard.summary.resolved || 0}
                 </div>
                 <div className="text-slate-400 text-sm">Resolved</div>
                 <div className="mt-2">
                   <ProgressBar
-                    value={analytics.dashboard.summary.resolved}
-                    max={analytics.dashboard.summary.total}
+                    value={analytics.dashboard.summary.resolved || 0}
+                    max={analytics.dashboard.summary.total || 1}
                     color="#10b981"
                     height="h-1"
                     showPercentage={false}
@@ -522,13 +550,13 @@ const Analytics = () => {
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-gray-400 mb-2">
-                  {analytics.dashboard.summary.closed}
+                  {analytics.dashboard.summary.closed || 0}
                 </div>
                 <div className="text-slate-400 text-sm">Closed</div>
                 <div className="mt-2">
                   <ProgressBar
-                    value={analytics.dashboard.summary.closed}
-                    max={analytics.dashboard.summary.total}
+                    value={analytics.dashboard.summary.closed || 0}
+                    max={analytics.dashboard.summary.total || 1}
                     color="#6b7280"
                     height="h-1"
                     showPercentage={false}

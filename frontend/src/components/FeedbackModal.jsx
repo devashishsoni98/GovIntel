@@ -151,6 +151,100 @@ const FeedbackModal = ({ grievance, onClose, onSuccess }) => {
               <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
+
+          {/* Rating */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-3">
+              Overall Rating *
+            </label>
+            <div className="flex items-center gap-2 mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  className="transition-all hover:scale-110"
+                >
+                  <Star
+                    className={`w-8 h-8 ${
+                      star <= (hoveredRating || rating)
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-slate-600"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            {(hoveredRating || rating) > 0 && (
+              <p className="text-sm text-slate-400">
+                {ratingLabels[hoveredRating || rating]}
+              </p>
+            )}
+          </div>
+
+          {/* Comment */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Additional Comments (Optional)
+            </label>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={4}
+              className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all resize-none"
+              placeholder="Share your experience or suggestions for improvement..."
+            />
+          </div>
+
+          {/* Feedback Impact */}
+          <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+            <h4 className="text-green-300 font-medium mb-2">Your Feedback Helps</h4>
+            <div className="text-sm text-green-200 space-y-1">
+              <p>• Improve service quality for future cases</p>
+              <p>• Recognize outstanding officer performance</p>
+              <p>• Identify areas for system improvement</p>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 p-4 sm:p-6 border-t border-slate-700 sticky bottom-0 bg-slate-800">
+          <button
+            onClick={onClose}
+            className="w-full sm:w-auto px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-all"
+          >
+            Skip for Now
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading || rating === 0}
+            className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg text-white font-medium hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader className="w-4 h-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Feedback"
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default FeedbackModal
         </div>
 
         {/* Footer */}

@@ -18,8 +18,11 @@ router.get("/dashboard", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id
     } else if (req.user.role === "officer") {
-      // For officers, show only grievances assigned to them
-      filter.assignedOfficer = req.user.id
+      // For officers, show only grievances assigned to them or in their department
+      filter.$or = [
+        { assignedOfficer: req.user.id },
+        { department: req.user.department }
+      ]
     }
     // Admin sees all grievances (no filter)
 
