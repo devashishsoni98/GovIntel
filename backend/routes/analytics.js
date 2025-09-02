@@ -199,6 +199,16 @@ router.get("/dashboard", auth, async (req, res) => {
       } : null
     }
 
+    console.log("Dashboard analytics data:", {
+      totalGrievances,
+      statusStatsCount: statusStats.length,
+      categoryStatsCount: categoryStats.length,
+      priorityStatsCount: priorityStats.length,
+      departmentStatsCount: departmentStats.length,
+      monthlyTrendCount: monthlyTrend.length,
+      userRole: role
+    })
+
     res.json({
       success: true,
       data: dashboardData

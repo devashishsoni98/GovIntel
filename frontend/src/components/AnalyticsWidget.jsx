@@ -83,6 +83,10 @@ const AnalyticsWidget = ({
     count: stat.count
   })) || []
 
+  // Check if we have meaningful data
+  const hasStatusData = statusChartData.length > 0 && statusChartData.some(item => item.count > 0)
+  const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some(item => item.count > 0)
+
   return (
     <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
@@ -129,7 +133,7 @@ const AnalyticsWidget = ({
       {showCharts && (
         <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} gap-6`}>
           {/* Status Distribution */}
-          {statusChartData.length > 0 && (
+          {hasStatusData && (
             <div>
               <DonutChart
                 data={statusChartData}
@@ -146,7 +150,7 @@ const AnalyticsWidget = ({
           )}
 
           {/* Category Breakdown */}
-          {categoryChartData.length > 0 && !compact && (
+          {hasCategoryData && !compact && (
             <div>
               <BarChart
                 data={categoryChartData.slice(0, 6)} // Show top 6 categories
@@ -155,6 +159,14 @@ const AnalyticsWidget = ({
                 yKey="count"
                 color="#8b5cf6"
               />
+            </div>
+          )}
+
+          {/* Show message when no chart data */}
+          {!hasStatusData && !hasCategoryData && (
+            <div className={`${compact ? 'col-span-1' : 'lg:col-span-2'} text-center py-8`}>
+              <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-400 text-sm">Charts will appear when data is available</p>
             </div>
           )}
         </div>

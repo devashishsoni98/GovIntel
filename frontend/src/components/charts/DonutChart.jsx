@@ -8,6 +8,12 @@ const DonutChart = ({ data, title, labelKey, valueKey, colors = [], centerText =
 
   const { chartData, total } = useMemo(() => {
     const total = data.reduce((sum, item) => sum + item[valueKey], 0)
+    
+    // Return early if no data
+    if (total === 0) {
+      return { chartData: [], total: 0 }
+    }
+    
     let currentAngle = 0
 
     const processedData = data.map((item, index) => {
@@ -29,6 +35,25 @@ const DonutChart = ({ data, title, labelKey, valueKey, colors = [], centerText =
 
     return { chartData: processedData, total }
   }, [data, valueKey, colors])
+
+  // Don't render if no data
+  if (!data || data.length === 0 || total === 0) {
+    return (
+      <div className="w-full">
+        {title && (
+          <h3 className="text-white font-medium mb-4">{title}</h3>
+        )}
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-slate-500 text-2xl">📊</span>
+            </div>
+            <p className="text-slate-400">No data available for chart</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const createPath = (centerX, centerY, innerRadius, outerRadius, startAngle, endAngle) => {
     const startOuter = polarToCartesian(centerX, centerY, outerRadius, endAngle)

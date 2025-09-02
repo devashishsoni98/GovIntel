@@ -26,7 +26,7 @@ import {
 
 // Import chart components
 import BarChart from "../components/charts/BarChart"
-// import PieChart from "../components/charts/PieChart"
+import PieChart from "../components/charts/PieChart"
 import LineChart from "../components/charts/LineChart"
 import DonutChart from "../components/charts/DonutChart"
 import MetricCard from "../components/charts/MetricCard"
@@ -145,6 +145,15 @@ const Analytics = () => {
     resolved: trend.resolved
   })) || []
 
+  // Filter out empty data and ensure minimum data for charts
+  const hasStatusData = statusChartData.length > 0 && statusChartData.some(item => item.count > 0)
+  const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some(item => item.count > 0)
+  const hasPriorityData = priorityChartData.length > 0 && priorityChartData.some(item => item.count > 0)
+  const hasMonthlyData = monthlyTrendData.length > 0 && monthlyTrendData.some(item => item.count > 0)
+  const hasTrendsData = trendsData.length > 0 && trendsData.some(item => item.total > 0)
+  const hasDepartmentData = analytics.dashboard?.departmentStats?.length > 0 && 
+    analytics.dashboard.departmentStats.some(dept => dept.count > 0)
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 pt-20 p-8">
@@ -255,7 +264,7 @@ const Analytics = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Status Distribution Donut Chart */}
-          {statusChartData.length > 0 && (
+          {hasStatusData && (
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
               <DonutChart
                 data={statusChartData}
@@ -272,7 +281,7 @@ const Analytics = () => {
           )}
 
           {/* Category Breakdown Pie Chart */}
-          {categoryChartData.length > 0 && (
+          {hasCategoryData && (
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
               <PieChart
                 data={categoryChartData}
@@ -283,12 +292,23 @@ const Analytics = () => {
               />
             </div>
           )}
+
+          {/* Show message when no chart data is available */}
+          {!hasStatusData && !hasCategoryData && (
+            <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8 text-center animate-fade-in">
+              <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No Chart Data Available</h3>
+              <p className="text-slate-400">
+                Charts will appear here once grievances are submitted and processed.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Priority Analysis and Department Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Priority Analysis */}
-          {priorityChartData.length > 0 && (
+          {hasPriorityData && (
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
               <BarChart
                 data={priorityChartData}
@@ -301,7 +321,7 @@ const Analytics = () => {
           )}
 
           {/* Department Performance (Admin only) */}
-          {user.role === "admin" && analytics.dashboard?.departmentStats && (
+          {user.role === "admin" && hasDepartmentData && (
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
               <h3 className="text-white font-medium mb-4 flex items-center gap-2">
                 <Building className="w-5 h-5 text-blue-400" />
@@ -321,10 +341,21 @@ const Analytics = () => {
               </div>
             </div>
           )}
+
+          {/* Show placeholder when no priority or department data */}
+          {!hasPriorityData && !hasDepartmentData && (
+            <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8 text-center animate-fade-in">
+              <Activity className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Additional Analytics Coming Soon</h3>
+              <p className="text-slate-400">
+                Priority and department analytics will appear as more data becomes available.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Trends Analysis */}
-        {monthlyTrendData.length > 0 && (
+        {hasMonthlyData && (
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8 animate-fade-in">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -347,7 +378,7 @@ const Analytics = () => {
         )}
 
         {/* Detailed Trends Table */}
-        {trendsData.length > 0 && (
+        {hasTrendsData && (
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8 animate-fade-in">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -419,7 +450,7 @@ const Analytics = () => {
         )}
 
         {/* Performance Metrics (Officer/Admin only) */}
-        {user.role !== "citizen" && analytics.performance && analytics.performance.length > 0 && (
+        {user.role !== "citizen" && analytics.performance && Array.isArray(analytics.performance) && analytics.performance.length > 0 && (
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
             <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <Zap className="w-6 h-6 text-yellow-400" />
@@ -462,7 +493,7 @@ const Analytics = () => {
         )}
 
         {/* Quick Stats Summary */}
-        {analytics.dashboard && (
+        {analytics.dashboard && analytics.dashboard.summary && (
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-fade-in">
             <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <BarChart3 className="w-6 h-6 text-green-400" />
@@ -534,6 +565,24 @@ const Analytics = () => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* No Data Message */}
+        {!analytics.dashboard && !loading && (
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8 text-center animate-fade-in">
+            <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">No Analytics Data Available</h3>
+            <p className="text-slate-400 mb-6">
+              Analytics will be available once grievances are submitted and processed in the system.
+            </p>
+            <button
+              onClick={fetchAnalytics}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-all hover:scale-105"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh Data
+            </button>
           </div>
         )}
       </div>

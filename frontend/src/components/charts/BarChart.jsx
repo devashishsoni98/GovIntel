@@ -1,6 +1,25 @@
 import { useMemo } from "react"
 
 const BarChart = ({ data, title, xKey, yKey, color = "#8b5cf6" }) => {
+  // Don't render if no data
+  if (!data || data.length === 0 || !data.some(item => item[yKey] > 0)) {
+    return (
+      <div className="w-full">
+        {title && (
+          <h3 className="text-white font-medium mb-4">{title}</h3>
+        )}
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-slate-700/50 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-slate-500 text-2xl">📊</span>
+            </div>
+            <p className="text-slate-400">No data available for chart</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const maxValue = useMemo(() => {
     return Math.max(...data.map(item => item[yKey]))
   }, [data, yKey])
