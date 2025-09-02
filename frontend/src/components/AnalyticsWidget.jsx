@@ -180,7 +180,7 @@ const AnalyticsWidget = ({
               <p className="text-slate-400 text-sm mb-2">No chart data available</p>
               <p className="text-slate-500 text-xs">
                 {userRole === "officer" 
-                  ? "Charts will appear when cases are assigned to you or your department"
+                  ? "Charts will appear when cases are assigned to you"
                   : "Charts will appear when data is available"
                 }
               </p>
@@ -217,7 +217,7 @@ const AnalyticsWidget = ({
           <p className="text-slate-400 text-sm mb-2">No analytics data available</p>
           <p className="text-slate-500 text-xs">
             {userRole === "officer" 
-              ? "Analytics will appear when cases are processed in your department"
+              ? "Analytics will appear when cases are assigned to you"
               : userRole === "citizen"
               ? "Analytics will appear when you submit grievances"
               : "Analytics will appear when data is available"

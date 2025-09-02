@@ -24,11 +24,8 @@ router.get("/dashboard", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id
     } else if (req.user.role === "officer") {
-      // Officers see all cases in their department
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null
-      if (userDepartment) {
-        filter.department = userDepartment
-      }
+      // Officers see only cases assigned to them
+      filter.assignedOfficer = req.user.id
     }
     // Admins see all grievances (no filter)
 
@@ -225,10 +222,8 @@ router.get("/trends", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id
     } else if (req.user.role === "officer") {
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null
-      if (userDepartment) {
-        filter.department = userDepartment
-      }
+      // Officers see only cases assigned to them
+      filter.assignedOfficer = req.user.id
     }
 
     // Calculate date range based on timeframe
@@ -317,10 +312,8 @@ router.get("/performance", auth, async (req, res) => {
     // Build filter based on user role
     let filter = {}
     if (req.user.role === "officer") {
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null
-      if (userDepartment) {
-        filter.department = userDepartment
-      }
+      // Officers see only their own performance
+      filter.assignedOfficer = req.user.id
     }
 
     // Get officer performance data
@@ -707,10 +700,8 @@ router.get("/summary", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id
     } else if (req.user.role === "officer") {
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null
-      if (userDepartment) {
-        filter.department = userDepartment
-      }
+      // Officers see only cases assigned to them
+      filter.assignedOfficer = req.user.id
     }
 
     const [

@@ -181,7 +181,7 @@ const OfficerDashboard = () => {
             Officer Dashboard
           </h1>
           <p className="text-slate-400 text-base sm:text-lg">
-            Welcome, {user?.name} - {user?.department} Department
+            Welcome, {user?.name} - Your Assigned Cases
           </p>
         </div>
 
@@ -279,7 +279,7 @@ const OfficerDashboard = () => {
           {/* Analytics Widget */}
           <div className="lg:col-span-3 mb-6">
             <AnalyticsWidget 
-              title="Department Analytics Overview"
+              title="Your Cases Analytics Overview"
               showCharts={true}
               compact={false}
               userRole="officer"
@@ -292,7 +292,7 @@ const OfficerDashboard = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  Department Cases
+                  Your Assigned Cases
                 </h2>
                 <Link to="/assigned-cases" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-all duration-300 hover:scale-105">
                   View All
@@ -302,7 +302,7 @@ const OfficerDashboard = () => {
               {!assignedGrievances || assignedGrievances.length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="w-12 h-12 text-slate-600 mx-auto mb-4 animate-pulse" />
-                  <p className="text-slate-400">No cases in your department yet</p>
+                  <p className="text-slate-400">No cases assigned to you yet</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -327,7 +327,7 @@ const OfficerDashboard = () => {
                             </span>
                             {grievance.assignedOfficer && grievance.assignedOfficer._id === user?.id && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-400/10 text-blue-400 border border-blue-400/20">
-                                Assigned to You
+                                Your Case
                               </span>
                             )}
                           </div>
@@ -372,36 +372,36 @@ const OfficerDashboard = () => {
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.2s'}}>
               <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                Department Overview
+                Your Performance Overview
               </h2>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                    <Building className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+                    <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-white font-medium capitalize text-sm sm:text-base">{user?.department} Department</p>
-                    <p className="text-slate-400 text-sm">Your assigned department</p>
+                    <p className="text-white font-medium capitalize text-sm sm:text-base">Officer {user?.name}</p>
+                    <p className="text-slate-400 text-sm">{user?.department} Department</p>
                   </div>
                 </div>
                 
-                {/* Department Stats Summary */}
+                {/* Personal Stats Summary */}
                 <div className="grid grid-cols-2 gap-3 mt-4">
                   <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
                     <div className="text-lg font-bold text-blue-400">{stats.total}</div>
-                    <div className="text-slate-400 text-xs">Dept Cases</div>
+                    <div className="text-slate-400 text-xs">Your Cases</div>
                   </div>
                   <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
                     <div className="text-lg font-bold text-green-400">{stats.resolutionRate}%</div>
-                    <div className="text-slate-400 text-xs">Success Rate</div>
+                    <div className="text-slate-400 text-xs">Your Success Rate</div>
                   </div>
                   <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
-                    <div className="text-lg font-bold text-purple-400">{stats.assigned || 0}</div>
-                    <div className="text-slate-400 text-xs">Assigned to You</div>
+                    <div className="text-lg font-bold text-purple-400">{stats.inProgress || 0}</div>
+                    <div className="text-slate-400 text-xs">In Progress</div>
                   </div>
                   <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
-                    <div className="text-lg font-bold text-yellow-400">{stats.pending || 0}</div>
-                    <div className="text-slate-400 text-xs">Pending</div>
+                    <div className="text-lg font-bold text-yellow-400">{stats.resolved || 0}</div>
+                    <div className="text-slate-400 text-xs">Resolved</div>
                   </div>
                 </div>
               </div>
@@ -410,13 +410,13 @@ const OfficerDashboard = () => {
             <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.3s'}}>
               <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
                 <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                Category Distribution
+                Your Cases by Category
               </h2>
               {!departmentStats || departmentStats.length === 0 || !departmentStats.some(cat => cat.count > 0) ? (
                 <div className="text-center py-6">
                   <BarChart3 className="w-10 h-10 text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-400 text-sm">No category data available yet</p>
-                  <p className="text-slate-500 text-xs mt-1">Data will appear when cases are processed</p>
+                  <p className="text-slate-500 text-xs mt-1">Data will appear when cases are assigned to you</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -444,19 +444,19 @@ const OfficerDashboard = () => {
               {stats.total > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <MetricCard
-                    title="Department Cases"
+                    title="Total Assigned"
                     value={stats.total}
                     icon={<FileText className="w-5 h-5" />}
                     color="blue"
-                    subtitle="Your department cases"
+                    subtitle="Cases assigned to you"
                   />
                   
                   <MetricCard
-                    title="Personal Cases"
-                    value={stats.assigned || 0}
+                    title="In Progress"
+                    value={stats.inProgress || 0}
                     icon={<UserPlus className="w-5 h-5" />}
                     color="purple"
-                    subtitle="Assigned to you"
+                    subtitle="Currently working on"
                   />
                   
                   <MetricCard
@@ -464,7 +464,7 @@ const OfficerDashboard = () => {
                     value={`${stats.resolutionRate || 0}%`}
                     icon={<CheckCircle className="w-5 h-5" />}
                     color="green"
-                    subtitle="Department success rate"
+                    subtitle="Your success rate"
                   />
                   
                   <MetricCard
@@ -472,14 +472,14 @@ const OfficerDashboard = () => {
                     value={`${stats.avgResolutionTime || 0}h`}
                     icon={<Clock className="w-5 h-5" />}
                     color="yellow"
-                    subtitle="Average time to resolve"
+                    subtitle="Your average time"
                   />
                 </div>
               ) : (
                 <div className="text-center py-6">
                   <Activity className="w-10 h-10 text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-400 text-sm">Performance metrics will appear</p>
-                  <p className="text-slate-500 text-xs mt-1">when cases are processed in your department</p>
+                  <p className="text-slate-500 text-xs mt-1">when cases are assigned to you</p>
                 </div>
               )}
             </div>
@@ -496,7 +496,7 @@ const OfficerDashboard = () => {
                 >
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5" />
-                    <span className="text-sm sm:text-base">View Department Cases</span>
+                    <span className="text-sm sm:text-base">View Your Assigned Cases</span>
                   </div>
                 </Link>
               </div>

@@ -191,15 +191,12 @@ router.get("/insights/:id", auth, async (req, res) => {
 
     // Check officer permissions
     if (req.user.role === "officer") {
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null
-      const grievanceDepartment = grievance.department ? grievance.department.toUpperCase() : null
       const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer._id.toString() === req.user.id
-      const isSameDepartment = userDepartment && grievanceDepartment === userDepartment
       
-      if (!isAssignedToUser && !isSameDepartment) {
+      if (!isAssignedToUser) {
         return res.status(403).json({
           success: false,
-          message: "Access denied - you can only view insights for cases assigned to you or in your department"
+          message: "Access denied - you can only view insights for cases assigned to you"
         })
       }
     }

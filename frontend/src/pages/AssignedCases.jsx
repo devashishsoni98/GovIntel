@@ -177,10 +177,10 @@ const AssignedCases = () => {
         {/* Header */}
         <div className="mb-6 sm:mb-8 animate-fade-in">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-            Department Cases
+            Your Assigned Cases
           </h1>
           <p className="text-slate-400 text-base sm:text-lg">
-            Manage and track all grievances in your department - {user?.department} Department
+            Manage and track grievances assigned to you - {user?.department} Department
           </p>
         </div>
 
@@ -253,7 +253,7 @@ const AssignedCases = () => {
         {/* Analytics Section */}
         <div className="mb-6 sm:mb-8">
           <AnalyticsWidget 
-            title="Case Analytics"
+            title="Your Cases Analytics"
             showCharts={true}
             compact={true}
             userRole="officer"
@@ -284,7 +284,7 @@ const AssignedCases = () => {
             <MessageSquare className="w-16 h-16 text-slate-600 mx-auto mb-6 animate-pulse" />
             <h3 className="text-xl font-bold text-white mb-4">No Cases Found</h3>
             <p className="text-slate-400 mb-8">
-              You don't have any assigned cases yet.
+              You don't have any cases assigned to you yet. Cases will appear here when they are assigned to you by administrators or through the auto-assignment system.
             </p>
           </div>
         ) : (

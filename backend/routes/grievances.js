@@ -666,11 +666,8 @@ router.get("/", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id;
     } else if (req.user.role === "officer") {
-      // For officers, show all grievances in their department
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
-      if (userDepartment) {
-        filter.department = userDepartment;
-      }
+      // For officers, show only grievances assigned to them
+      filter.assignedOfficer = req.user.id;
     }
 
     // Apply additional filters
@@ -678,7 +675,6 @@ router.get("/", auth, async (req, res) => {
     if (category) filter.category = category;
     if (department && req.user.role === "admin") {
       // For admin department filter, override the base filter
-      delete filter.$or
       filter.department = department
     }
     if (priority) filter.priority = priority;
@@ -748,14 +744,10 @@ router.get("/:id", auth, async (req, res) => {
 
     // Enhanced officer access check
     if (req.user.role === "officer") {
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
-      const grievanceDepartment = grievance.department ? grievance.department.toUpperCase() : null;
       const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer._id.toString() === req.user.id;
       
       console.log("Officer access check:", {
         userId: req.user.id,
-        userDepartment,
-        grievanceDepartment,
         isAssignedToUser,
         assignedOfficerId: grievance.assignedOfficer?._id?.toString()
       });
@@ -818,13 +810,9 @@ router.patch("/:id/status", auth, async (req, res) => {
     });
     // Check if officer has permission to update this grievance
     if (req.user.role === "officer") {
-      const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
-      const grievanceDepartment = grievance.department ? grievance.department.toUpperCase() : null;
       const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer.toString() === req.user.id;
       
       console.log("Officer permission check:", {
-        userDepartment,
-        grievanceDepartment,
         isAssignedToUser,
         userId: req.user.id,
         assignedOfficerId: grievance.assignedOfficer?.toString()
