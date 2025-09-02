@@ -43,11 +43,12 @@ const DonutChart = ({ data, title, labelKey, valueKey, colors = [], centerText =
         {title && (
           <h3 className="text-white font-medium mb-4">{title}</h3>
         )}
-        <div className="text-center py-8">
+        <div className="text-center py-8 bg-slate-700/20 rounded-lg border border-slate-600/30">
           <div className="w-12 h-12 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-3">
             <span className="text-slate-500 text-xl">📊</span>
           </div>
-          <p className="text-slate-400 text-sm">No data available</p>
+          <p className="text-slate-400 text-sm mb-1">No data available</p>
+          <p className="text-slate-500 text-xs">Chart will appear when data is processed</p>
         </div>
       </div>
     )
@@ -136,6 +137,14 @@ const DonutChart = ({ data, title, labelKey, valueKey, colors = [], centerText =
               </div>
             </div>
           ))}
+          
+          {/* Total Summary */}
+          <div className="pt-3 border-t border-slate-600/30">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 text-sm font-medium">Total</span>
+              <span className="text-white font-bold">{total}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -29,6 +29,7 @@ const AnalyticsWidget = ({
 
       if (response.ok) {
         const data = await response.json()
+        console.log("AnalyticsWidget: Received data:", data)
         setAnalytics(data.data)
       } else {
         setError("Failed to load analytics")
@@ -87,6 +88,15 @@ const AnalyticsWidget = ({
   const hasStatusData = statusChartData.length > 0 && statusChartData.some(item => item.count > 0)
   const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some(item => item.count > 0)
   const hasRecentActivity = analytics.recentGrievances && analytics.recentGrievances.length > 0
+
+  console.log("AnalyticsWidget: Chart data check:", {
+    statusChartData,
+    categoryChartData,
+    hasStatusData,
+    hasCategoryData,
+    hasRecentActivity,
+    totalGrievances: analytics.summary?.total
+  })
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
@@ -165,9 +175,15 @@ const AnalyticsWidget = ({
 
           {/* Show message when no chart data */}
           {!hasStatusData && !hasCategoryData && (
-            <div className={`${compact ? 'col-span-1' : 'lg:col-span-2'} text-center py-8`}>
+            <div className={`${compact ? 'col-span-1' : 'lg:col-span-2'} text-center py-8 bg-slate-700/20 rounded-lg border border-slate-600/30`}>
               <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400 text-sm">Charts will appear when data is available</p>
+              <p className="text-slate-400 text-sm mb-2">No chart data available</p>
+              <p className="text-slate-500 text-xs">
+                {userRole === "officer" 
+                  ? "Charts will appear when cases are assigned to you or your department"
+                  : "Charts will appear when data is available"
+                }
+              </p>
             </div>
           )}
         </div>
@@ -196,9 +212,17 @@ const AnalyticsWidget = ({
 
       {/* Show message when no data is available */}
       {!hasStatusData && !hasCategoryData && !hasRecentActivity && (
-        <div className="mt-6 pt-6 border-t border-slate-700/50 text-center">
+        <div className="mt-6 pt-6 border-t border-slate-700/50 text-center bg-slate-700/20 rounded-lg p-6">
           <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <p className="text-slate-400 text-sm">Analytics will appear when cases are assigned to your department</p>
+          <p className="text-slate-400 text-sm mb-2">No analytics data available</p>
+          <p className="text-slate-500 text-xs">
+            {userRole === "officer" 
+              ? "Analytics will appear when cases are assigned to you or your department"
+              : userRole === "citizen"
+              ? "Analytics will appear when you submit grievances"
+              : "Analytics will appear when data is available"
+            }
+          </p>
         </div>
       )}
     </div>

@@ -8,11 +8,12 @@ const BarChart = ({ data, title, xKey, yKey, color = "#8b5cf6" }) => {
         {title && (
           <h3 className="text-white font-medium mb-4">{title}</h3>
         )}
-        <div className="text-center py-8">
+        <div className="text-center py-8 bg-slate-700/20 rounded-lg border border-slate-600/30">
           <div className="w-12 h-12 bg-slate-700/50 rounded-lg flex items-center justify-center mx-auto mb-3">
             <span className="text-slate-500 text-xl">📊</span>
           </div>
-          <p className="text-slate-400 text-sm">No data available</p>
+          <p className="text-slate-400 text-sm mb-1">No data available</p>
+          <p className="text-slate-500 text-xs">Chart will appear when data is processed</p>
         </div>
       </div>
     )
@@ -47,7 +48,7 @@ const BarChart = ({ data, title, xKey, yKey, color = "#8b5cf6" }) => {
                   height={barHeight}
                   fill={color}
                   opacity="0.8"
-                  className="hover:opacity-100 transition-opacity cursor-pointer"
+                  className="hover:opacity-100 transition-all duration-300 cursor-pointer hover:brightness-110"
                   rx="4"
                 />
                 
@@ -77,6 +78,14 @@ const BarChart = ({ data, title, xKey, yKey, color = "#8b5cf6" }) => {
             )
           })}
         </svg>
+        
+        {/* Chart Summary */}
+        <div className="mt-4 pt-4 border-t border-slate-700/50">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-400">Total Items: {data.length}</span>
+            <span className="text-slate-400">Max Value: {maxValue}</span>
+          </div>
+        </div>
       </div>
     </div>
   )

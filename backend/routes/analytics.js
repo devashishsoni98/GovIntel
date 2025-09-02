@@ -14,15 +14,17 @@ router.get("/dashboard", auth, async (req, res) => {
     
     // Build filter based on user role
     let grievanceFilter = {}
-    let userFilter = { isActive: true }
     
     if (role === "citizen") {
       grievanceFilter.citizen = id
     } else if (role === "officer") {
-      // For officers, show all grievances in their department
+      // For officers, show grievances assigned to them OR in their department
       const userDepartment = department ? department.toUpperCase() : null;
       if (userDepartment) {
-        filter.department = userDepartment;
+        grievanceFilter.$or = [
+          { assignedOfficer: id },
+          { department: userDepartment }
+        ];
       }
     }
     // Admin sees all data (no filter)
@@ -50,24 +52,28 @@ router.get("/dashboard", auth, async (req, res) => {
       // Status distribution
       Grievance.aggregate([
         { $match: grievanceFilter },
-        { $group: { _id: "$status", count: { $sum: 1 } } }
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
       ]),
       
       // Category distribution
       Grievance.aggregate([
         { $match: grievanceFilter },
-        { $group: { _id: "$category", count: { $sum: 1 } } }
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
       ]),
       
       // Priority distribution
       Grievance.aggregate([
         { $match: grievanceFilter },
-        { $group: { _id: "$priority", count: { $sum: 1 } } }
+        { $group: { _id: "$priority", count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
       ]),
       
       // Department distribution (admin only)
       role === "admin" ? Grievance.aggregate([
-        { $group: { _id: "$department", count: { $sum: 1 } } }
+        { $group: { _id: "$department", count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
       ]) : [],
       
       // Recent grievances
@@ -122,10 +128,10 @@ router.get("/dashboard", auth, async (req, res) => {
       
       // User statistics (admin only)
       role === "admin" ? Promise.all([
-        User.countDocuments(userFilter),
-        User.countDocuments({ ...userFilter, role: "citizen" }),
-        User.countDocuments({ ...userFilter, role: "officer" }),
-        User.countDocuments({ ...userFilter, role: "admin" })
+        User.countDocuments({ isActive: true }),
+        User.countDocuments({ isActive: true, role: "citizen" }),
+        User.countDocuments({ isActive: true, role: "officer" }),
+        User.countDocuments({ isActive: true, role: "admin" })
       ]) : [0, 0, 0, 0]
     ])
 
@@ -150,6 +156,31 @@ router.get("/dashboard", auth, async (req, res) => {
       resolutionRate: item.count > 0 ? Math.round((item.resolved / item.count) * 100) : 0
     }))
 
+    // Add percentage calculations for stats
+    const statusStatsWithPercentage = statusStats.map(stat => ({
+      status: stat._id,
+      count: stat.count,
+      percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
+    }))
+
+    const categoryStatsWithPercentage = categoryStats.map(stat => ({
+      category: stat._id,
+      count: stat.count,
+      percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
+    }))
+
+    const priorityStatsWithPercentage = priorityStats.map(stat => ({
+      priority: stat._id,
+      count: stat.count,
+      percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
+    }))
+
+    const departmentStatsWithPercentage = departmentStats.map(stat => ({
+      department: stat._id,
+      count: stat.count,
+      percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
+    }))
+
     // Build response
     const dashboardData = {
       summary: {
@@ -162,26 +193,10 @@ router.get("/dashboard", auth, async (req, res) => {
         resolutionRate,
         avgResolutionTime: Math.round(avgResolutionTime)
       },
-      statusStats: statusStats.map(stat => ({
-        status: stat._id,
-        count: stat.count,
-        percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
-      })),
-      categoryStats: categoryStats.map(stat => ({
-        category: stat._id,
-        count: stat.count,
-        percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
-      })),
-      priorityStats: priorityStats.map(stat => ({
-        priority: stat._id,
-        count: stat.count,
-        percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
-      })),
-      departmentStats: departmentStats.map(stat => ({
-        department: stat._id,
-        count: stat.count,
-        percentage: totalGrievances > 0 ? Math.round((stat.count / totalGrievances) * 100) : 0
-      })),
+      statusStats: statusStatsWithPercentage,
+      categoryStats: categoryStatsWithPercentage,
+      priorityStats: priorityStatsWithPercentage,
+      departmentStats: departmentStatsWithPercentage,
       recentGrievances: recentGrievances.slice(0, 5),
       monthlyTrend: formattedMonthlyTrend,
       userStats: role === "admin" ? {
@@ -199,7 +214,9 @@ router.get("/dashboard", auth, async (req, res) => {
       priorityStatsCount: priorityStats.length,
       departmentStatsCount: departmentStats.length,
       monthlyTrendCount: monthlyTrend.length,
-      userRole: role
+      userRole: role,
+      grievanceFilter,
+      statusMap
     })
 
     res.json({

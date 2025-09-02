@@ -34,6 +34,8 @@ const OfficerDashboard = () => {
       setLoading(true)
       setError("")
 
+      console.log("OfficerDashboard: Fetching analytics for user:", user)
+
       // Fetch analytics
       const analyticsResponse = await fetch("/api/analytics/dashboard", {
         headers: {
@@ -62,12 +64,13 @@ const OfficerDashboard = () => {
 
           // Set department stats from categoryStats
           const categoryStats = analyticsData.data.categoryStats || []
-          // Only show categories that have data
-          const filteredCategoryStats = categoryStats.filter(cat => cat.count > 0)
-          setDepartmentStats(filteredCategoryStats)
+          console.log("Officer: Category stats received:", categoryStats)
+          setDepartmentStats(categoryStats)
         }
       } else {
         console.error("Analytics API error:", analyticsResponse.status)
+        const errorData = await analyticsResponse.json()
+        console.error("Analytics API error data:", errorData)
       }
 
       // Fetch assigned grievances
@@ -345,6 +348,18 @@ const OfficerDashboard = () => {
                     <p className="text-slate-400 text-sm">Your assigned department</p>
                   </div>
                 </div>
+                
+                {/* Department Stats Summary */}
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
+                    <div className="text-lg font-bold text-blue-400">{stats.total}</div>
+                    <div className="text-slate-400 text-xs">Total Cases</div>
+                  </div>
+                  <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-3 text-center">
+                    <div className="text-lg font-bold text-green-400">{stats.resolutionRate}%</div>
+                    <div className="text-slate-400 text-xs">Success Rate</div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -353,7 +368,7 @@ const OfficerDashboard = () => {
                 <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
                 Category Distribution
               </h2>
-              {!departmentStats || departmentStats.length === 0 ? (
+              {!departmentStats || departmentStats.length === 0 || !departmentStats.some(cat => cat.count > 0) ? (
                 <div className="text-center py-6">
                   <BarChart3 className="w-10 h-10 text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-400 text-sm">No category data available yet</p>
@@ -361,12 +376,15 @@ const OfficerDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {departmentStats.map((category, index) => (
+                  {departmentStats.filter(cat => cat.count > 0).map((category, index) => (
                     <div key={category.category || index} className="flex items-center justify-between">
                       <span className="text-slate-300 text-sm capitalize">
                         {(category.category || category._id || "Unknown").replace("_", " ")}
                       </span>
-                      <span className="text-white font-medium">{category.count || 0}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-medium">{category.count || 0}</span>
+                        <span className="text-slate-400 text-xs">({category.percentage || 0}%)</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -386,7 +404,7 @@ const OfficerDashboard = () => {
                     value={stats.total}
                     icon={<FileText className="w-5 h-5" />}
                     color="blue"
-                    subtitle="Total department cases"
+                    subtitle="Your department cases"
                   />
                   
                   <MetricCard
