@@ -217,7 +217,7 @@ const AnalyticsWidget = ({
           <p className="text-slate-400 text-sm mb-2">No analytics data available</p>
           <p className="text-slate-500 text-xs">
             {userRole === "officer" 
-              ? "Analytics will appear when cases are assigned to you or your department"
+              ? "Analytics will appear when cases are processed in your department"
               : userRole === "citizen"
               ? "Analytics will appear when you submit grievances"
               : "Analytics will appear when data is available"
