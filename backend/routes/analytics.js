@@ -18,14 +18,8 @@ router.get("/dashboard", auth, async (req, res) => {
     if (role === "citizen") {
       grievanceFilter.citizen = id
     } else if (role === "officer") {
-      // For officers, show grievances assigned to them OR in their department
-      const userDepartment = department ? department.toUpperCase() : null;
-      if (userDepartment) {
-        grievanceFilter.$or = [
-          { assignedOfficer: id },
-          { department: userDepartment }
-        ];
-      }
+      // For officers, show only grievances assigned to them specifically
+      grievanceFilter.assignedOfficer = id
     }
     // Admin sees all data (no filter)
 

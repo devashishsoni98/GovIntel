@@ -666,11 +666,8 @@ router.get("/", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id;
     } else if (req.user.role === "officer") {
-      // For officers, show grievances assigned to them OR in their department
-      filter.$or = [
-        { assignedOfficer: req.user.id },
-        { department: req.user.department, assignedOfficer: null }
-      ]
+      // For officers, show only grievances assigned to them specifically
+      filter.assignedOfficer = req.user.id
     }
 
     // Apply additional filters
@@ -751,21 +748,19 @@ router.get("/:id", auth, async (req, res) => {
       const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
       const grievanceDepartment = grievance.department ? grievance.department.toUpperCase() : null;
       const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer._id.toString() === req.user.id;
-      const isSameDepartment = userDepartment && grievanceDepartment === userDepartment;
       
       console.log("Officer access check:", {
         userId: req.user.id,
         userDepartment,
         grievanceDepartment,
         isAssignedToUser,
-        isSameDepartment,
         assignedOfficerId: grievance.assignedOfficer?._id?.toString()
       });
       
-      if (!isAssignedToUser && !isSameDepartment) {
+      if (!isAssignedToUser) {
         return res.status(403).json({
           success: false,
-          message: "Access denied - you can only view grievances assigned to you or in your department",
+          message: "Access denied - you can only view grievances assigned to you",
         });
       }
     }
@@ -823,21 +818,19 @@ router.patch("/:id/status", auth, async (req, res) => {
       const userDepartment = req.user.department ? req.user.department.toUpperCase() : null;
       const grievanceDepartment = grievance.department ? grievance.department.toUpperCase() : null;
       const isAssignedToUser = grievance.assignedOfficer && grievance.assignedOfficer.toString() === req.user.id;
-      const isSameDepartment = userDepartment && grievanceDepartment === userDepartment;
       
       console.log("Officer permission check:", {
         userDepartment,
         grievanceDepartment,
         isAssignedToUser,
-        isSameDepartment,
         userId: req.user.id,
         assignedOfficerId: grievance.assignedOfficer?.toString()
       });
 
-      if (!isAssignedToUser && !isSameDepartment) {
+      if (!isAssignedToUser) {
         return res.status(403).json({
           success: false,
-          message: "Access denied - you can only update grievances assigned to you or in your department",
+          message: "Access denied - you can only update grievances assigned to you",
         });
       }
     }
