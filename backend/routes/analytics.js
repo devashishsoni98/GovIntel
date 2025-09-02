@@ -24,8 +24,9 @@ router.get("/dashboard", auth, async (req, res) => {
     if (req.user.role === "citizen") {
       filter.citizen = req.user.id
     } else if (req.user.role === "officer") {
-      // Officers see only cases assigned to them
-      filter.assignedOfficer = req.user.id
+      // Officers see only cases assigned to them - use ObjectId
+      const mongoose = require('mongoose')
+      filter.assignedOfficer = new mongoose.Types.ObjectId(req.user.id)
     }
     // Admins see all grievances (no filter)
 
@@ -149,6 +150,44 @@ router.get("/dashboard", auth, async (req, res) => {
       ])
     }
 
+    // Get officer-specific performance metrics
+    let officerPerformance = null
+    if (req.user.role === "officer") {
+      const officerStats = await Grievance.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            totalCases: { $sum: 1 },
+            resolvedCases: { $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] } },
+            avgResolutionTime: {
+              $avg: {
+                $cond: [
+                  { $and: [{ $eq: ["$status", "resolved"] }, { $ne: ["$resolutionTime", null] }] },
+                  "$resolutionTime",
+                  null
+                ]
+              }
+            },
+            urgentCases: { $sum: { $cond: [{ $eq: ["$priority", "urgent"] }, 1, 0] } },
+            highPriorityCases: { $sum: { $cond: [{ $eq: ["$priority", "high"] }, 1, 0] } }
+          }
+        }
+      ])
+
+      if (officerStats.length > 0) {
+        const stats = officerStats[0]
+        officerPerformance = {
+          totalCases: stats.totalCases,
+          resolvedCases: stats.resolvedCases,
+          resolutionRate: stats.totalCases > 0 ? Math.round((stats.resolvedCases / stats.totalCases) * 100) : 0,
+          avgResolutionTime: Math.round(stats.avgResolutionTime || 0),
+          urgentCases: stats.urgentCases,
+          highPriorityCases: stats.highPriorityCases,
+          efficiency: stats.totalCases > 0 ? Math.round(((stats.resolvedCases + (stats.totalCases - stats.resolvedCases) * 0.5) / stats.totalCases) * 100) : 0
+        }
+      }
+    }
     // Format the response
     const dashboardData = {
       summary: {
@@ -183,7 +222,8 @@ router.get("/dashboard", auth, async (req, res) => {
       departmentStats: departmentStats.map(stat => ({
         department: stat._id,
         count: stat.count
-      }))
+      })),
+      officerPerformance
     }
 
     console.log("Analytics dashboard data:", {
@@ -192,7 +232,8 @@ router.get("/dashboard", auth, async (req, res) => {
       summary: dashboardData.summary,
       statusStatsCount: statusStats.length,
       categoryStatsCount: categoryStats.length,
-      recentGrievancesCount: recentGrievances.length
+      recentGrievancesCount: recentGrievances.length,
+      officerPerformance
     })
 
     res.json({
