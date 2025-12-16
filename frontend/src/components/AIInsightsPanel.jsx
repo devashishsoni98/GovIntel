@@ -207,7 +207,7 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
               <Brain className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">AI Analysis Insights</h2>
+              <h2 className="text-xl font-bold text-white">Analysis Insights</h2>
               <p className="text-slate-400 text-sm">Advanced analytics for grievance: {grievance?.title}</p>
             </div>
           </div>

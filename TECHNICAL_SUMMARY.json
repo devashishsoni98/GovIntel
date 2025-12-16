@@ -1,0 +1,753 @@
+{
+  "projectMetadata": {
+    "name": "GovIntel",
+    "fullName": "GovIntel - AI-Powered Public Grievance Analyzer for Government",
+    "type": "Full-Stack MERN + AI/ML",
+    "author": "Devashish Soni",
+    "status": "Production-Ready (with caveats)",
+    "analysisDate": "November 26, 2025"
+  },
+
+  "authentication": {
+    "method": "JWT (JSON Web Tokens)",
+    "tokenExpiration": "7 days",
+    "passwordHashing": "bcryptjs (12 rounds)",
+    "roles": {
+      "citizen": {
+        "canSubmitGrievances": true,
+        "canViewOwnGrievances": true,
+        "canProvideFeedback": true,
+        "canManageUsers": false
+      },
+      "officer": {
+        "canViewAssignedGrievances": true,
+        "canUpdateStatus": true,
+        "canAutoAssign": true,
+        "canReassignGrievances": false,
+        "requiresPasscode": true,
+        "passcode": "OFFICER2024"
+      },
+      "admin": {
+        "canManageUsers": true,
+        "canManageDepartments": true,
+        "canDeleteGrievances": true,
+        "canAccessAnalytics": true,
+        "canBatchAnalyze": true,
+        "canReassignGrievances": true
+      }
+    },
+    "filePaths": {
+      "middleware": "backend/middleware/auth.js",
+      "userModel": "backend/models/User.js",
+      "authRoutes": "backend/routes/auth.js",
+      "frontendAuth": "frontend/src/redux/slices/authSlice.js",
+      "protectedRoutes": "frontend/src/components/ProtectedRoute.jsx"
+    },
+    "securityRisks": [
+      {
+        "severity": "CRITICAL",
+        "issue": "Hardcoded officer passcode",
+        "location": "backend/routes/auth.js",
+        "fix": "Move to environment variable"
+      },
+      {
+        "severity": "CRITICAL",
+        "issue": "Default admin credentials seeded",
+        "location": "backend/server.js",
+        "credentials": "admin@gmail.com / 123456",
+        "fix": "Remove from seed, use secure setup process"
+      },
+      {
+        "severity": "HIGH",
+        "issue": "JWT stored in localStorage",
+        "vulnerability": "XSS attacks can steal tokens",
+        "fix": "Use httpOnly cookies"
+      }
+    ]
+  },
+
+  "aiML": {
+    "status": "IMPLEMENTED",
+    "components": {
+      "sentimentAnalysis": {
+        "package": "sentiment npm",
+        "categories": ["positive", "neutral", "negative"],
+        "scoreRange": "-1 to +1",
+        "features": ["intensifier detection", "negation detection"],
+        "file": "backend/utils/aiAnalysis.js"
+      },
+      "urgencyScoring": {
+        "range": "0-100",
+        "method": "Keyword matching + sentiment adjustment + time-sensitive phrases",
+        "levels": ["low", "medium", "high", "urgent"],
+        "autoEscalation": true,
+        "file": "backend/utils/aiAnalysis.js"
+      },
+      "categoryClassification": {
+        "categories": 8,
+        "method": "TF-IDF + keyword matching",
+        "confidence": "0-1 score",
+        "categories_list": [
+          "infrastructure",
+          "sanitation",
+          "water_supply",
+          "electricity",
+          "transportation",
+          "healthcare",
+          "education",
+          "police"
+        ],
+        "file": "backend/utils/aiAnalysis.js"
+      },
+      "keywordExtraction": {
+        "method": "TF-IDF",
+        "topKeywords": 10,
+        "file": "backend/utils/aiAnalysis.js"
+      },
+      "smartRouting": {
+        "algorithm": "Multi-factor officer scoring",
+        "factors": {
+          "workload": {
+            "weight": "40%",
+            "method": "Count of active cases"
+          },
+          "experience": {
+            "weight": "20%",
+            "method": "Count of resolved cases"
+          },
+          "performance": {
+            "weight": "25%",
+            "method": "Resolution quality/speed"
+          },
+          "availability": {
+            "weight": "5%",
+            "method": "Working hours matching"
+          },
+          "specialization": {
+            "weight": "10%",
+            "method": "Department expertise"
+          }
+        },
+        "fallback": "Assign to least-loaded officer",
+        "file": "backend/utils/smartRouting.js"
+      }
+    },
+    "flaskMLApp": {
+      "status": "PLACEHOLDER ONLY",
+      "location": "aiml/app.py",
+      "currentCode": "Basic Flask app with / endpoint",
+      "integration": "NOT INTEGRATED",
+      "notes": "Requires implementation for external ML services"
+    },
+    "endpoints": {
+      "analyzeGrievance": {
+        "method": "POST",
+        "path": "/api/analysis/grievance/:id",
+        "access": "Officer/Admin",
+        "purpose": "Trigger AI analysis on single grievance"
+      },
+      "batchAnalyze": {
+        "method": "POST",
+        "path": "/api/analysis/batch",
+        "access": "Admin only",
+        "purpose": "Analyze multiple grievances"
+      },
+      "insights": {
+        "method": "GET",
+        "path": "/api/analysis/insights/:id",
+        "access": "Officer/Admin",
+        "purpose": "Get detailed AI insights"
+      },
+      "summary": {
+        "method": "GET",
+        "path": "/api/analysis/summary",
+        "access": "Officer/Admin",
+        "purpose": "Get analysis statistics"
+      }
+    },
+    "flowOnGrievanceCreation": [
+      "User submits grievance form",
+      "Backend validates & saves to DB",
+      "AIAnalysisEngine.analyzeGrievance() triggered (non-blocking)",
+      "Performs sentiment, urgency, category, keyword extraction",
+      "Updates grievance.analysisData",
+      "Auto-escalates priority if urgency > 80",
+      "SmartRoutingEngine.autoAssignGrievance() assigns to best officer",
+      "Returns updated grievance to frontend"
+    ]
+  },
+
+  "backend": {
+    "framework": "Express.js 4.18.2",
+    "runtime": "Node.js 16+",
+    "database": "MongoDB 8.0",
+    "port": 5000,
+    "totalEndpoints": "40+",
+    "routes": {
+      "auth": {
+        "file": "backend/routes/auth.js",
+        "endpoints": 5,
+        "list": [
+          "POST /auth/register",
+          "POST /auth/login",
+          "GET /auth/me",
+          "PUT /auth/profile",
+          "POST /auth/logout"
+        ]
+      },
+      "grievances": {
+        "file": "backend/routes/grievances.js",
+        "endpoints": 11,
+        "list": [
+          "POST / (create with file upload)",
+          "GET / (list with filters & pagination)",
+          "GET /:id (single grievance)",
+          "PATCH /:id/status (update status)",
+          "POST /:id/feedback (submit feedback)",
+          "POST /:id/analyze (trigger AI analysis)",
+          "POST /:id/reassign (admin only)",
+          "POST /:id/auto-assign",
+          "GET /officers/available",
+          "GET /stats/overview",
+          "GET /analytics/dashboard"
+        ]
+      },
+      "analysis": {
+        "file": "backend/routes/ai.js",
+        "endpoints": 4,
+        "list": [
+          "POST /analysis/grievance/:id",
+          "POST /analysis/batch",
+          "GET /analysis/insights/:id",
+          "GET /analysis/summary"
+        ]
+      },
+      "analytics": {
+        "file": "backend/routes/analytics.js",
+        "endpoints": "multiple",
+        "features": ["dashboard data", "trend analysis", "status/category/priority stats"]
+      },
+      "users": {
+        "file": "backend/routes/users.js",
+        "endpoints": 6,
+        "access": "Admin only",
+        "list": ["GET /users/stats", "GET /users", "GET /users/:id", "PUT /users/:id", "PUT /users/:id/role", "DELETE /users/:id"]
+      },
+      "admin": {
+        "file": "backend/routes/admin.js",
+        "endpoints": 5,
+        "list": [
+          "DELETE /admin/grievances/:id",
+          "DELETE /admin/grievances/bulk",
+          "And other admin operations"
+        ]
+      },
+      "departments": {
+        "file": "backend/routes/departments.js",
+        "endpoints": 4,
+        "list": [
+          "GET /departments/active (public)",
+          "GET /departments (public)",
+          "GET /departments/:id (public)",
+          "POST /departments (admin)"
+        ]
+      }
+    },
+    "middleware": [
+      "CORS (configured for localhost:3000, localhost:5173)",
+      "Body parser (50MB limit)",
+      "JWT auth (custom middleware)",
+      "Multer (file upload)",
+      "Error handler (global)",
+      "Static file server (/uploads)"
+    ],
+    "fileUpload": {
+      "handler": "Multer",
+      "maxSize": "10MB per file",
+      "maxFiles": 5,
+      "allowedTypes": ["jpeg", "jpg", "png", "gif", "pdf", "doc", "docx", "txt", "mp4", "avi", "mov", "mp3", "wav", "m4a"],
+      "storageLocation": "backend/uploads/grievances/",
+      "filenameGeneration": "Timestamp + random + sanitized original"
+    },
+    "modelsPaths": {
+      "User": "backend/models/User.js",
+      "Grievance": "backend/models/Grievance.js",
+      "Department": "backend/models/Department.js"
+    },
+    "utilityEngines": {
+      "AIAnalysisEngine": "backend/utils/aiAnalysis.js",
+      "SmartRoutingEngine": "backend/utils/smartRouting.js"
+    }
+  },
+
+  "database": {
+    "system": "MongoDB",
+    "collections": 3,
+    "models": {
+      "User": {
+        "fields": 15,
+        "primaryFields": [
+          "name",
+          "email (unique)",
+          "password (hashed)",
+          "role (citizen/officer/admin)",
+          "phone",
+          "department (for officers)",
+          "isActive",
+          "lastLogin",
+          "address",
+          "preferences"
+        ],
+        "indexes": ["email (unique)", "role", "department"],
+        "virtuals": 1,
+        "methods": 3,
+        "passwordHashing": true,
+        "roleBasedFields": {
+          "citizen": ["phone (required)"],
+          "officer": ["phone (required)", "department (required)"],
+          "admin": ["phone (optional)", "department (not used)"]
+        }
+      },
+      "Grievance": {
+        "fields": 22,
+        "primaryFields": [
+          "title",
+          "description",
+          "category",
+          "priority",
+          "status",
+          "citizen (ref: User)",
+          "assignedOfficer (ref: User)",
+          "department",
+          "location (address, coordinates, landmark)",
+          "attachments (array)",
+          "updates (array with trail)",
+          "analysisData (AI results)",
+          "feedback",
+          "isAnonymous",
+          "expectedResolutionDate",
+          "actualResolutionDate",
+          "resolutionTime"
+        ],
+        "statuses": [
+          "pending",
+          "assigned",
+          "in_progress",
+          "resolved",
+          "closed",
+          "rejected"
+        ],
+        "priorities": ["low", "medium", "high", "urgent"],
+        "categories": 8,
+        "indexes": [
+          "citizen+createdAt",
+          "status",
+          "category+department",
+          "assignedOfficer+status",
+          "priority+status"
+        ],
+        "virtuals": 2,
+        "preHooks": [
+          "Auto-calculate resolutionTime on resolve",
+          "Auto-assign department from category"
+        ]
+      },
+      "Department": {
+        "fields": 18,
+        "primaryFields": [
+          "name (unique)",
+          "code (unique, uppercase)",
+          "description",
+          "categories (array)",
+          "officers (ref: User array)",
+          "head (ref: User)",
+          "contactInfo",
+          "workingHours",
+          "isActive",
+          "statistics"
+        ],
+        "departments": [
+          "MUNICIPAL",
+          "HEALTH",
+          "EDUCATION",
+          "TRANSPORT",
+          "POLICE",
+          "REVENUE",
+          "OTHER"
+        ],
+        "indexes": ["name", "code", "categories", "isActive"],
+        "virtuals": 2,
+        "methods": 2
+      }
+    },
+    "relationships": {
+      "User-Grievance-citizen": "1 user → many grievances (as citizen)",
+      "User-Grievance-officer": "1 user → many grievances (as assignedOfficer)",
+      "User-Department": "Many officers → 1 department",
+      "Grievance-Department": "Many grievances → 1 department"
+    }
+  },
+
+  "frontend": {
+    "framework": "React 19.1.0",
+    "buildTool": "Vite 6.3.5",
+    "stateManagement": "Redux Toolkit 2.8.2",
+    "routing": "React Router DOM 7.6.2",
+    "styling": "Tailwind CSS 4.1.8",
+    "uiLibraries": ["Lucide React", "React Icons"],
+    "httpClient": "Axios 1.9.0 (with JWT interceptors)",
+    "pages": 8,
+    "components": 20,
+    "structure": {
+      "pages": {
+        "public": ["Home", "SignIn"],
+        "citizen": ["SubmitComplaint", "MyGrievances"],
+        "officer": ["AssignedCases"],
+        "admin": ["UserManagement", "Analytics"],
+        "shared": ["Dashboard", "GrievanceDetail"]
+      },
+      "components": {
+        "auth": ["SignIn", "AuthInitializer", "ProtectedRoute"],
+        "layout": ["Navbar"],
+        "modals": [
+          "AdminAssignModal",
+          "AdminReassignModal",
+          "StatusUpdateModal",
+          "DeleteConfirmationModal",
+          "FeedbackModal"
+        ],
+        "utilities": ["FilePreview", "LocationPicker", "AIInsightsPanel", "AnalyticsWidget"],
+        "charts": ["BarChart", "LineChart", "PieChart", "DonutChart", "MetricCard", "ProgressBar"],
+        "dashboards": ["CitizenDashboard", "AdminDashboard", "OfficerDashboard"]
+      },
+      "redux": {
+        "slices": ["authSlice (login, register, logout)", "grievanceSlice (CRUD)"],
+        "store": "Redux store configuration"
+      },
+      "api": {
+        "axiosInstance": "Configured with JWT interceptor",
+        "baseURL": "http://localhost:5000/api (configurable)",
+        "services": ["grievanceService.js", "userService.js"]
+      }
+    },
+    "apiCommunication": {
+      "baseURL": "VITE_API_URL env var or http://localhost:5000/api",
+      "timeout": "10 seconds",
+      "contentType": "application/json",
+      "authentication": "Bearer token in Authorization header",
+      "fileUpload": "multipart/form-data for /api/grievances POST",
+      "interceptors": {
+        "request": "Injects JWT token from localStorage",
+        "response": "Handles 401 errors, redirects to signin"
+      }
+    },
+    "responsiveDesign": true,
+    "darkTheme": true
+  },
+
+  "endpoints": {
+    "total": "40+",
+    "byCategory": {
+      "authentication": 5,
+      "grievances": 11,
+      "analysis": 4,
+      "users": 6,
+      "admin": 5,
+      "departments": 4,
+      "analytics": "multiple",
+      "health": 2
+    },
+    "fileUploadDetails": {
+      "endpoint": "POST /api/grievances",
+      "contentType": "multipart/form-data",
+      "fieldName": "attachments",
+      "maxFiles": 5,
+      "maxFileSize": "10MB",
+      "allowedMimeTypes": "images, PDF, videos, audio, Office docs"
+    }
+  },
+
+  "securityAnalysis": {
+    "criticalRisks": [
+      {
+        "id": 1,
+        "severity": "CRITICAL",
+        "issue": "Hardcoded Officer Passcode",
+        "location": "backend/routes/auth.js line ~48",
+        "passcode": "OFFICER2024",
+        "impact": "Anyone can register as officer knowing this string",
+        "fix": "Move to JWT_SECRET or environment variable, implement proper authentication"
+      },
+      {
+        "id": 2,
+        "severity": "CRITICAL",
+        "issue": "Default Admin Credentials in Seed",
+        "location": "backend/server.js line ~170",
+        "credentials": "admin@gmail.com / 123456",
+        "impact": "Hardcoded credentials allow unauthorized admin access",
+        "fix": "Remove from code, implement secure admin setup wizard"
+      },
+      {
+        "id": 3,
+        "severity": "CRITICAL",
+        "issue": "JWT Secret Not Enforced",
+        "location": "All auth routes",
+        "impact": "If JWT_SECRET is weak, tokens can be forged",
+        "fix": "Ensure JWT_SECRET is 32+ characters, random, kept secret"
+      }
+    ],
+    "highRisks": [
+      {
+        "id": 4,
+        "severity": "HIGH",
+        "issue": "JWT in localStorage (XSS Vulnerable)",
+        "location": "frontend/src/api/index.js, auth flow",
+        "impact": "XSS attacks can steal authentication tokens",
+        "fix": "Use httpOnly cookies instead of localStorage"
+      },
+      {
+        "id": 5,
+        "severity": "HIGH",
+        "issue": "No Rate Limiting on Auth",
+        "location": "backend/routes/auth.js",
+        "impact": "Brute force attacks possible on login/register",
+        "library": "express-rate-limit installed but not used",
+        "fix": "Apply rate limiter to auth endpoints"
+      },
+      {
+        "id": 6,
+        "severity": "HIGH",
+        "issue": "Incomplete Input Validation",
+        "location": "Multiple endpoints",
+        "impact": "Invalid data could cause crashes or data corruption",
+        "library": "express-validator installed but inconsistently used",
+        "fix": "Implement comprehensive validation across all endpoints"
+      },
+      {
+        "id": 7,
+        "severity": "HIGH",
+        "issue": "No HTTPS Enforcement",
+        "location": "All endpoints",
+        "impact": "Tokens transmitted in plaintext over HTTP",
+        "fix": "Enforce HTTPS in production with SSL/TLS certificates"
+      }
+    ],
+    "mediumRisks": [
+      {
+        "id": 8,
+        "severity": "MEDIUM",
+        "issue": "Officer Access Control Issue",
+        "location": "backend/routes/grievances.js line ~190",
+        "detail": "Officers can view cases from other departments via $or query",
+        "fix": "Restrict to own department only"
+      },
+      {
+        "id": 9,
+        "severity": "MEDIUM",
+        "issue": "No Audit Logging",
+        "location": "backend/routes/admin.js",
+        "impact": "Cannot track who deleted what (compliance issue)",
+        "fix": "Implement persistent audit collection"
+      },
+      {
+        "id": 10,
+        "severity": "MEDIUM",
+        "issue": "No Encryption for PII",
+        "location": "User model (addresses, phone numbers)",
+        "impact": "Data breach exposes personally identifiable information",
+        "fix": "Encrypt sensitive fields using crypto or specialized library"
+      }
+    ],
+    "implementedSecurityMeasures": [
+      "✅ JWT authentication",
+      "✅ Password hashing with bcryptjs (12 rounds)",
+      "✅ Role-based access control (RBAC)",
+      "✅ Input validation (partial)",
+      "✅ File upload validation",
+      "✅ CORS configuration",
+      "✅ Error handling (production-safe)",
+      "✅ Account activation check",
+      "✅ Sensitive data exclusion (password)"
+    ],
+    "deploymentSecurityChecklist": [
+      "[ ] Remove hardcoded passcode",
+      "[ ] Remove default admin credentials",
+      "[ ] Set strong JWT_SECRET (32+ chars, random)",
+      "[ ] Enable HTTPS/TLS certificates",
+      "[ ] Implement rate limiting",
+      "[ ] Add comprehensive input validation",
+      "[ ] Implement audit logging",
+      "[ ] Encrypt sensitive fields",
+      "[ ] Configure proper CORS for production domain",
+      "[ ] Move tokens to httpOnly cookies",
+      "[ ] Implement WAF (Web Application Firewall)",
+      "[ ] Set up email service for notifications",
+      "[ ] Configure database backups"
+    ]
+  },
+
+  "missingFeatures": [
+    {
+      "feature": "Email Notifications",
+      "mentioned": "README.md (future enhancements)",
+      "implemented": false,
+      "impact": "Users unaware of status changes"
+    },
+    {
+      "feature": "SMS Notifications",
+      "mentioned": "README.md (future enhancements)",
+      "implemented": false,
+      "impact": "SMS alerts unavailable"
+    },
+    {
+      "feature": "Flask ML API",
+      "mentioned": "README.md (AI engine)",
+      "implemented": false,
+      "status": "Placeholder only (aiml/app.py)",
+      "impact": "External ML integration not available"
+    },
+    {
+      "feature": "Multi-language Support",
+      "mentioned": "README.md (future enhancements)",
+      "implemented": false,
+      "impact": "No i18n library configured"
+    },
+    {
+      "feature": "Advanced Search",
+      "mentioned": "Project specs",
+      "implemented": false,
+      "detail": "Only basic search on name/email for users",
+      "impact": "Cannot full-text search grievance descriptions"
+    },
+    {
+      "feature": "Case Escalation",
+      "mentioned": "README.md",
+      "implemented": false,
+      "impact": "Overdue cases not automatically escalated"
+    },
+    {
+      "feature": "OAuth/SSO",
+      "mentioned": "Standard for modern apps",
+      "implemented": false,
+      "impact": "Users must create separate accounts"
+    },
+    {
+      "feature": "Real-time Updates",
+      "mentioned": "User expectation",
+      "implemented": false,
+      "technology": "No WebSockets configured",
+      "impact": "Users must refresh for status updates"
+    },
+    {
+      "feature": "Caching Layer",
+      "mentioned": "Performance optimization",
+      "implemented": false,
+      "technology": "No Redis configured",
+      "impact": "Database queried for every request"
+    }
+  ],
+
+  "performanceConsiderations": {
+    "databaseIndexes": {
+      "implemented": 15,
+      "coverage": "Good - all frequently queried fields indexed"
+    },
+    "pagination": {
+      "implemented": true,
+      "defaultLimit": 10,
+      "endpoints": ["grievances list", "users list"]
+    },
+    "fileHandling": {
+      "maxFileSize": "10MB per file",
+      "maxFilesPerRequest": 5,
+      "storageLocation": "backend/uploads/grievances/",
+      "notOptimized": "No CDN, cloud storage, or file compression"
+    },
+    "cachingOpportunities": [
+      {
+        "data": "Department list",
+        "currentBehavior": "Fetched on every signup",
+        "solution": "Cache for 24 hours"
+      },
+      {
+        "data": "Analytics summaries",
+        "currentBehavior": "Calculated on every request",
+        "solution": "Cache for 1 hour"
+      },
+      {
+        "data": "User permissions",
+        "currentBehavior": "Checked per request",
+        "solution": "Cache in session/JWT claims"
+      }
+    ]
+  },
+
+  "deploymentRequirements": {
+    "environment": {
+      "NODE_ENV": "production",
+      "PORT": 5000,
+      "MONGODB_URI": "MongoDB connection string",
+      "JWT_SECRET": "Strong random 32+ character secret",
+      "JWT_EXPIRE": "7d",
+      "FRONTEND_URL": "Production frontend domain"
+    },
+    "infrastructure": [
+      "Node.js 16+ runtime",
+      "MongoDB instance (Atlas recommended)",
+      "Reverse proxy (Nginx) for HTTPS",
+      "SSL/TLS certificates",
+      "Email service (SendGrid, AWS SES, etc.)",
+      "Optional: Redis for caching",
+      "Optional: AWS S3 or similar for file storage"
+    ],
+    "preDeploymentTasks": [
+      "Remove default admin credentials",
+      "Remove hardcoded officer passcode",
+      "Set strong JWT_SECRET",
+      "Configure production MongoDB URI",
+      "Enable HTTPS/TLS",
+      "Set up email service",
+      "Implement rate limiting",
+      "Configure audit logging",
+      "Set proper CORS origins",
+      "Enable security headers (Helmet)"
+    ]
+  },
+
+  "codeQuality": {
+    "strengths": [
+      "Clear separation of concerns (routes, models, middleware)",
+      "Comprehensive error handling",
+      "Input validation framework in place (express-validator)",
+      "Descriptive comments in key files",
+      "Async/await throughout (no callback hell)",
+      "Logging for debugging"
+    ],
+    "improvements": [
+      "Add unit tests (jest configured but no tests found)",
+      "Add integration tests",
+      "Implement ESLint consistently",
+      "Remove console.logs from production code",
+      "Add JSDoc comments",
+      "Implement API versioning",
+      "Add API documentation (Swagger/OpenAPI)"
+    ]
+  },
+
+  "testingStatus": {
+    "unitTests": {
+      "status": "NOT FOUND",
+      "framework": "Jest (configured in package.json)"
+    },
+    "integrationTests": {
+      "status": "NOT FOUND",
+      "framework": "Supertest (configured)"
+    },
+    "e2eTests": {
+      "status": "NOT FOUND"
+    },
+    "securityTests": {
+      "status": "NOT COMPLETED"
+    }
+  }
+}
