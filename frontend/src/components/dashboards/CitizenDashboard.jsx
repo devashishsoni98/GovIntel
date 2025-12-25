@@ -1,13 +1,23 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSelector } from "react-redux"
-import { Link } from "react-router-dom"
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, MessageSquare, Calendar, MapPin } from "lucide-react"
-import { selectUser } from "../../redux/slices/authSlice"
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import {
+  Plus,
+  FileText,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  MessageSquare,
+  Calendar,
+  MapPin,
+} from "lucide-react";
+import { selectUser } from "../../redux/slices/authSlice";
+import api from "../../api/index.js";
 
 const CitizenDashboard = () => {
-  const user = useSelector(selectUser)
+  const user = useSelector(selectUser);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -17,30 +27,28 @@ const CitizenDashboard = () => {
     rejected: 0,
     resolutionRate: 0,
     avgResolutionTime: 0,
-  })
-  const [recentGrievances, setRecentGrievances] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  });
+  const [recentGrievances, setRecentGrievances] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
+    fetchDashboardData();
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true)
-      setError("")
+      setLoading(true);
+      setError("");
 
       // Fetch analytics
-      const analyticsResponse = await fetch("/analytics/dashboard", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const analyticsResponse = await api.get("/analytics/dashboard");
+
+
 
       if (analyticsResponse.ok) {
-        const analyticsData = await analyticsResponse.json()
-        console.log("Analytics data:", analyticsData)
+        const analyticsData = analyticsResponse.data;
+        console.log("Analytics data:", analyticsData);
 
         if (analyticsData.success && analyticsData.data) {
           setStats(
@@ -53,83 +61,85 @@ const CitizenDashboard = () => {
               rejected: 0,
               resolutionRate: 0,
               avgResolutionTime: 0,
-            },
-          )
+            }
+          );
 
           // Set recent grievances from analytics if available
           if (analyticsData.data.recentGrievances) {
-            setRecentGrievances(analyticsData.data.recentGrievances)
+            setRecentGrievances(analyticsData.data.recentGrievances);
           }
         }
       } else {
-        console.error("Analytics API error:", analyticsResponse.status)
+        console.error("Analytics API error:", analyticsResponse.status);
       }
 
       // If we don't have recent grievances from analytics, fetch them separately
       if (recentGrievances.length === 0) {
-        const grievancesResponse = await fetch("/grievances?limit=5&sortBy=updatedAt&sortOrder=desc", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
+        const grievancesResponse = await api.get(
+          "/grievances?limit=5&sortBy=updatedAt&sortOrder=desc"
+        );
+
+        const grievancesData = grievancesResponse.data;
 
         if (grievancesResponse.ok) {
-          const grievancesData = await grievancesResponse.json()
-          console.log("Grievances data:", grievancesData)
+          const grievancesData = await grievancesResponse.json();
+          console.log("Grievances data:", grievancesData);
 
           // Fix: Access grievancesData.data directly, not grievancesData.data.grievances
           if (grievancesData.success && grievancesData.data) {
-            setRecentGrievances(Array.isArray(grievancesData.data) ? grievancesData.data : [])
+            setRecentGrievances(
+              Array.isArray(grievancesData.data) ? grievancesData.data : []
+            );
           }
         } else {
-          console.error("Grievances API error:", grievancesResponse.status)
+          console.error("Grievances API error:", grievancesResponse.status);
         }
       }
     } catch (error) {
-      console.error("Error fetching dashboard data:", error)
-      setError("Failed to load dashboard data")
+      console.error("Error fetching dashboard data:", error);
+      setError("Failed to load dashboard data");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
-        return "text-yellow-400 bg-yellow-400/10"
+        return "text-yellow-400 bg-yellow-400/10";
       case "in_progress":
-        return "text-blue-400 bg-blue-400/10"
+        return "text-blue-400 bg-blue-400/10";
       case "resolved":
-        return "text-green-400 bg-green-400/10"
+        return "text-green-400 bg-green-400/10";
       case "closed":
-        return "text-gray-400 bg-gray-400/10"
+        return "text-gray-400 bg-gray-400/10";
       case "rejected":
-        return "text-red-400 bg-red-400/10"
+        return "text-red-400 bg-red-400/10";
       default:
-        return "text-gray-400 bg-gray-400/10"
+        return "text-gray-400 bg-gray-400/10";
     }
-  }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "pending":
-        return <Clock className="w-4 h-4" />
+        return <Clock className="w-4 h-4" />;
       case "in_progress":
-        return <AlertCircle className="w-4 h-4" />
+        return <AlertCircle className="w-4 h-4" />;
       case "resolved":
-        return <CheckCircle className="w-4 h-4" />
+        return <CheckCircle className="w-4 h-4" />;
       default:
-        return <FileText className="w-4 h-4" />
+        return <FileText className="w-4 h-4" />;
     }
-  }
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
@@ -145,7 +155,7 @@ const CitizenDashboard = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -154,13 +164,16 @@ const CitizenDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-8">
             <p className="text-red-400">{error}</p>
-            <button onClick={fetchDashboardData} className="mt-2 text-red-300 hover:text-red-200 underline">
+            <button
+              onClick={fetchDashboardData}
+              className="mt-2 text-red-300 hover:text-red-200 underline"
+            >
               Try again
             </button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -171,7 +184,9 @@ const CitizenDashboard = () => {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
             Welcome back, {user?.name}!
           </h1>
-          <p className="text-slate-400 text-base sm:text-lg">Track your grievances and submit new complaints</p>
+          <p className="text-slate-400 text-base sm:text-lg">
+            Track your grievances and submit new complaints
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -179,8 +194,12 @@ const CitizenDashboard = () => {
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-slate-800/70 transition-all duration-300 group hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 animate-slide-up">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-xs sm:text-sm">Total Grievances</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">{stats.total || 0}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">
+                  Total Grievances
+                </p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">
+                  {stats.total || 0}
+                </p>
               </div>
               <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400" />
@@ -243,8 +262,12 @@ const CitizenDashboard = () => {
                       <Plus className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-white font-semibold text-sm">Submit New Complaint</h3>
-                      <p className="text-white/80 text-xs">Report a new grievance</p>
+                      <h3 className="text-white font-semibold text-sm">
+                        Submit New Complaint
+                      </h3>
+                      <p className="text-white/80 text-xs">
+                        Report a new grievance
+                      </p>
                     </div>
                   </div>
                 </Link>
@@ -258,8 +281,12 @@ const CitizenDashboard = () => {
                       <MessageSquare className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-white font-semibold text-sm">View My Grievances</h3>
-                      <p className="text-slate-400 text-xs">Track your complaints</p>
+                      <h3 className="text-white font-semibold text-sm">
+                        View My Grievances
+                      </h3>
+                      <p className="text-slate-400 text-xs">
+                        Track your complaints
+                      </p>
                     </div>
                   </div>
                 </Link>
@@ -267,7 +294,10 @@ const CitizenDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.2s'}}>
+          <div
+            className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in"
+            style={{ animationDelay: "0.2s" }}
+          >
             <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               Tips
@@ -275,28 +305,40 @@ const CitizenDashboard = () => {
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 animate-pulse"></div>
-                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">Provide detailed descriptions for faster resolution</p>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                  Provide detailed descriptions for faster resolution
+                </p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 animate-pulse delay-200"></div>
-                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">Include photos or videos as evidence</p>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                  Include photos or videos as evidence
+                </p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-2 h-2 bg-green-400 rounded-full mt-2 animate-pulse delay-500"></div>
-                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">Check back regularly for updates</p>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                  Check back regularly for updates
+                </p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Recent Grievances */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in" style={{animationDelay: '0.4s'}}>
+        <div
+          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-fade-in"
+          style={{ animationDelay: "0.4s" }}
+        >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
               Recent Grievances
             </h2>
-            <Link to="/my-grievances" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-all duration-300 hover:scale-105">
+            <Link
+              to="/my-grievances"
+              className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-all duration-300 hover:scale-105"
+            >
               View All
             </Link>
           </div>
@@ -323,7 +365,9 @@ const CitizenDashboard = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-white font-medium">{grievance.title}</h3>
+                        <h3 className="text-white font-medium">
+                          {grievance.title}
+                        </h3>
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(grievance.status)}`}
                         >
@@ -331,7 +375,9 @@ const CitizenDashboard = () => {
                           {grievance.status.replace("_", " ")}
                         </span>
                       </div>
-                      <p className="text-slate-400 text-sm mb-2 line-clamp-2 leading-relaxed">{grievance.description}</p>
+                      <p className="text-slate-400 text-sm mb-2 line-clamp-2 leading-relaxed">
+                        {grievance.description}
+                      </p>
                       <div className="flex items-center gap-4 text-xs text-slate-500">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
@@ -357,7 +403,7 @@ const CitizenDashboard = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CitizenDashboard
+export default CitizenDashboard;
