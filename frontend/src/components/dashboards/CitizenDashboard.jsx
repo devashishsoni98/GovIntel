@@ -32,7 +32,7 @@ const CitizenDashboard = () => {
       setError("")
 
       // Fetch analytics
-      const analyticsResponse = await fetch("/api/analytics/dashboard", {
+      const analyticsResponse = await fetch("analytics/dashboard", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -67,7 +67,7 @@ const CitizenDashboard = () => {
 
       // If we don't have recent grievances from analytics, fetch them separately
       if (recentGrievances.length === 0) {
-        const grievancesResponse = await fetch("/api/grievances?limit=5&sortBy=updatedAt&sortOrder=desc", {
+        const grievancesResponse = await fetch("/grievances?limit=5&sortBy=updatedAt&sortOrder=desc", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
