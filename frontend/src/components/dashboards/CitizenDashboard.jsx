@@ -32,7 +32,7 @@ const CitizenDashboard = () => {
       setError("")
 
       // Fetch analytics
-      const analyticsResponse = await fetch("analytics/dashboard", {
+      const analyticsResponse = await fetch("/analytics/dashboard", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
