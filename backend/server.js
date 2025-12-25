@@ -26,31 +26,31 @@ dotenv.config()
 const app = express()
 
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "https://gov-intel.netlify.app",
-  "http://localhost:5173", // Vite default port
-  "http://localhost:3000", // React default port
-].filter(Boolean)
+// const allowedOrigins = [
+//   process.env.FRONTEND_URL,
+//   "https://gov-intel.netlify.app",
+//   "http://localhost:5173", // Vite default port
+//   "http://localhost:3000", // React default port
+// ].filter(Boolean)
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (curl, server-to-server)
-      if (!origin) return callback(null, true)
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       // Allow requests with no origin (curl, server-to-server)
+//       if (!origin) return callback(null, true)
 
-      // Allow if origin matches one of the allowed origins
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        return callback(null, true)
-      }
+//       // Allow if origin matches one of the allowed origins
+//       if (allowedOrigins.indexOf(origin) !== -1) {
+//         return callback(null, true)
+//       }
 
-      // Otherwise block and log the origin for debugging
-      console.warn(`Blocked CORS request from origin: ${origin}`)
-      return callback(new Error("Not allowed by CORS"))
-    },
-    credentials: true,
-  }),
-)
+//       // Otherwise block and log the origin for debugging
+//       console.warn(`Blocked CORS request from origin: ${origin}`)
+//       return callback(new Error("Not allowed by CORS"))
+//     },
+//     credentials: true,
+//   }),
+// )
 
 // Ensure OPTIONS preflight requests are handled for all routes
 app.options("*", cors())
