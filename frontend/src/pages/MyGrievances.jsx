@@ -432,7 +432,7 @@ import {
   Star,
   MessageSquare,
 } from "lucide-react";
-import api from "../../api";
+import api from "../api";
 
 const MyGrievances = () => {
   const [grievances, setGrievances] = useState([]);
