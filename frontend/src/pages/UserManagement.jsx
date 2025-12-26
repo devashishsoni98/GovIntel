@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import {
@@ -18,11 +20,9 @@ import {
   Loader,
 } from "lucide-react"
 import { selectUser } from "../redux/slices/authSlice"
-import api from "../api"
+import api from "../api/api"
 
-// ==========================
-// Debounce Hook
-// ==========================
+// -------------------- Debounce Hook --------------------
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value)
 
@@ -34,6 +34,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue
 }
 
+// -------------------- Component --------------------
 const UserManagement = () => {
   const currentUser = useSelector(selectUser)
 
@@ -61,17 +62,18 @@ const UserManagement = () => {
 
   const [selectedUsers, setSelectedUsers] = useState([])
 
-  // Modal states
+  // -------------------- Modal States --------------------
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+
   const [editingUser, setEditingUser] = useState(null)
   const [viewingUser, setViewingUser] = useState(null)
   const [deletingUser, setDeletingUser] = useState(null)
   const [modalLoading, setModalLoading] = useState(false)
 
-  // Form data
+  // -------------------- Form State --------------------
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -87,12 +89,10 @@ const UserManagement = () => {
     },
   })
 
-  // ==========================
-  // Effects
-  // ==========================
+  // -------------------- Effects --------------------
   useEffect(() => {
-    setFilters((prev) => ({ ...prev, search: debouncedSearch }))
-    setPagination((prev) => ({ ...prev, current: 1 }))
+    setFilters(prev => ({ ...prev, search: debouncedSearch }))
+    setPagination(prev => ({ ...prev, current: 1 }))
   }, [debouncedSearch])
 
   useEffect(() => {
@@ -100,9 +100,7 @@ const UserManagement = () => {
     fetchDepartments()
   }, [filters, pagination.current])
 
-  // ==========================
-  // API calls
-  // ==========================
+  // -------------------- API Calls --------------------
   const fetchUsers = async () => {
     try {
       setLoading(true)
@@ -114,10 +112,10 @@ const UserManagement = () => {
         ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v)),
       }
 
-      const res = await api.get("/users", { params })
+      const { data } = await api.get("/users", { params })
 
-      setUsers(res.data?.data?.users || [])
-      setPagination(res.data?.data?.pagination || pagination)
+      setUsers(data.data.users || [])
+      setPagination(data.data.pagination || pagination)
     } catch (err) {
       console.error("Fetch users error:", err)
       setError(err.response?.data?.message || "Failed to fetch users")
@@ -128,61 +126,90 @@ const UserManagement = () => {
 
   const fetchDepartments = async () => {
     try {
-      const res = await api.get("/departments/active")
-      setDepartments(res.data?.data || [])
+      const { data } = await api.get("/departments/active")
+      setDepartments(data.data || [])
     } catch (err) {
       console.error("Fetch departments error:", err)
     }
   }
 
-  // ==========================
-  // Handlers
-  // ==========================
+  // -------------------- Handlers --------------------
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
-    setPagination((prev) => ({ ...prev, current: 1 }))
-  }
-
-  const handleSearchChange = (e) => setSearchInput(e.target.value)
-
-  const clearSearch = () => {
-    setSearchInput("")
-    setFilters((prev) => ({ ...prev, search: "" }))
-  }
-
-  const handlePageChange = (page) => {
-    setPagination((prev) => ({ ...prev, current: page }))
+    setFilters(prev => ({ ...prev, [key]: value }))
+    setPagination(prev => ({ ...prev, current: 1 }))
   }
 
   const handleSelectUser = (id) => {
-    setSelectedUsers((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    setSelectedUsers(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     )
   }
 
   const handleSelectAll = () => {
-    if (selectedUsers.length === users.length) setSelectedUsers([])
-    else setSelectedUsers(users.map((u) => u._id))
+    if (selectedUsers.length === users.length) {
+      setSelectedUsers([])
+    } else {
+      setSelectedUsers(users.map(u => u._id))
+    }
   }
 
-  // ==========================
-  // User actions (API)
-  // ==========================
   const handleToggleUserStatus = async (user) => {
     try {
       await api.patch(`/users/${user._id}/status`, {
         isActive: !user.isActive,
       })
 
-      setUsers((prev) =>
-        prev.map((u) =>
+      setUsers(prev =>
+        prev.map(u =>
           u._id === user._id ? { ...u, isActive: !u.isActive } : u
         )
       )
     } catch (err) {
-      console.error("Toggle status error:", err)
-      setError(err.response?.data?.message || "Failed to update status")
+      setError(err.response?.data?.message || "Failed to update user status")
     }
+  }
+
+  // -------------------- Modal Actions --------------------
+  const handleCreateUser = () => {
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      role: "citizen",
+      phone: "",
+      department: "",
+      address: { street: "", city: "", state: "", zipCode: "" },
+    })
+    setShowCreateModal(true)
+  }
+
+  const handleEditUser = (user) => {
+    setEditingUser(user)
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      password: "",
+      role: user.role,
+      phone: user.phone || "",
+      department: user.department || "",
+      address: {
+        street: user.address?.street || "",
+        city: user.address?.city || "",
+        state: user.address?.state || "",
+        zipCode: user.address?.zipCode || "",
+      },
+    })
+    setShowEditModal(true)
+  }
+
+  const handleViewUser = (user) => {
+    setViewingUser(user)
+    setShowViewModal(true)
+  }
+
+  const handleDeleteUser = (user) => {
+    setDeletingUser(user)
+    setShowDeleteModal(true)
   }
 
   const handleCreateSubmit = async (e) => {
@@ -203,7 +230,6 @@ const UserManagement = () => {
     e.preventDefault()
     try {
       setModalLoading(true)
-
       const payload = { ...formData }
       if (!payload.password) delete payload.password
 
@@ -232,37 +258,20 @@ const UserManagement = () => {
     }
   }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-
-    if (name.startsWith("address.")) {
-      const field = name.split(".")[1]
-      setFormData((prev) => ({
-        ...prev,
-        address: { ...prev.address, [field]: value },
-      }))
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
-    }
-  }
-
-  // ==========================
-  // Helpers
-  // ==========================
+  // -------------------- Helpers --------------------
   const getRoleColor = (role) => {
-    if (role === "admin") return "text-red-400 bg-red-400/10 border-red-400/20"
-    if (role === "officer") return "text-blue-400 bg-blue-400/10 border-blue-400/20"
-    return "text-green-400 bg-green-400/10 border-green-400/20"
+    if (role === "admin") return "text-red-400 bg-red-400/10"
+    if (role === "officer") return "text-blue-400 bg-blue-400/10"
+    return "text-green-400 bg-green-400/10"
   }
 
-  const getRoleIcon = (role) => {
-    if (role === "admin") return <Shield className="w-4 h-4" />
-    if (role === "officer") return <UserCheck className="w-4 h-4" />
-    return <Users className="w-4 h-4" />
-  }
+  const getRoleIcon = (role) =>
+    role === "admin" ? <Shield className="w-4 h-4" /> :
+    role === "officer" ? <UserCheck className="w-4 h-4" /> :
+    <Users className="w-4 h-4" />
 
-  const formatDate = (d) =>
-    new Date(d).toLocaleDateString("en-US", {
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -282,11 +291,13 @@ const UserManagement = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         <form onSubmit={handleCreateSubmit} className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Name *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Name *
+              </label>
               <input
                 type="text"
                 name="name"
@@ -296,9 +307,11 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Email *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Email *
+              </label>
               <input
                 type="email"
                 name="email"
@@ -308,9 +321,11 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Password *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Password *
+              </label>
               <input
                 type="password"
                 name="password"
@@ -320,9 +335,11 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Role *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Role *
+              </label>
               <select
                 name="role"
                 value={formData.role}
@@ -335,9 +352,11 @@ const UserManagement = () => {
                 <option value="admin">Administrator</option>
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Phone</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Phone
+              </label>
               <input
                 type="tel"
                 name="phone"
@@ -346,10 +365,12 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             {formData.role === "officer" && (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Department</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Department
+                </label>
                 <select
                   name="department"
                   value={formData.department}
@@ -366,7 +387,7 @@ const UserManagement = () => {
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-700">
             <button
               type="button"
@@ -396,7 +417,7 @@ const UserManagement = () => {
         </form>
       </div>
     </div>
-  )
+  );
 
   const EditUserModal = () => (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -410,11 +431,13 @@ const UserManagement = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         <form onSubmit={handleEditSubmit} className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Name *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Name *
+              </label>
               <input
                 type="text"
                 name="name"
@@ -424,9 +447,11 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Email *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Email *
+              </label>
               <input
                 type="email"
                 name="email"
@@ -436,9 +461,11 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">New Password</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                New Password
+              </label>
               <input
                 type="password"
                 name="password"
@@ -448,9 +475,11 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Role *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Role *
+              </label>
               <select
                 name="role"
                 value={formData.role}
@@ -463,9 +492,11 @@ const UserManagement = () => {
                 <option value="admin">Administrator</option>
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Phone</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Phone
+              </label>
               <input
                 type="tel"
                 name="phone"
@@ -474,10 +505,12 @@ const UserManagement = () => {
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
-            
+
             {formData.role === "officer" && (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Department</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Department
+                </label>
                 <select
                   name="department"
                   value={formData.department}
@@ -494,7 +527,7 @@ const UserManagement = () => {
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-700">
             <button
               type="button"
@@ -524,7 +557,7 @@ const UserManagement = () => {
         </form>
       </div>
     </div>
-  )
+  );
 
   const ViewUserModal = () => (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -538,7 +571,7 @@ const UserManagement = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         {viewingUser && (
           <div className="p-6 space-y-6">
             <div className="flex items-center gap-4">
@@ -548,64 +581,84 @@ const UserManagement = () => {
                 </span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">{viewingUser.name}</h3>
+                <h3 className="text-xl font-bold text-white">
+                  {viewingUser.name}
+                </h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(viewingUser.role)}`}>
+                  <span
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(viewingUser.role)}`}
+                  >
                     {getRoleIcon(viewingUser.role)}
                     {viewingUser.role}
                   </span>
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                    viewingUser.isActive
-                      ? "text-green-400 bg-green-400/10 border border-green-400/20"
-                      : "text-red-400 bg-red-400/10 border border-red-400/20"
-                  }`}>
-                    {viewingUser.isActive ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
+                  <span
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                      viewingUser.isActive
+                        ? "text-green-400 bg-green-400/10 border border-green-400/20"
+                        : "text-red-400 bg-red-400/10 border border-red-400/20"
+                    }`}
+                  >
+                    {viewingUser.isActive ? (
+                      <UserCheck className="w-3 h-3" />
+                    ) : (
+                      <UserX className="w-3 h-3" />
+                    )}
                     {viewingUser.isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Email</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">
+                  Email
+                </label>
                 <div className="flex items-center gap-2 text-white">
                   <Mail className="w-4 h-4" />
                   {viewingUser.email}
                 </div>
               </div>
-              
+
               {viewingUser.phone && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Phone</label>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">
+                    Phone
+                  </label>
                   <div className="flex items-center gap-2 text-white">
                     <Phone className="w-4 h-4" />
                     {viewingUser.phone}
                   </div>
                 </div>
               )}
-              
+
               {viewingUser.department && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Department</label>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">
+                    Department
+                  </label>
                   <div className="flex items-center gap-2 text-white">
                     <Building className="w-4 h-4" />
                     <span className="capitalize">{viewingUser.department}</span>
                   </div>
                 </div>
               )}
-              
+
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Created</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">
+                  Created
+                </label>
                 <div className="flex items-center gap-2 text-white">
                   <Calendar className="w-4 h-4" />
                   {formatDate(viewingUser.createdAt)}
                 </div>
               </div>
-              
+
               {viewingUser.lastLogin && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Last Login</label>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">
+                    Last Login
+                  </label>
                   <div className="flex items-center gap-2 text-white">
                     <Calendar className="w-4 h-4" />
                     {formatDate(viewingUser.lastLogin)}
@@ -613,18 +666,22 @@ const UserManagement = () => {
                 </div>
               )}
             </div>
-            
+
             {viewingUser.address && (
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Address</label>
+                <label className="block text-sm font-medium text-slate-400 mb-2">
+                  Address
+                </label>
                 <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
                   <p className="text-white">
                     {[
                       viewingUser.address.street,
                       viewingUser.address.city,
                       viewingUser.address.state,
-                      viewingUser.address.zipCode
-                    ].filter(Boolean).join(", ") || "No address provided"}
+                      viewingUser.address.zipCode,
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "No address provided"}
                   </p>
                 </div>
               </div>
@@ -633,7 +690,7 @@ const UserManagement = () => {
         )}
       </div>
     </div>
-  )
+  );
 
   const DeleteUserModal = () => (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -647,16 +704,17 @@ const UserManagement = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         {deletingUser && (
           <div className="p-6">
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
               <p className="text-red-400 font-medium mb-2">⚠️ Warning</p>
               <p className="text-slate-300 text-sm">
-                You are about to permanently delete the user "{deletingUser.name}". This action cannot be undone.
+                You are about to permanently delete the user "
+                {deletingUser.name}". This action cannot be undone.
               </p>
             </div>
-            
+
             <div className="flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
@@ -686,7 +744,7 @@ const UserManagement = () => {
         )}
       </div>
     </div>
-  )
+  );
 
   if (loading) {
     return (
@@ -702,7 +760,7 @@ const UserManagement = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -711,10 +769,14 @@ const UserManagement = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">User Management</h1>
-            <p className="text-slate-400">Manage system users, roles, and permissions</p>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              User Management
+            </h1>
+            <p className="text-slate-400">
+              Manage system users, roles, and permissions
+            </p>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 md:mt-0">
             {selectedUsers.length > 0 && (
               <div className="flex items-center gap-2">
@@ -728,10 +790,8 @@ const UserManagement = () => {
                 </button>
               </div>
             )}
-            
-            
-            
-            <button 
+
+            <button
               onClick={handleCreateUser}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 rounded-lg text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all hover:scale-105"
             >
@@ -813,15 +873,20 @@ const UserManagement = () => {
             {/* Clear Filters */}
             <button
               onClick={() => {
-                setSearchInput("")
-                setFilters({ role: "", department: "", status: "active", search: "" })
+                setSearchInput("");
+                setFilters({
+                  role: "",
+                  department: "",
+                  status: "active",
+                  search: "",
+                });
               }}
               className="px-4 py-3 border border-slate-600 rounded-xl text-slate-300 hover:bg-slate-700/50 transition-all hover:scale-105"
             >
               Clear Filters
             </button>
           </div>
-          
+
           {/* Search Results Info */}
           {filters.search && (
             <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
@@ -833,7 +898,9 @@ const UserManagement = () => {
                   </span>
                 ) : (
                   <>
-                    Found {pagination.total} user{pagination.total !== 1 ? 's' : ''} matching "{filters.search}"
+                    Found {pagination.total} user
+                    {pagination.total !== 1 ? "s" : ""} matching "
+                    {filters.search}"
                   </>
                 )}
               </p>
@@ -853,11 +920,15 @@ const UserManagement = () => {
           {/* Table Header */}
           <div className="p-6 border-b border-slate-700/50">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">Users ({pagination.total})</h2>
+              <h2 className="text-xl font-bold text-white">
+                Users ({pagination.total})
+              </h2>
               <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
-                  checked={selectedUsers.length === users.length && users.length > 0}
+                  checked={
+                    selectedUsers.length === users.length && users.length > 0
+                  }
                   onChange={handleSelectAll}
                   className="w-4 h-4 text-purple-500 bg-slate-700 border-slate-600 rounded focus:ring-purple-500 focus:ring-2"
                 />
@@ -872,14 +943,18 @@ const UserManagement = () => {
           {users.length === 0 ? (
             <div className="p-12 text-center">
               <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">No Users Found</h3>
+              <h3 className="text-xl font-bold text-white mb-2">
+                No Users Found
+              </h3>
               <p className="text-slate-400 mb-6">
-                {filters.search || filters.role || filters.department || (filters.status && filters.status !== "active")
+                {filters.search ||
+                filters.role ||
+                filters.department ||
+                (filters.status && filters.status !== "active")
                   ? "No users match your current filters."
-                  : "No users have been created yet."
-                }
+                  : "No users have been created yet."}
               </p>
-              <button 
+              <button
                 onClick={handleCreateUser}
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 rounded-xl text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-all hover:scale-105"
               >
@@ -922,7 +997,10 @@ const UserManagement = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-700/50">
                   {users.map((user) => (
-                    <tr key={user._id} className="hover:bg-slate-700/30 transition-all duration-300 hover:scale-[1.01]">
+                    <tr
+                      key={user._id}
+                      className="hover:bg-slate-700/30 transition-all duration-300 hover:scale-[1.01]"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="checkbox"
@@ -939,7 +1017,9 @@ const UserManagement = () => {
                             </span>
                           </div>
                           <div className="ml-4">
-                            <div className="text-white font-medium">{user.name}</div>
+                            <div className="text-white font-medium">
+                              {user.name}
+                            </div>
                             <div className="text-slate-400 text-sm flex items-center gap-1">
                               <Mail className="w-3 h-3" />
                               {user.email}
@@ -954,7 +1034,9 @@ const UserManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(user.role)}`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(user.role)}`}
+                        >
                           {getRoleIcon(user.role)}
                           {user.role}
                         </span>
@@ -963,7 +1045,9 @@ const UserManagement = () => {
                         {user.department ? (
                           <div className="flex items-center gap-1 text-slate-300">
                             <Building className="w-4 h-4" />
-                            <span className="capitalize">{user.department}</span>
+                            <span className="capitalize">
+                              {user.department}
+                            </span>
                           </div>
                         ) : (
                           <span className="text-slate-500">-</span>
@@ -978,7 +1062,11 @@ const UserManagement = () => {
                               : "text-red-400 bg-red-400/10 border border-red-400/20 hover:bg-red-400/20"
                           }`}
                         >
-                          {user.isActive ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
+                          {user.isActive ? (
+                            <UserCheck className="w-3 h-3" />
+                          ) : (
+                            <UserX className="w-3 h-3" />
+                          )}
                           {user.isActive ? "Active" : "Inactive"}
                         </button>
                       </td>
@@ -1027,7 +1115,11 @@ const UserManagement = () => {
             <div className="flex items-center justify-between p-6 border-t border-slate-700/50">
               <div className="text-slate-400 text-sm">
                 Showing {(pagination.current - 1) * pagination.limit + 1} to{" "}
-                {Math.min(pagination.current * pagination.limit, pagination.total)} of {pagination.total} users
+                {Math.min(
+                  pagination.current * pagination.limit,
+                  pagination.total
+                )}{" "}
+                of {pagination.total} users
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -1039,11 +1131,12 @@ const UserManagement = () => {
                 </button>
 
                 {[...Array(pagination.pages)].map((_, i) => {
-                  const page = i + 1
+                  const page = i + 1;
                   if (
                     page === 1 ||
                     page === pagination.pages ||
-                    (page >= pagination.current - 1 && page <= pagination.current + 1)
+                    (page >= pagination.current - 1 &&
+                      page <= pagination.current + 1)
                   ) {
                     return (
                       <button
@@ -1057,15 +1150,18 @@ const UserManagement = () => {
                       >
                         {page}
                       </button>
-                    )
-                  } else if (page === pagination.current - 2 || page === pagination.current + 2) {
+                    );
+                  } else if (
+                    page === pagination.current - 2 ||
+                    page === pagination.current + 2
+                  ) {
                     return (
                       <span key={page} className="text-slate-500">
                         ...
                       </span>
-                    )
+                    );
                   }
-                  return null
+                  return null;
                 })}
 
                 <button
@@ -1087,7 +1183,7 @@ const UserManagement = () => {
         {showDeleteModal && <DeleteUserModal />}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UserManagement
+export default UserManagement;
