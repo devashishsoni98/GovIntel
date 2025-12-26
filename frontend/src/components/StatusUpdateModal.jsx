@@ -1,7 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { X, AlertTriangle, CheckCircle, Clock, XCircle, Loader } from "lucide-react"
+import {
+  X,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Loader,
+} from "lucide-react"
+import api from "../api"
 
 const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
   const [status, setStatus] = useState(grievance.status)
@@ -28,42 +36,36 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
       setLoading(true)
       setError("")
 
-      const response = await fetch(`/api/grievances/${grievance._id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
+      const response = await api.patch(
+        `/api/grievances/${grievance._id}/status`,
+        {
           status,
-          comment: comment.trim()
-        }),
-      })
+          comment: comment.trim(),
+        }
+      )
 
-      if (response.ok) {
-        const data = await response.json()
-        console.log("Status update successful:", data)
-        onSuccess()
-      } else {
-        const errorData = await response.json()
-        console.error("Status update failed:", errorData)
-        setError(errorData.message || "Failed to update status")
-      }
+      console.log("Status update successful:", response.data)
+      onSuccess()
     } catch (error) {
       console.error("Status update error:", error)
-      setError("Network error during status update")
+      const message =
+        error.response?.data?.message ||
+        "Network error during status update"
+      setError(message)
     } finally {
       setLoading(false)
     }
   }
 
   const getStatusInfo = (statusValue) => {
-    return statusOptions.find(option => option.value === statusValue)
+    return statusOptions.find(
+      (option) => option.value === statusValue
+    )
   }
 
   const currentStatusInfo = getStatusInfo(grievance.status)
   const newStatusInfo = getStatusInfo(status)
-
+  
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full my-8 max-h-[90vh] overflow-y-auto">

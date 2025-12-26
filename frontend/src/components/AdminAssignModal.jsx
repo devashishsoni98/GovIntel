@@ -1,5 +1,8 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { X, User, Building, UserPlus, Loader, CheckCircle, FileText } from "lucide-react"
+import api from "../api"
 
 const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
   const [officers, setOfficers] = useState([])
@@ -15,38 +18,33 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
   const fetchOfficers = async () => {
     try {
       setFetchingOfficers(true)
-      
-      // Fetch all departments with officers
-      const response = await fetch("/api/departments", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      setError("")
 
-      if (response.ok) {
-        const data = await response.json()
-        
-        // Extract all officers from all departments
+      const response = await api.get("/departments")
+      const data = response.data
+
+      if (data.success && data.data) {
         const allOfficers = []
-        data.data.forEach(department => {
+
+        data.data.forEach((department) => {
           if (department.officers && department.officers.length > 0) {
-            department.officers.forEach(officer => {
+            department.officers.forEach((officer) => {
               allOfficers.push({
                 ...officer,
                 departmentName: department.name,
                 departmentCode: department.code,
-                currentWorkload: 0 // Will be calculated if needed
+                currentWorkload: 0,
               })
             })
           }
         })
-        
+
         setOfficers(allOfficers)
       } else {
         setError("Failed to fetch officers")
       }
-    } catch (error) {
-      console.error("Fetch officers error:", error)
+    } catch (err) {
+      console.error("Fetch officers error:", err)
       setError("Network error while fetching officers")
     } finally {
       setFetchingOfficers(false)
@@ -63,30 +61,32 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
       setLoading(true)
       setError("")
 
-      console.log("Manual assign request:", { grievanceId: grievance._id, officerId: selectedOfficer })
-      const response = await fetch(`/api/grievances/${grievance._id}/reassign`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          officerId: selectedOfficer,
-        }),
+      console.log("Manual assign request:", {
+        grievanceId: grievance._id,
+        officerId: selectedOfficer,
       })
 
-      if (response.ok) {
-        const data = await response.json()
+      const response = await api.post(
+        `/grievances/${grievance._id}/reassign`,
+        {
+          officerId: selectedOfficer,
+        }
+      )
+
+      const data = response.data
+
+      if (data.success) {
         console.log("Manual assign successful:", data)
         onSuccess()
       } else {
-        const errorData = await response.json()
-        console.error("Manual assign failed:", errorData)
-        setError(errorData.message || "Failed to assign grievance")
+        setError(data.message || "Failed to assign grievance")
       }
-    } catch (error) {
-      console.error("Assign error:", error)
-      setError("Network error during assignment")
+    } catch (err) {
+      console.error("Assign error:", err)
+      setError(
+        err.response?.data?.message ||
+          "Network error during assignment"
+      )
     } finally {
       setLoading(false)
     }
@@ -98,32 +98,32 @@ const AdminAssignModal = ({ grievance, onClose, onSuccess }) => {
       setError("")
 
       console.log("Auto assign request for grievance:", grievance._id)
-      const response = await fetch(`/api/grievances/${grievance._id}/auto-assign`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
 
-      if (response.ok) {
-        const data = await response.json()
+      const response = await api.post(
+        `/grievances/${grievance._id}/auto-assign`
+      )
+
+      const data = response.data
+
+      if (data.success) {
         console.log("Auto assign successful:", data)
         onSuccess()
       } else {
-        const errorData = await response.json()
-        console.error("Auto assign failed:", errorData)
-        setError(errorData.message || "Failed to auto-assign grievance")
+        setError(data.message || "Failed to auto-assign grievance")
       }
-    } catch (error) {
-      console.error("Auto-assign error:", error)
-      setError("Network error during auto-assignment")
+    } catch (err) {
+      console.error("Auto-assign error:", err)
+      setError(
+        err.response?.data?.message ||
+          "Network error during auto-assignment"
+      )
     } finally {
       setLoading(false)
     }
   }
 
   const getSelectedOfficerInfo = () => {
-    return officers.find(officer => officer._id === selectedOfficer)
+    return officers.find((officer) => officer._id === selectedOfficer)
   }
 
   return (

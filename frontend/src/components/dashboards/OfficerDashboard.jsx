@@ -3,13 +3,29 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import { FileText, Clock, CheckCircle, AlertTriangle, TrendingUp, Calendar, MapPin, User, Building, BarChart3, Activity, UserPlus, XCircle } from "lucide-react"
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  TrendingUp,
+  Calendar,
+  MapPin,
+  User,
+  Building,
+  BarChart3,
+  Activity,
+  UserPlus,
+  XCircle,
+} from "lucide-react"
 import { selectUser } from "../../redux/slices/authSlice"
 import AnalyticsWidget from "../AnalyticsWidget"
 import MetricCard from "../charts/MetricCard"
+import api from "../../api"
 
 const OfficerDashboard = () => {
   const user = useSelector(selectUser)
+
   const [stats, setStats] = useState({
     total: 0,
     assigned: 0,
@@ -21,6 +37,7 @@ const OfficerDashboard = () => {
     resolutionRate: 0,
     avgResolutionTime: 0,
   })
+
   const [assignedGrievances, setAssignedGrievances] = useState([])
   const [departmentStats, setDepartmentStats] = useState([])
   const [loading, setLoading] = useState(true)
@@ -37,71 +54,53 @@ const OfficerDashboard = () => {
 
       console.log("OfficerDashboard: Fetching analytics for user:", user)
 
-      // Fetch analytics
-      const analyticsResponse = await fetch("/api/analytics/dashboard", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const analyticsResponse = await api.get("/analytics/dashboard")
+      const analyticsData = analyticsResponse.data
 
-      if (analyticsResponse.ok) {
-        const analyticsData = await analyticsResponse.json()
-        console.log("Officer Analytics data:", analyticsData)
+      console.log("Officer Analytics data:", analyticsData)
 
-        if (analyticsData.success && analyticsData.data) {
-          // Set stats from summary
-          setStats(
-            analyticsData.data.summary || {
-              total: 0,
-              assigned: 0,
-              pending: 0,
-              inProgress: 0,
-              resolved: 0,
-              closed: 0,
-              rejected: 0,
-              resolutionRate: 0,
-              avgResolutionTime: 0,
-            },
-          )
+      if (analyticsData.success && analyticsData.data) {
+        setStats(
+          analyticsData.data.summary || {
+            total: 0,
+            assigned: 0,
+            pending: 0,
+            inProgress: 0,
+            resolved: 0,
+            closed: 0,
+            rejected: 0,
+            resolutionRate: 0,
+            avgResolutionTime: 0,
+          }
+        )
 
-          // Set department stats from categoryStats with proper data
-          const categoryStats = analyticsData.data.categoryStats || []
-          console.log("Officer: Category stats received:", categoryStats)
-          
-          // Add percentage calculation for category stats
-          const totalCases = analyticsData.data.summary?.total || 0
-          const categoryStatsWithPercentage = categoryStats.map(cat => ({
-            ...cat,
-            percentage: totalCases > 0 ? Math.round((cat.count / totalCases) * 100) : 0
-          }))
-          
-          setDepartmentStats(categoryStatsWithPercentage)
-        }
-      } else {
-        console.error("Analytics API error:", analyticsResponse.status)
-        const errorData = await analyticsResponse.json()
-        console.error("Analytics API error data:", errorData)
+        const categoryStats = analyticsData.data.categoryStats || []
+        console.log("Officer: Category stats received:", categoryStats)
+
+        const totalCases = analyticsData.data.summary?.total || 0
+        const categoryStatsWithPercentage = categoryStats.map((cat) => ({
+          ...cat,
+          percentage:
+            totalCases > 0 ? Math.round((cat.count / totalCases) * 100) : 0,
+        }))
+
+        setDepartmentStats(categoryStatsWithPercentage)
       }
 
-      // Fetch assigned grievances
-      const grievancesResponse = await fetch("/api/grievances?limit=10&sortBy=createdAt&sortOrder=desc", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const grievancesResponse = await api.get(
+        "/grievances?limit=10&sortBy=createdAt&sortOrder=desc"
+      )
+      const grievancesData = grievancesResponse.data
 
-      if (grievancesResponse.ok) {
-        const grievancesData = await grievancesResponse.json()
-        console.log("Officer Grievances data:", grievancesData)
+      console.log("Officer Grievances data:", grievancesData)
 
-        if (grievancesData.success && grievancesData.data) {
-          setAssignedGrievances(Array.isArray(grievancesData.data) ? grievancesData.data : [])
-        }
-      } else {
-        console.error("Grievances API error:", grievancesResponse.status)
+      if (grievancesData.success && grievancesData.data) {
+        setAssignedGrievances(
+          Array.isArray(grievancesData.data) ? grievancesData.data : []
+        )
       }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error)
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err)
       setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
@@ -171,7 +170,10 @@ const OfficerDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-8">
             <p className="text-red-400">{error}</p>
-            <button onClick={fetchDashboardData} className="mt-2 text-red-300 hover:text-red-200 underline">
+            <button
+              onClick={fetchDashboardData}
+              className="mt-2 text-red-300 hover:text-red-200 underline"
+            >
               Try again
             </button>
           </div>
@@ -179,6 +181,7 @@ const OfficerDashboard = () => {
       </div>
     )
   }
+
 
   return (
     <div className="min-h-screen bg-slate-900 pt-20 sm:pt-24 p-4 sm:p-6 lg:p-8">

@@ -20,9 +20,10 @@ import {
   MessageSquare,
   BarChart3,
   Activity
-} from 'lucide-react'
+} from "lucide-react"
 import { selectUser } from "../redux/slices/authSlice"
 import AnalyticsWidget from "../components/AnalyticsWidget"
+import api from "../api"
 
 const AssignedCases = () => {
   const user = useSelector(selectUser)
@@ -34,13 +35,13 @@ const AssignedCases = () => {
     pending: 0,
     inProgress: 0,
     resolved: 0,
-    avgResolutionTime: 0
+    avgResolutionTime: 0,
   })
   const [pagination, setPagination] = useState({
     current: 1,
     pages: 1,
     total: 0,
-    limit: 10
+    limit: 10,
   })
 
   useEffect(() => {
@@ -53,39 +54,31 @@ const AssignedCases = () => {
       setLoading(true)
       setError("")
 
-      // For officers, only fetch cases assigned to them
       const isOfficer = user?.role === "officer"
-      const officerFilter = isOfficer ? `&assignedOfficer=${user.id}` : ""
 
       const queryParams = new URLSearchParams({
         page: pagination.current.toString(),
         limit: pagination.limit.toString(),
         sortBy: "createdAt",
         sortOrder: "desc",
-        ...(isOfficer && { assignedOfficer: user.id })
+        ...(isOfficer && { assignedOfficer: user.id }),
       })
 
-      const response = await fetch(`/api/grievances?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const response = await api.get(`/api/grievances?${queryParams.toString()}`)
 
-      if (response.ok) {
-        const data = await response.json()
-        setCases(data.data || [])
-        setPagination(prev => ({
-          ...prev,
-          pages: data.pagination?.pages || 1,
-          total: data.pagination?.total || 0
-        }))
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to fetch cases")
-      }
+      const data = response.data
+
+      setCases(data.data || [])
+      setPagination((prev) => ({
+        ...prev,
+        pages: data.pagination?.pages || 1,
+        total: data.pagination?.total || 0,
+      }))
     } catch (error) {
       console.error("Fetch cases error:", error)
-      setError("Network error. Please try again.")
+      setError(
+        error.response?.data?.message || "Network error. Please try again."
+      )
     } finally {
       setLoading(false)
     }
@@ -93,17 +86,11 @@ const AssignedCases = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch("/api/analytics/dashboard", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const response = await api.get("/api/analytics/dashboard")
+      const data = response.data
 
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success && data.data) {
-          setStats(data.data.summary || {})
-        }
+      if (data.success && data.data) {
+        setStats(data.data.summary || {})
       }
     } catch (error) {
       console.error("Fetch stats error:", error)
@@ -111,7 +98,7 @@ const AssignedCases = () => {
   }
 
   const handlePageChange = (page) => {
-    setPagination(prev => ({ ...prev, current: page }))
+    setPagination((prev) => ({ ...prev, current: page }))
   }
 
   const getStatusColor = (status) => {
@@ -172,7 +159,9 @@ const AssignedCases = () => {
   }
 
   const getDaysSince = (dateString) => {
-    const days = Math.floor((Date.now() - new Date(dateString)) / (1000 * 60 * 60 * 24))
+    const days = Math.floor(
+      (Date.now() - new Date(dateString)) / (1000 * 60 * 60 * 24)
+    )
     return days === 0 ? "Today" : `${days} day${days > 1 ? "s" : ""} ago`
   }
 

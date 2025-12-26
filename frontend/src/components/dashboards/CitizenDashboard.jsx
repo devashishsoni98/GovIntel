@@ -3,11 +3,22 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, MessageSquare, Calendar, MapPin } from "lucide-react"
+import {
+  Plus,
+  FileText,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  MessageSquare,
+  Calendar,
+  MapPin,
+} from "lucide-react"
 import { selectUser } from "../../redux/slices/authSlice"
+import api from "../../api"
 
 const CitizenDashboard = () => {
   const user = useSelector(selectUser)
+
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -18,6 +29,7 @@ const CitizenDashboard = () => {
     resolutionRate: 0,
     avgResolutionTime: 0,
   })
+
   const [recentGrievances, setRecentGrievances] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -31,62 +43,43 @@ const CitizenDashboard = () => {
       setLoading(true)
       setError("")
 
-      // Fetch analytics
-      const analyticsResponse = await fetch("/analytics/dashboard", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const analyticsResponse = await api.get("/analytics/dashboard")
+      const analyticsData = analyticsResponse.data
 
-      if (analyticsResponse.ok) {
-        const analyticsData = await analyticsResponse.json()
-        console.log("Analytics data:", analyticsData)
-
-        if (analyticsData.success && analyticsData.data) {
-          setStats(
-            analyticsData.data.summary || {
-              total: 0,
-              pending: 0,
-              inProgress: 0,
-              resolved: 0,
-              closed: 0,
-              rejected: 0,
-              resolutionRate: 0,
-              avgResolutionTime: 0,
-            },
-          )
-
-          // Set recent grievances from analytics if available
-          if (analyticsData.data.recentGrievances) {
-            setRecentGrievances(analyticsData.data.recentGrievances)
+      if (analyticsData.success && analyticsData.data) {
+        setStats(
+          analyticsData.data.summary || {
+            total: 0,
+            pending: 0,
+            inProgress: 0,
+            resolved: 0,
+            closed: 0,
+            rejected: 0,
+            resolutionRate: 0,
+            avgResolutionTime: 0,
           }
+        )
+
+        if (analyticsData.data.recentGrievances) {
+          setRecentGrievances(analyticsData.data.recentGrievances)
         }
-      } else {
-        console.error("Analytics API error:", analyticsResponse.status)
       }
 
-      // If we don't have recent grievances from analytics, fetch them separately
       if (recentGrievances.length === 0) {
-        const grievancesResponse = await fetch("/grievances?limit=5&sortBy=updatedAt&sortOrder=desc", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
+        const grievancesResponse = await api.get(
+          "/grievances?limit=5&sortBy=updatedAt&sortOrder=desc"
+        )
 
-        if (grievancesResponse.ok) {
-          const grievancesData = await grievancesResponse.json()
-          console.log("Grievances data:", grievancesData)
+        const grievancesData = grievancesResponse.data
 
-          // Fix: Access grievancesData.data directly, not grievancesData.data.grievances
-          if (grievancesData.success && grievancesData.data) {
-            setRecentGrievances(Array.isArray(grievancesData.data) ? grievancesData.data : [])
-          }
-        } else {
-          console.error("Grievances API error:", grievancesResponse.status)
+        if (grievancesData.success && grievancesData.data) {
+          setRecentGrievances(
+            Array.isArray(grievancesData.data) ? grievancesData.data : []
+          )
         }
       }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error)
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err)
       setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
@@ -154,7 +147,10 @@ const CitizenDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-8">
             <p className="text-red-400">{error}</p>
-            <button onClick={fetchDashboardData} className="mt-2 text-red-300 hover:text-red-200 underline">
+            <button
+              onClick={fetchDashboardData}
+              className="mt-2 text-red-300 hover:text-red-200 underline"
+            >
               Try again
             </button>
           </div>

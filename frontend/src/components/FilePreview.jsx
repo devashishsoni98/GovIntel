@@ -1,56 +1,148 @@
 import { useState } from "react"
-import { 
-  FileText, 
-  ImageIcon, 
-  Video, 
-  Mic, 
-  Download, 
-  Eye, 
-  X, 
+import {
+  FileText,
+  ImageIcon,
+  Video,
+  Mic,
+  Download,
+  Eye,
+  X,
   Loader,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react"
+import api from "../api"
 
 const FilePreview = ({ attachment, onClose }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  
+
   const getFileUrl = (attachment) => {
-    const baseUrl = import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'
-    const filename = attachment.relativePath || attachment.filename || attachment.path.split('/').pop()
+    const baseUrl =
+      import.meta.env.VITE_UPLOAD_URL || "http://localhost:5000"
+    const filename =
+      attachment.relativePath ||
+      attachment.filename ||
+      attachment.path.split("/").pop()
+
     return `${baseUrl}/api/files/${filename}`
   }
-  
+
   const handleDownload = async () => {
     try {
       const url = getFileUrl(attachment)
-      const response = await fetch(url)
-      
-      if (!response.ok) {
-        throw new Error('Download failed')
-      }
-      
-      const blob = await response.blob()
+
+      const response = await api.get(url, {
+        responseType: "blob",
+      })
+
+      const blob = response.data
       const downloadUrl = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
+
+      const a = document.createElement("a")
       a.href = downloadUrl
-      a.download = attachment.originalName || attachment.filename
+      a.download =
+        attachment.originalName || attachment.filename
+
       document.body.appendChild(a)
       a.click()
+
       window.URL.revokeObjectURL(downloadUrl)
       document.body.removeChild(a)
     } catch (error) {
-      console.error('Download error:', error)
-      alert('Failed to download file')
+      console.error("Download error:", error)
+      alert("Failed to download file")
     }
   }
-  
-  const isImage = attachment.mimetype.startsWith('image/')
-  const isVideo = attachment.mimetype.startsWith('video/')
-  const isAudio = attachment.mimetype.startsWith('audio/')
-  const isPDF = attachment.mimetype.includes('pdf')
-  
+
+  const isImage = attachment.mimetype.startsWith("image/")
+  const isVideo = attachment.mimetype.startsWith("video/")
+  const isAudio = attachment.mimetype.startsWith("audio/")
+  const isPDF = attachment.mimetype.includes("pdf")
+
+  const renderPreview = () => {
+    const fileUrl = getFileUrl(attachment)
+
+    if (isImage) {
+      return (
+        <img
+          src={fileUrl}
+          alt={attachment.originalName}
+          className="max-w-full max-h-[80vh] rounded-lg"
+          onLoad={() => setLoading(false)}
+          onError={() => {
+            setLoading(false)
+            setError(true)
+          }}
+        />
+      )
+    }
+
+    if (isVideo) {
+      return (
+        <video
+          controls
+          className="max-w-full max-h-[80vh] rounded-lg"
+          onLoadedData={() => setLoading(false)}
+          onError={() => {
+            setLoading(false)
+            setError(true)
+          }}
+        >
+          <source src={fileUrl} type={attachment.mimetype} />
+        </video>
+      )
+    }
+
+    if (isAudio) {
+      return (
+        <audio
+          controls
+          className="w-full"
+          onCanPlay={() => setLoading(false)}
+          onError={() => {
+            setLoading(false)
+            setError(true)
+          }}
+        >
+          <source src={fileUrl} type={attachment.mimetype} />
+        </audio>
+      )
+    }
+
+    if (isPDF) {
+      return (
+        <iframe
+          src={fileUrl}
+          className="w-full h-[80vh] rounded-lg"
+          onLoad={() => setLoading(false)}
+          onError={() => {
+            setLoading(false)
+            setError(true)
+          }}
+          title="PDF Preview"
+        />
+      )
+    }
+
+    setLoading(false)
+    return (
+      <div className="text-center">
+        <FileText className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+        <p className="text-slate-400 mb-2">
+          Preview not available
+        </p>
+        <button
+          onClick={handleDownload}
+          className="text-blue-400 hover:text-blue-300 flex items-center gap-2 mx-auto"
+        >
+          <Download className="w-4 h-4" />
+          Download file
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">

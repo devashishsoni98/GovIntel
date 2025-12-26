@@ -3,16 +3,32 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import { Users, FileText, Building, Clock, CheckCircle, BarChart3, Calendar, Shield, Trash2, Eye, UserPlus, TrendingUp, Activity } from "lucide-react"
+import {
+  Users,
+  FileText,
+  Building,
+  Clock,
+  CheckCircle,
+  BarChart3,
+  Calendar,
+  Shield,
+  Trash2,
+  Eye,
+  UserPlus,
+  TrendingUp,
+  Activity,
+} from "lucide-react"
 import { selectUser } from "../../redux/slices/authSlice"
 import DeleteConfirmationModal from "../DeleteConfirmationModal"
 import AdminAssignModal from "../AdminAssignModal"
 import AdminReassignModal from "../AdminReassignModal"
 import AnalyticsWidget from "../AnalyticsWidget"
 import MetricCard from "../charts/MetricCard"
+import api from "../../api"
 
 const AdminDashboard = () => {
   const user = useSelector(selectUser)
+
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -26,16 +42,20 @@ const AdminDashboard = () => {
     totalOfficers: 0,
     totalCitizens: 0,
   })
+
   const [departmentStats, setDepartmentStats] = useState([])
   const [recentActivity, setRecentActivity] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+
   const [selectedGrievances, setSelectedGrievances] = useState([])
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletingGrievance, setDeletingGrievance] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [assigningGrievance, setAssigningGrievance] = useState(null)
+
   const [showReassignModal, setShowReassignModal] = useState(false)
   const [reassigningGrievance, setReassigningGrievance] = useState(null)
 
@@ -48,59 +68,40 @@ const AdminDashboard = () => {
       setLoading(true)
       setError("")
 
-      // Fetch grievance analytics
-      const analyticsResponse = await fetch("/api/analytics/dashboard", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const analyticsResponse = await api.get("/analytics/dashboard")
+      const analyticsData = analyticsResponse.data
 
-      if (analyticsResponse.ok) {
-        const analyticsData = await analyticsResponse.json()
-        console.log("Admin Analytics data:", analyticsData)
+      if (analyticsData.success && analyticsData.data) {
+        setStats((prev) => ({
+          ...prev,
+          ...analyticsData.data.summary,
+        }))
 
-        if (analyticsData.success && analyticsData.data) {
+        setDepartmentStats(analyticsData.data.categoryStats || [])
+
+        if (analyticsData.data.userStats) {
           setStats((prev) => ({
             ...prev,
-            ...analyticsData.data.summary,
+            totalUsers: analyticsData.data.userStats.total || 0,
+            totalOfficers: analyticsData.data.userStats.officers || 0,
+            totalCitizens: analyticsData.data.userStats.citizens || 0,
           }))
-          
-          // Set department and category stats
-          setDepartmentStats(analyticsData.data.categoryStats || [])
-          
-          // Set user stats if available
-          if (analyticsData.data.userStats) {
-            setStats((prev) => ({
-              ...prev,
-              totalUsers: analyticsData.data.userStats.total || 0,
-              totalOfficers: analyticsData.data.userStats.officers || 0,
-              totalCitizens: analyticsData.data.userStats.citizens || 0,
-            }))
-          }
         }
-      } else {
-        console.error("Analytics API error:", analyticsResponse.status)
       }
 
-      // Fetch recent grievances for activity
-      const grievancesResponse = await fetch("/api/grievances?limit=5&sortBy=createdAt&sortOrder=desc", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const grievancesResponse = await api.get(
+        "/grievances?limit=5&sortBy=createdAt&sortOrder=desc"
+      )
 
-      if (grievancesResponse.ok) {
-        const grievancesData = await grievancesResponse.json()
-        console.log("Admin Grievances data:", grievancesData)
+      const grievancesData = grievancesResponse.data
 
-        if (grievancesData.success && grievancesData.data) {
-          setRecentActivity(Array.isArray(grievancesData.data) ? grievancesData.data : [])
-        }
-      } else {
-        console.error("Grievances API error:", grievancesResponse.status)
+      if (grievancesData.success && grievancesData.data) {
+        setRecentActivity(
+          Array.isArray(grievancesData.data) ? grievancesData.data : []
+        )
       }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error)
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err)
       setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
@@ -108,9 +109,9 @@ const AdminDashboard = () => {
   }
 
   const handleSelectGrievance = (grievanceId) => {
-    setSelectedGrievances(prev => 
-      prev.includes(grievanceId) 
-        ? prev.filter(id => id !== grievanceId)
+    setSelectedGrievances((prev) =>
+      prev.includes(grievanceId)
+        ? prev.filter((id) => id !== grievanceId)
         : [...prev, grievanceId]
     )
   }
@@ -119,7 +120,7 @@ const AdminDashboard = () => {
     if (selectedGrievances.length === recentActivity.length) {
       setSelectedGrievances([])
     } else {
-      setSelectedGrievances(recentActivity.map(g => g._id))
+      setSelectedGrievances(recentActivity.map((g) => g._id))
     }
   }
 
@@ -147,117 +148,72 @@ const AdminDashboard = () => {
 
   const handleAutoAssignSingle = async (grievance) => {
     try {
-      setError("") // Clear any previous errors
-      const response = await fetch(`/api/grievances/${grievance._id}/auto-assign`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        console.log("Auto-assign successful:", data)
-        // Refresh the recent activity to show updated assignment
-        fetchDashboardData()
-      } else {
-        const errorData = await response.json()
-        console.error("Auto-assign failed:", errorData)
-        setError(errorData.message || "Failed to auto-assign grievance")
-      }
-    } catch (error) {
-      console.error("Auto-assign error:", error)
-      setError("Network error during auto-assignment")
+      setError("")
+      await api.post(`/grievances/${grievance._id}/auto-assign`)
+      fetchDashboardData()
+    } catch (err) {
+      console.error("Auto-assign error:", err)
+      setError("Failed to auto-assign grievance")
     }
   }
+
   const confirmDelete = async () => {
     try {
       setIsDeleting(true)
-      
+
       if (deletingGrievance) {
-        // Single delete
-        const response = await fetch(`/api/admin/grievances/${deletingGrievance._id}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            reason: "Admin deletion from dashboard"
-          })
+        await api.delete(`/admin/grievances/${deletingGrievance._id}`, {
+          data: { reason: "Admin deletion from dashboard" },
         })
 
-        if (response.ok) {
-          setRecentActivity(prev => prev.filter(g => g._id !== deletingGrievance._id))
-          setStats(prev => ({ ...prev, total: prev.total - 1 }))
-        } else {
-          const errorData = await response.json()
-          setError(errorData.message || "Failed to delete grievance")
-        }
+        setRecentActivity((prev) =>
+          prev.filter((g) => g._id !== deletingGrievance._id)
+        )
+        setStats((prev) => ({ ...prev, total: prev.total - 1 }))
       } else {
-        // Bulk delete
-        console.log("Starting bulk delete for IDs:", selectedGrievances)
-        
-        const response = await fetch("/api/admin/grievances/bulk", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
+        const response = await api.delete("/admin/grievances/bulk", {
+          data: {
             grievanceIds: selectedGrievances,
-            reason: "Bulk admin deletion from dashboard"
-          })
+            reason: "Bulk admin deletion from dashboard",
+          },
         })
 
-        console.log("Bulk delete response status:", response.status)
-        
-        if (response.ok) {
-          const data = await response.json()
-          console.log("Bulk delete response data:", data)
-          
-          setRecentActivity(prev => prev.filter(g => !selectedGrievances.includes(g._id)))
-          setSelectedGrievances([])
-          setStats(prev => ({ ...prev, total: prev.total - data.deletedCount }))
-          
-          // Show success message
-          setError("")
-        } else {
-          const errorData = await response.json()
-          console.error("Bulk delete error:", errorData)
-          setError(errorData.message || "Failed to delete grievances")
-        }
+        setRecentActivity((prev) =>
+          prev.filter((g) => !selectedGrievances.includes(g._id))
+        )
+        setSelectedGrievances([])
+        setStats((prev) => ({
+          ...prev,
+          total: prev.total - (response.data.deletedCount || 0),
+        }))
       }
 
       setShowDeleteModal(false)
       setDeletingGrievance(null)
-    } catch (error) {
-      console.error("Delete error:", error)
-      setError("Network error during deletion")
+    } catch (err) {
+      console.error("Delete error:", err)
+      setError("Failed to delete grievance(s)")
     } finally {
       setIsDeleting(false)
     }
   }
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     })
-  }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 pt-20 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-slate-700 rounded w-1/4 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-32 bg-slate-700 rounded-xl"></div>
-              ))}
-            </div>
+        <div className="max-w-7xl mx-auto animate-pulse">
+          <div className="h-8 bg-slate-700 rounded w-1/4 mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-32 bg-slate-700 rounded-xl"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -268,9 +224,12 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-slate-900 pt-20 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-8">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
             <p className="text-red-400">{error}</p>
-            <button onClick={fetchDashboardData} className="mt-2 text-red-300 hover:text-red-200 underline">
+            <button
+              onClick={fetchDashboardData}
+              className="mt-2 text-red-300 hover:text-red-200 underline"
+            >
               Try again
             </button>
           </div>

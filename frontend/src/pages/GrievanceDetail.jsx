@@ -36,6 +36,7 @@ import FilePreview from "../components/FilePreview"
 import AnalysisInsightsPanel from "../components/AIInsightsPanel"
 import AdminAssignModal from "../components/AdminAssignModal"
 import AdminReassignModal from "../components/AdminReassignModal"
+import api from "../api"
 
 const GrievanceDetail = () => {
   const { id } = useParams()
@@ -54,9 +55,7 @@ const GrievanceDetail = () => {
   const [showReassignModal, setShowReassignModal] = useState(false)
 
   useEffect(() => {
-    if (id) {
-      fetchGrievance()
-    }
+    if (id) fetchGrievance()
   }, [id])
 
   const fetchGrievance = async () => {
@@ -64,23 +63,14 @@ const GrievanceDetail = () => {
       setLoading(true)
       setError("")
 
-      const response = await fetch(`/api/grievances/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        console.log("Grievance data:", data)
-        setGrievance(data.data)
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to fetch grievance details")
-      }
+      const response = await api.get(`/api/grievances/${id}`)
+      setGrievance(response.data.data)
     } catch (error) {
       console.error("Fetch grievance error:", error)
-      setError("Network error. Please try again.")
+      setError(
+        error.response?.data?.message ||
+          "Network error. Please try again."
+      )
     } finally {
       setLoading(false)
     }
@@ -88,12 +78,12 @@ const GrievanceDetail = () => {
 
   const handleStatusUpdate = () => {
     setShowStatusModal(false)
-    fetchGrievance() // Refresh data
+    fetchGrievance()
   }
 
   const handleFeedbackSubmit = () => {
     setShowFeedbackModal(false)
-    fetchGrievance() // Refresh data
+    fetchGrievance()
   }
 
   const handleFilePreview = (attachment) => {
@@ -103,12 +93,12 @@ const GrievanceDetail = () => {
 
   const handleAssignSuccess = () => {
     setShowAssignModal(false)
-    fetchGrievance() // Refresh data
+    fetchGrievance()
   }
 
   const handleReassignSuccess = () => {
     setShowReassignModal(false)
-    fetchGrievance() // Refresh data
+    fetchGrievance()
   }
 
   const getStatusColor = (status) => {
@@ -116,7 +106,6 @@ const GrievanceDetail = () => {
       case "pending":
         return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
       case "assigned":
-        return "text-blue-400 bg-blue-400/10 border-blue-400/20"
       case "in_progress":
         return "text-blue-400 bg-blue-400/10 border-blue-400/20"
       case "resolved":
@@ -164,24 +153,22 @@ const GrievanceDetail = () => {
     }
   }
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     })
-  }
 
-  const formatDateShort = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDateShort = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     })
-  }
 
   const getFileIcon = (mimetype) => {
     if (mimetype.startsWith("image/")) return <Eye className="w-4 h-4 text-blue-400" />
@@ -190,26 +177,20 @@ const GrievanceDetail = () => {
     return <Download className="w-4 h-4 text-slate-400" />
   }
 
-  const canUpdateStatus = () => {
-    return user?.role === USER_ROLES.OFFICER || user?.role === USER_ROLES.ADMIN
-  }
+  const canUpdateStatus = () =>
+    user?.role === USER_ROLES.OFFICER || user?.role === USER_ROLES.ADMIN
 
-  const canProvideFeedback = () => {
-    return (
-      user?.role === USER_ROLES.CITIZEN &&
-      grievance?.citizen?._id === user?.id &&
-      grievance?.status === "resolved" &&
-      !grievance?.feedback?.rating
-    )
-  }
+  const canProvideFeedback = () =>
+    user?.role === USER_ROLES.CITIZEN &&
+    grievance?.citizen?._id === user?.id &&
+    grievance?.status === "resolved" &&
+    !grievance?.feedback?.rating
 
-  const canViewAnalysisInsights = () => {
-    return user?.role === USER_ROLES.OFFICER || user?.role === USER_ROLES.ADMIN
-  }
+  const canViewAnalysisInsights = () =>
+    user?.role === USER_ROLES.OFFICER || user?.role === USER_ROLES.ADMIN
 
-  const canAssignGrievance = () => {
-    return user?.role === USER_ROLES.ADMIN
-  }
+  const canAssignGrievance = () =>
+    user?.role === USER_ROLES.ADMIN
 
   if (loading) {
     return (

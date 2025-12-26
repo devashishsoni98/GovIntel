@@ -1,5 +1,16 @@
+"use client"
+
 import { useState, useEffect } from "react"
-import { X, User, Building, UserPlus, Loader, CheckCircle, AlertTriangle } from "lucide-react"
+import {
+  X,
+  User,
+  Building,
+  UserPlus,
+  Loader,
+  CheckCircle,
+  AlertTriangle,
+} from "lucide-react"
+import api from "../api"
 
 const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
   const [officers, setOfficers] = useState([])
@@ -15,38 +26,33 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
   const fetchOfficers = async () => {
     try {
       setFetchingOfficers(true)
-      
-      // Fetch all departments with officers
-      const response = await fetch("/api/departments", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      setError("")
 
-      if (response.ok) {
-        const data = await response.json()
-        
-        // Extract all officers from all departments
+      const response = await api.get("/departments")
+      const data = response.data
+
+      if (data.success && data.data) {
         const allOfficers = []
-        data.data.forEach(department => {
+
+        data.data.forEach((department) => {
           if (department.officers && department.officers.length > 0) {
-            department.officers.forEach(officer => {
+            department.officers.forEach((officer) => {
               allOfficers.push({
                 ...officer,
                 departmentName: department.name,
                 departmentCode: department.code,
-                currentWorkload: 0 // Will be calculated if needed
+                currentWorkload: 0,
               })
             })
           }
         })
-        
+
         setOfficers(allOfficers)
       } else {
         setError("Failed to fetch officers")
       }
-    } catch (error) {
-      console.error("Fetch officers error:", error)
+    } catch (err) {
+      console.error("Fetch officers error:", err)
       setError("Network error while fetching officers")
     } finally {
       setFetchingOfficers(false)
@@ -59,7 +65,6 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
       return
     }
 
-    // Prevent reassigning to the same officer
     if (selectedOfficer === grievance.assignedOfficer?._id) {
       setError("Cannot reassign to the same officer")
       return
@@ -69,46 +74,47 @@ const AdminReassignModal = ({ grievance, onClose, onSuccess }) => {
       setLoading(true)
       setError("")
 
-      console.log("Reassign request:", { grievanceId: grievance._id, officerId: selectedOfficer })
-      const response = await fetch(`/api/grievances/${grievance._id}/reassign`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          officerId: selectedOfficer,
-        }),
+      console.log("Reassign request:", {
+        grievanceId: grievance._id,
+        officerId: selectedOfficer,
       })
 
-      if (response.ok) {
-        const data = await response.json()
+      const response = await api.post(
+        `/grievances/${grievance._id}/reassign`,
+        {
+          officerId: selectedOfficer,
+        }
+      )
+
+      const data = response.data
+
+      if (data.success) {
         console.log("Reassign successful:", data)
         onSuccess()
       } else {
-        const errorData = await response.json()
-        console.error("Reassign failed:", errorData)
-        setError(errorData.message || "Failed to reassign grievance")
+        setError(data.message || "Failed to reassign grievance")
       }
-    } catch (error) {
-      console.error("Reassign error:", error)
-      setError("Network error during reassignment")
+    } catch (err) {
+      console.error("Reassign error:", err)
+      setError(
+        err.response?.data?.message ||
+          "Network error during reassignment"
+      )
     } finally {
       setLoading(false)
     }
   }
 
   const getSelectedOfficerInfo = () => {
-    return officers.find(officer => officer._id === selectedOfficer)
+    return officers.find((officer) => officer._id === selectedOfficer)
   }
 
   const isCurrentlyAssigned = (officerId) => {
     return officerId === grievance.assignedOfficer?._id
   }
 
-  // Group officers by department for better organization
   const groupedOfficers = officers.reduce((groups, officer) => {
-    const dept = officer.departmentName || officer.department || 'Unknown'
+    const dept = officer.departmentName || officer.department || "Unknown"
     if (!groups[dept]) {
       groups[dept] = []
     }

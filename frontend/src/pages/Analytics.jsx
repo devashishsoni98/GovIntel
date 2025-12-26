@@ -17,7 +17,9 @@ import {
   Activity,
 } from "lucide-react"
 
-// Import chart components
+import api from "../api"
+
+// Charts
 import BarChart from "../components/charts/BarChart"
 import LineChart from "../components/charts/LineChart"
 import DonutChart from "../components/charts/DonutChart"
@@ -45,27 +47,31 @@ const Analytics = () => {
       setLoading(true)
       setError("")
 
-      const [dashboardRes, trendsRes, performanceRes] = await Promise.all([
-        fetch("/api/analytics/dashboard", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }),
-        fetch(`/api/analytics/trends?timeframe=${timeframe}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }),
-        user.role !== "citizen"
-          ? fetch("/api/analytics/performance", {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            })
-          : Promise.resolve({ ok: false }),
-      ])
+      const requests = [
+        api.get("/api/analytics/dashboard"),
+        api.get(`/api/analytics/trends?timeframe=${timeframe}`),
+      ]
 
-      const [dashboard, trends, performance] = await Promise.all([
-        dashboardRes.ok ? dashboardRes.json() : null,
-        trendsRes.ok ? trendsRes.json() : null,
-        performanceRes.ok ? performanceRes.json() : null,
-      ])
+      if (user.role !== "citizen") {
+        requests.push(api.get("/api/analytics/performance"))
+      }
+
+      const responses = await Promise.allSettled(requests)
+
+      const dashboard =
+        responses[0].status === "fulfilled"
+          ? responses[0].value.data
+          : null
+
+      const trends =
+        responses[1].status === "fulfilled"
+          ? responses[1].value.data
+          : null
+
+      const performance =
+        responses[2] && responses[2].status === "fulfilled"
+          ? responses[2].value.data
+          : null
 
       setAnalytics({
         dashboard: dashboard?.data || null,
@@ -82,21 +88,20 @@ const Analytics = () => {
 
   const exportData = async (type) => {
     try {
-      const response = await fetch(`/api/analytics/export?type=${type}&timeframe=${timeframe}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      })
+      const response = await api.get(
+        `/api/analytics/export?type=${type}&timeframe=${timeframe}`,
+        { responseType: "blob" }
+      )
 
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `analytics-${type}-${timeframe}.csv`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      }
+      const blob = response.data
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `analytics-${type}-${timeframe}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
     } catch (error) {
       console.error("Export error:", error)
     }
@@ -105,12 +110,13 @@ const Analytics = () => {
   const formatTrendDate = (dateObj) => {
     if (!dateObj) return "Unknown"
     if (timeframe === "week") {
-      return `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(dateObj.day).padStart(2, "0")}`
+      return `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(
+        dateObj.day
+      ).padStart(2, "0")}`
     }
     return `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}`
   }
 
-  // Prepare chart data with null checks
   const statusChartData =
     analytics.dashboard?.statusStats?.filter(Boolean).map((stat) => ({
       status: String(stat?.status ?? "unknown").replaceAll("_", " "),
@@ -149,15 +155,20 @@ const Analytics = () => {
 
   const monthMatchesAug2025 = (label) => {
     const s = String(label ?? "").toLowerCase()
-    return s.includes("2025") && (s.includes("aug") || s.includes("-08") || s.includes("/08") || s.includes(" 08"))
+    return (
+      s.includes("2025") &&
+      (s.includes("aug") || s.includes("-08") || s.includes("/08") || s.includes(" 08"))
+    )
   }
 
-  let filteredMonthlyTrendData = (monthlyTrendData || []).filter((d) => monthMatchesAug2025(d?.month))
+  let filteredMonthlyTrendData = (monthlyTrendData || []).filter((d) =>
+    monthMatchesAug2025(d?.month)
+  )
 
   if (!filteredMonthlyTrendData.length) {
     const augTrends = (trendsData || []).filter((t) => {
       const s = String(t?.date ?? "").toLowerCase()
-      return s.includes("2025") && (s.includes("aug") || s.startsWith("2025-08") || s.includes("-08"))
+      return s.includes("2025") && (s.includes("aug") || s.startsWith("2025-08"))
     })
     const totalCount = augTrends.reduce((sum, t) => sum + (t?.total ?? 0), 0)
     if (totalCount > 0) {
@@ -165,15 +176,13 @@ const Analytics = () => {
     }
   }
 
-  // Filter out empty data and ensure minimum data for charts
-  const hasStatusData = statusChartData.length > 0 && statusChartData.some((item) => item.count > 0)
-  const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some((item) => item.count > 0)
-  const hasPriorityData = priorityChartData.length > 0 && priorityChartData.some((item) => item.count > 0)
-  const hasMonthlyData = filteredMonthlyTrendData.length > 0 && filteredMonthlyTrendData.some((item) => item.count > 0)
-  const hasTrendsData = trendsData.length > 0 && trendsData.some((item) => item.total > 0)
+  const hasStatusData = statusChartData.some((i) => i.count > 0)
+  const hasCategoryData = categoryChartData.some((i) => i.count > 0)
+  const hasPriorityData = priorityChartData.some((i) => i.count > 0)
+  const hasMonthlyData = filteredMonthlyTrendData.some((i) => i.count > 0)
+  const hasTrendsData = trendsData.some((i) => i.total > 0)
   const hasDepartmentData =
-    analytics.dashboard?.departmentStats?.length > 0 &&
-    analytics.dashboard.departmentStats.some((dept) => (dept?.count ?? 0) > 0)
+    analytics.dashboard?.departmentStats?.some((d) => (d?.count ?? 0) > 0)
 
   if (loading) {
     return (

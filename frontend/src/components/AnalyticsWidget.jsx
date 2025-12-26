@@ -1,14 +1,21 @@
 import { useState, useEffect } from "react"
-import { BarChart3, TrendingUp, PieChart, Activity, RefreshCw } from "lucide-react"
+import {
+  BarChart3,
+  TrendingUp,
+  PieChart,
+  Activity,
+  RefreshCw,
+} from "lucide-react"
 import BarChart from "./charts/BarChart"
 import DonutChart from "./charts/DonutChart"
 import MetricCard from "./charts/MetricCard"
+import api from "../api"
 
-const AnalyticsWidget = ({ 
-  title = "Analytics Overview", 
-  showCharts = true, 
+const AnalyticsWidget = ({
+  title = "Analytics Overview",
+  showCharts = true,
   compact = false,
-  userRole = "citizen" 
+  userRole = "citizen",
 }) => {
   const [analytics, setAnalytics] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -23,20 +30,21 @@ const AnalyticsWidget = ({
       setLoading(true)
       setError("")
 
-      const response = await fetch("/api/analytics/dashboard", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      })
+      const response = await api.get("/analytics/dashboard")
 
-      if (response.ok) {
-        const data = await response.json()
-        console.log("AnalyticsWidget: Received data:", data)
+      const data = response.data
+      console.log("AnalyticsWidget: Received data:", data)
+
+      if (data.success && data.data) {
         setAnalytics(data.data)
       } else {
-        setError("Failed to load analytics")
+        setError(data.message || "Failed to load analytics")
       }
-    } catch (error) {
-      console.error("Analytics widget error:", error)
-      setError("Network error")
+    } catch (err) {
+      console.error("Analytics widget error:", err)
+      setError(
+        err.response?.data?.message || "Network error"
+      )
     } finally {
       setLoading(false)
     }
@@ -74,20 +82,29 @@ const AnalyticsWidget = ({
 
   if (!analytics) return null
 
-  const statusChartData = analytics.statusStats?.map(stat => ({
-    status: stat.status.replace('_', ' '),
-    count: stat.count
-  })) || []
+  const statusChartData =
+    analytics.statusStats?.map((stat) => ({
+      status: stat.status.replace("_", " "),
+      count: stat.count,
+    })) || []
 
-  const categoryChartData = analytics.categoryStats?.map(stat => ({
-    category: stat.category.replace('_', ' '),
-    count: stat.count
-  })) || []
+  const categoryChartData =
+    analytics.categoryStats?.map((stat) => ({
+      category: stat.category.replace("_", " "),
+      count: stat.count,
+    })) || []
 
-  // Check if we have meaningful data
-  const hasStatusData = statusChartData.length > 0 && statusChartData.some(item => item.count > 0)
-  const hasCategoryData = categoryChartData.length > 0 && categoryChartData.some(item => item.count > 0)
-  const hasRecentActivity = analytics.recentGrievances && analytics.recentGrievances.length > 0
+  const hasStatusData =
+    statusChartData.length > 0 &&
+    statusChartData.some((item) => item.count > 0)
+
+  const hasCategoryData =
+    categoryChartData.length > 0 &&
+    categoryChartData.some((item) => item.count > 0)
+
+  const hasRecentActivity =
+    analytics.recentGrievances &&
+    analytics.recentGrievances.length > 0
 
   console.log("AnalyticsWidget: Chart data check:", {
     statusChartData,
@@ -97,7 +114,7 @@ const AnalyticsWidget = ({
     hasRecentActivity,
     totalGrievances: analytics.summary?.total,
     userRole,
-    analytics
+    analytics,
   })
 
   return (

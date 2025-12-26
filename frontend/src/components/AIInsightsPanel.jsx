@@ -1,5 +1,21 @@
+"use client"
+
 import { useState, useEffect } from "react"
-import { X, Brain, TrendingUp, Target, AlertTriangle, CheckCircle, BarChart3, Activity, Zap, Eye, RefreshCw } from "lucide-react"
+import {
+  X,
+  Brain,
+  TrendingUp,
+  Target,
+  AlertTriangle,
+  CheckCircle,
+  BarChart3,
+  Activity,
+  Zap,
+  Eye,
+  RefreshCw,
+  Clock,
+} from "lucide-react"
+import api from "../api"
 
 const AIInsightsPanel = ({ grievance, onClose }) => {
   const [insights, setInsights] = useState(null)
@@ -18,31 +34,34 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
       setLoading(true)
       setError("")
 
-      // Extract insights from grievance data
       const analysisData = grievance.analysisData || {}
       const grievanceInsights = {
         sentiment: {
-          value: analysisData.sentiment || 'neutral',
+          value: analysisData.sentiment || "neutral",
           score: analysisData.sentimentScore || 0,
-          confidence: analysisData.confidence || 0.5
+          confidence: analysisData.confidence || 0.5,
         },
         urgency: {
           score: analysisData.urgencyScore || 50,
-          level: getUrgencyLevel(analysisData.urgencyScore || 50)
+          level: getUrgencyLevel(analysisData.urgencyScore || 50),
         },
         keywords: analysisData.keywords || [],
-        suggestedDepartment: analysisData.suggestedDepartment || 'municipal',
+        suggestedDepartment:
+          analysisData.suggestedDepartment || "municipal",
         classification: {
           category: grievance.category,
-          confidence: analysisData.categoryConfidence || 0.8
+          confidence: analysisData.categoryConfidence || 0.8,
         },
-        recommendations: generateRecommendations(grievance, analysisData),
-        riskFactors: identifyRiskFactors(grievance, analysisData)
+        recommendations: generateRecommendations(
+          grievance,
+          analysisData
+        ),
+        riskFactors: identifyRiskFactors(grievance, analysisData),
       }
 
       setInsights(grievanceInsights)
-    } catch (error) {
-      console.error("Error loading insights:", error)
+    } catch (err) {
+      console.error("Error loading insights:", err)
       setError("Failed to load AI insights")
     } finally {
       setLoading(false)
@@ -50,57 +69,63 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
   }
 
   const getUrgencyLevel = (score) => {
-    if (score >= 80) return 'urgent'
-    if (score >= 65) return 'high'
-    if (score >= 35) return 'medium'
-    return 'low'
+    if (score >= 80) return "urgent"
+    if (score >= 65) return "high"
+    if (score >= 35) return "medium"
+    return "low"
   }
 
   const generateRecommendations = (grievance, analysisData) => {
     const recommendations = []
-    
-    // Based on urgency
+
     if (analysisData.urgencyScore >= 80) {
       recommendations.push({
-        type: 'urgent',
-        title: 'Immediate Action Required',
-        description: 'High urgency score indicates this case needs immediate attention',
+        type: "urgent",
+        title: "Immediate Action Required",
+        description:
+          "High urgency score indicates this case needs immediate attention",
         icon: <AlertTriangle className="w-4 h-4" />,
-        color: 'text-red-400'
+        color: "text-red-400",
       })
     }
 
-    // Based on sentiment
-    if (analysisData.sentiment === 'negative') {
+    if (analysisData.sentiment === "negative") {
       recommendations.push({
-        type: 'sentiment',
-        title: 'Negative Sentiment Detected',
-        description: 'Citizen appears frustrated. Consider prioritizing communication',
+        type: "sentiment",
+        title: "Negative Sentiment Detected",
+        description:
+          "Citizen appears frustrated. Consider prioritizing communication",
         icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-orange-400'
+        color: "text-orange-400",
       })
     }
 
-    // Based on status and time
-    const daysSinceCreation = Math.floor((Date.now() - new Date(grievance.createdAt)) / (1000 * 60 * 60 * 24))
-    if (daysSinceCreation > 7 && grievance.status === 'pending') {
+    const daysSinceCreation = Math.floor(
+      (Date.now() - new Date(grievance.createdAt)) /
+        (1000 * 60 * 60 * 24)
+    )
+
+    if (daysSinceCreation > 7 && grievance.status === "pending") {
       recommendations.push({
-        type: 'timeline',
-        title: 'Long Pending Duration',
+        type: "timeline",
+        title: "Long Pending Duration",
         description: `Case has been pending for ${daysSinceCreation} days. Consider immediate assignment`,
         icon: <Clock className="w-4 h-4" />,
-        color: 'text-yellow-400'
+        color: "text-yellow-400",
       })
     }
 
-    // Based on category
-    if (grievance.category === 'healthcare' || grievance.category === 'police') {
+    if (
+      grievance.category === "healthcare" ||
+      grievance.category === "police"
+    ) {
       recommendations.push({
-        type: 'category',
-        title: 'Critical Service Category',
-        description: 'This category typically requires faster response times',
+        type: "category",
+        title: "Critical Service Category",
+        description:
+          "This category typically requires faster response times",
         icon: <Target className="w-4 h-4" />,
-        color: 'text-blue-400'
+        color: "text-blue-400",
       })
     }
 
@@ -110,31 +135,42 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
   const identifyRiskFactors = (grievance, analysisData) => {
     const risks = []
 
-    // High urgency + negative sentiment
-    if (analysisData.urgencyScore >= 70 && analysisData.sentiment === 'negative') {
+    if (
+      analysisData.urgencyScore >= 70 &&
+      analysisData.sentiment === "negative"
+    ) {
       risks.push({
-        level: 'high',
-        factor: 'Escalation Risk',
-        description: 'High urgency combined with negative sentiment may lead to public escalation'
+        level: "high",
+        factor: "Escalation Risk",
+        description:
+          "High urgency combined with negative sentiment may lead to public escalation",
       })
     }
 
-    // Long pending time
-    const daysSinceCreation = Math.floor((Date.now() - new Date(grievance.createdAt)) / (1000 * 60 * 60 * 24))
+    const daysSinceCreation = Math.floor(
+      (Date.now() - new Date(grievance.createdAt)) /
+        (1000 * 60 * 60 * 24)
+    )
+
     if (daysSinceCreation > 14) {
       risks.push({
-        level: 'medium',
-        factor: 'Delayed Response',
-        description: 'Extended pending time may impact citizen satisfaction'
+        level: "medium",
+        factor: "Delayed Response",
+        description:
+          "Extended pending time may impact citizen satisfaction",
       })
     }
 
-    // Multiple updates without resolution
-    if (grievance.updates && grievance.updates.length > 5 && grievance.status !== 'resolved') {
+    if (
+      grievance.updates &&
+      grievance.updates.length > 5 &&
+      grievance.status !== "resolved"
+    ) {
       risks.push({
-        level: 'medium',
-        factor: 'Resolution Complexity',
-        description: 'Multiple updates suggest this case may require additional resources'
+        level: "medium",
+        factor: "Resolution Complexity",
+        description:
+          "Multiple updates suggest this case may require additional resources",
       })
     }
 
@@ -146,25 +182,24 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
       setReanalyzing(true)
       setError("")
 
-      const response = await fetch(`/api/grievances/${grievance._id}/analyze`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      const response = await api.post(
+        `/grievances/${grievance._id}/analyze`
+      )
 
-      if (response.ok) {
-        const data = await response.json()
+      const data = response.data
+
+      if (data.success) {
         console.log("Reanalysis successful:", data)
-        // Reload insights with new data
         loadInsights()
       } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to reanalyze grievance")
+        setError(data.message || "Failed to reanalyze grievance")
       }
-    } catch (error) {
-      console.error("Reanalysis error:", error)
-      setError("Network error during reanalysis")
+    } catch (err) {
+      console.error("Reanalysis error:", err)
+      setError(
+        err.response?.data?.message ||
+          "Network error during reanalysis"
+      )
     } finally {
       setReanalyzing(false)
     }
@@ -172,28 +207,40 @@ const AIInsightsPanel = ({ grievance, onClose }) => {
 
   const getSentimentColor = (sentiment) => {
     switch (sentiment) {
-      case 'positive': return 'text-green-400 bg-green-400/10'
-      case 'negative': return 'text-red-400 bg-red-400/10'
-      default: return 'text-yellow-400 bg-yellow-400/10'
+      case "positive":
+        return "text-green-400 bg-green-400/10"
+      case "negative":
+        return "text-red-400 bg-red-400/10"
+      default:
+        return "text-yellow-400 bg-yellow-400/10"
     }
   }
 
   const getUrgencyColor = (level) => {
     switch (level) {
-      case 'urgent': return 'text-red-400 bg-red-400/10'
-      case 'high': return 'text-orange-400 bg-orange-400/10'
-      case 'medium': return 'text-yellow-400 bg-yellow-400/10'
-      case 'low': return 'text-green-400 bg-green-400/10'
-      default: return 'text-gray-400 bg-gray-400/10'
+      case "urgent":
+        return "text-red-400 bg-red-400/10"
+      case "high":
+        return "text-orange-400 bg-orange-400/10"
+      case "medium":
+        return "text-yellow-400 bg-yellow-400/10"
+      case "low":
+        return "text-green-400 bg-green-400/10"
+      default:
+        return "text-gray-400 bg-gray-400/10"
     }
   }
 
   const getRiskColor = (level) => {
     switch (level) {
-      case 'high': return 'text-red-400 bg-red-400/10 border-red-400/20'
-      case 'medium': return 'text-orange-400 bg-orange-400/10 border-orange-400/20'
-      case 'low': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20'
-      default: return 'text-gray-400 bg-gray-400/10 border-gray-400/20'
+      case "high":
+        return "text-red-400 bg-red-400/10 border-red-400/20"
+      case "medium":
+        return "text-orange-400 bg-orange-400/10 border-orange-400/20"
+      case "low":
+        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
+      default:
+        return "text-gray-400 bg-gray-400/10 border-gray-400/20"
     }
   }
 
