@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux";
 import {
   Upload,
@@ -13,6 +14,13 @@ import {
   Mic,
   Send,
   Loader,
+  Eye,
+  Download,
+  Clock,
+  UserPlus,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { selectUser } from "../redux/slices/authSlice";
 import { createGrievance, reset } from "../redux/slices/grievanceSlice";
@@ -210,15 +218,28 @@ const SubmitComplaint = () => {
     });
   };
 
-  const getFileIcon = (mimetype) => {
-    if (mimetype.startsWith("image/"))
-      return <Eye className="w-4 h-4 text-blue-400" />;
-    if (mimetype.startsWith("video/"))
-      return <Eye className="w-4 h-4 text-purple-400" />;
-    if (mimetype.startsWith("audio/"))
-      return <Eye className="w-4 h-4 text-green-400" />;
-    return <Download className="w-4 h-4 text-slate-400" />;
-  };
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "0 Bytes"
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB", "GB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return (bytes / Math.pow(k, i)).toFixed(2) + " " + sizes[i]
+  }
+  
+
+  const getFileIcon = (file) => {
+    if (file.type.startsWith("image/"))
+      return <Eye className="w-4 h-4 text-blue-400" />
+  
+    if (file.type.startsWith("video/"))
+      return <Eye className="w-4 h-4 text-purple-400" />
+  
+    if (file.type.startsWith("audio/"))
+      return <Eye className="w-4 h-4 text-green-400" />
+  
+    return <Download className="w-4 h-4 text-slate-400" />
+  }
+  
 
   const handleStatusUpdate = () => {
     setShowStatusModal(false);
