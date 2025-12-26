@@ -16,6 +16,8 @@ import GrievanceDetail from "./pages/GrievanceDetail"
 import AssignedCases from "./pages/AssignedCases"
 import UserManagement from "./pages/UserManagement"
 import Analytics from "./pages/Analytics"
+import FeaturesPage from "./pages/Features"
+import HowItWorksPage from "./pages/HowItWorks"
 
 // User roles
 import { USER_ROLES } from "./redux/slices/authSlice"
@@ -31,6 +33,8 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/signin" element={<SignIn />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
 
               {/* Protected Routes */}
               <Route

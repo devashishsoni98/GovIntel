@@ -59,8 +59,8 @@ const Navbar = () => {
     if (!isAuthenticated) {
       return [
         { name: "Home", href: "/", current: location.pathname === "/" },
-        { name: "Features", href: "/#features", current: false },
-        { name: "How It Works", href: "/#how-it-works", current: false },
+        { name: "Features", href: "/features", current: false },
+        { name: "How It Works", href: "/how-it-works", current: false },
       ]
     }
 
