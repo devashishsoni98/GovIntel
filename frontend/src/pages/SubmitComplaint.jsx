@@ -177,6 +177,135 @@ const SubmitComplaint = () => {
     })
   }
 
+  const formatDate = (dateString) => { 
+    return new Date(dateString).toLocaleDateString("en-US", { 
+      year: "numeric", 
+      month: "long", 
+      day: "numeric", 
+      hour: "2-digit", 
+      minute: "2-digit",
+     }) 
+    }
+
+  const formatDateShort = (dateString) => { 
+    return new Date(dateString).toLocaleDateString("en-US", {
+       month: "short", 
+       day: "numeric", 
+       hour: "2-digit", 
+       minute: "2-digit", 
+      }) 
+    }
+
+  const getFileIcon = (mimetype) => { 
+    if (mimetype.startsWith("image/")) return <Eye className="w-4 h-4 text-blue-400" /> 
+    if (mimetype.startsWith("video/")) return <Eye className="w-4 h-4 text-purple-400" /> 
+    if (mimetype.startsWith("audio/")) return <Eye className="w-4 h-4 text-green-400" /> 
+    return <Download className="w-4 h-4 text-slate-400" /> 
+  }
+
+  const GrievanceDetail = () => { 
+    const { id } = useParams() 
+    const navigate = useNavigate() 
+    const user = useSelector(selectUser) 
+    const [grievance, setGrievance] = useState(null) 
+    const [loading, setLoading] = useState(true) 
+    const [error, setError] = useState("") 
+    const [showStatusModal, setShowStatusModal] = useState(false) 
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+     const [showFilePreview, setShowFilePreview] = useState(false) 
+     const [previewFile, setPreviewFile] = useState(null) 
+     const [showAnalysisInsights, setShowAnalysisInsights] = useState(false) 
+     const [showAssignModal, setShowAssignModal] = useState(false) 
+     const [showReassignModal, setShowReassignModal] = useState(false) 
+     
+     useEffect(() => { 
+      if (id) { 
+        fetchGrievance() 
+      } 
+    }, [id]) 
+    
+    const fetchGrievance = async () => {
+      try {
+        setLoading(true)
+        setError("")
+    
+        const response = await api.get(`/grievances/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+    
+        console.log("Grievance data:", response.data)
+        setGrievance(response.data.data)
+    
+      } catch (error) {
+        console.error("Fetch grievance error:", error)
+    
+        if (error.response?.data?.message) {
+          setError(error.response.data.message)
+        } else {
+          setError("Network error. Please try again.")
+        }
+    
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+
+    const handleStatusUpdate = () => { setShowStatusModal(false) 
+              fetchGrievance()  
+            } 
+    const handleFeedbackSubmit = () => { 
+      setShowFeedbackModal(false) 
+      fetchGrievance()
+     } 
+      
+    const handleFilePreview = (attachment) => {
+       setPreviewFile(attachment)
+        setShowFilePreview(true)
+       } 
+       
+    const handleAssignSuccess = () => { 
+      setShowAssignModal(false)
+       fetchGrievance() 
+      } 
+    const handleReassignSuccess = () => { 
+      setShowReassignModal(false)
+       fetchGrievance() 
+       } 
+    const getStatusColor = (status) => { 
+      switch (status) { 
+        case "pending": 
+        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" 
+        case "assigned": return "text-blue-400 bg-blue-400/10 border-blue-400/20" 
+        case "in_progress": return "text-blue-400 bg-blue-400/10 border-blue-400/20" 
+        case "resolved": return "text-green-400 bg-green-400/10 border-green-400/20" 
+        case "closed": return "text-gray-400 bg-gray-400/10 border-gray-400/20" 
+        case "rejected": return "text-red-400 bg-red-400/10 border-red-400/20" 
+        default: return "text-gray-400 bg-gray-400/10 border-gray-400/20" } 
+      } 
+      
+    const getStatusIcon = (status) => { 
+      switch (status) { 
+        case "pending": return <Clock className="w-4 h-4" /> 
+        case "assigned": return <UserPlus className="w-4 h-4" /> 
+        case "in_progress": return <AlertTriangle className="w-4 h-4" /> 
+        case "resolved": return <CheckCircle className="w-4 h-4" /> 
+        case "closed": return <CheckCircle className="w-4 h-4" /> 
+        case "rejected": return <XCircle className="w-4 h-4" /> 
+        default: return <FileText className="w-4 h-4" /> } 
+      }
+        
+        const getPriorityColor = (priority) => {
+           switch (priority) { 
+            case "urgent": return "text-red-400 bg-red-400/10 border-red-400/20" 
+            case "high": return "text-orange-400 bg-orange-400/10 border-orange-400/20" 
+            case "medium": return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" 
+            case "low": return "text-green-400 bg-green-400/10 border-green-400/20" 
+            default: return "text-gray-400 bg-gray-400/10 border-gray-400/20" }
+           }
+
   // ===========================
   // Submit
   // ===========================
