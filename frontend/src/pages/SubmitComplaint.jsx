@@ -1,19 +1,31 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { useSelector, useDispatch } from "react-redux"
-import { Upload, X, MapPin, FileText, ImageIcon, Video, Mic, Send, Loader } from "lucide-react"
-import { selectUser } from "../redux/slices/authSlice"
-import { createGrievance, reset } from "../redux/slices/grievanceSlice"
-import api from "../api"   // ✅ axios instance
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  Upload,
+  X,
+  MapPin,
+  FileText,
+  ImageIcon,
+  Video,
+  Mic,
+  Send,
+  Loader,
+} from "lucide-react";
+import { selectUser } from "../redux/slices/authSlice";
+import { createGrievance, reset } from "../redux/slices/grievanceSlice";
+import api from "../api"; // ✅ axios instance
 
 const SubmitComplaint = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const user = useSelector(selectUser)
-  const { isLoading, isError, isSuccess, message } = useSelector((state) => state.grievances)
-  const fileInputRef = useRef(null)
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+  const { isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.grievances
+  );
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -30,35 +42,35 @@ const SubmitComplaint = () => {
     },
     isAnonymous: false,
     expectedResolutionDate: "",
-  })
+  });
 
-  const [attachments, setAttachments] = useState([])
-  const [departments, setDepartments] = useState([])
-  const [loadingDepartments, setLoadingDepartments] = useState(true)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [attachments, setAttachments] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [loadingDepartments, setLoadingDepartments] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // ===========================
   // Fetch departments
   // ===========================
   useEffect(() => {
-    fetchDepartments()
-  }, [])
+    fetchDepartments();
+  }, []);
 
   const fetchDepartments = async () => {
     try {
-      setLoadingDepartments(true)
+      setLoadingDepartments(true);
 
-      const res = await api.get("/departments/active")
+      const res = await api.get("/departments/active");
 
-      setDepartments(res.data?.data || [])
+      setDepartments(res.data?.data || []);
     } catch (err) {
-      console.error("Fetch departments error:", err)
-      setError("Failed to load departments")
+      console.error("Fetch departments error:", err);
+      setError("Failed to load departments");
     } finally {
-      setLoadingDepartments(false)
+      setLoadingDepartments(false);
     }
-  }
+  };
 
   // ===========================
   // Categories
@@ -74,53 +86,55 @@ const SubmitComplaint = () => {
       ],
       HEALTH: [{ value: "healthcare", label: "Healthcare", icon: "🏥" }],
       EDUCATION: [{ value: "education", label: "Education", icon: "🎓" }],
-      TRANSPORT: [{ value: "transportation", label: "Transportation", icon: "🚌" }],
+      TRANSPORT: [
+        { value: "transportation", label: "Transportation", icon: "🚌" },
+      ],
       POLICE: [{ value: "police", label: "Police", icon: "👮" }],
       REVENUE: [{ value: "revenue", label: "Revenue & Tax", icon: "💰" }],
-    }
+    };
 
-    const all = []
+    const all = [];
     departments.forEach((d) => {
-      all.push(...(categoryMap[d.code] || []))
-    })
-    return all
-  }
+      all.push(...(categoryMap[d.code] || []));
+    });
+    return all;
+  };
 
   const priorities = [
     { value: "low", label: "Low" },
     { value: "medium", label: "Medium" },
     { value: "high", label: "High" },
     { value: "urgent", label: "Urgent" },
-  ]
+  ];
 
   // ===========================
   // Input handlers
   // ===========================
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
 
     if (name.includes(".")) {
-      const [parent, child] = name.split(".")
+      const [parent, child] = name.split(".");
       setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...prev[parent],
           [child]: type === "checkbox" ? checked : value,
         },
-      }))
+      }));
     } else {
       setFormData((prev) => ({
         ...prev,
         [name]: type === "checkbox" ? checked : value,
-      }))
+      }));
     }
-  }
+  };
 
   const handleLocationChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
 
     if (name.includes("coordinates.")) {
-      const field = name.split(".")[1]
+      const field = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
         location: {
@@ -130,7 +144,7 @@ const SubmitComplaint = () => {
             [field]: value,
           },
         },
-      }))
+      }));
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -138,29 +152,29 @@ const SubmitComplaint = () => {
           ...prev.location,
           [name]: value,
         },
-      }))
+      }));
     }
-  }
+  };
 
   // ===========================
   // Files
   // ===========================
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files)
-    setError("")
+    const files = Array.from(e.target.files);
+    setError("");
 
-    const valid = files.filter((f) => f.size <= 10 * 1024 * 1024)
+    const valid = files.filter((f) => f.size <= 10 * 1024 * 1024);
     if (attachments.length + valid.length > 5) {
-      setError("Maximum 5 files allowed")
-      return
+      setError("Maximum 5 files allowed");
+      return;
     }
 
-    setAttachments((prev) => [...prev, ...valid])
-  }
+    setAttachments((prev) => [...prev, ...valid]);
+  };
 
   const removeAttachment = (i) => {
-    setAttachments((prev) => prev.filter((_, idx) => idx !== i))
-  }
+    setAttachments((prev) => prev.filter((_, idx) => idx !== i));
+  };
 
   const getCurrentLocation = () => {
     navigator.geolocation?.getCurrentPosition((pos) => {
@@ -173,160 +187,140 @@ const SubmitComplaint = () => {
             longitude: pos.coords.longitude.toString(),
           },
         },
-      }))
-    })
-  }
+      }));
+    });
+  };
 
-  const formatDate = (dateString) => { 
-    return new Date(dateString).toLocaleDateString("en-US", { 
-      year: "numeric", 
-      month: "long", 
-      day: "numeric", 
-      hour: "2-digit", 
-      minute: "2-digit",
-     }) 
-    }
-
-  const formatDateShort = (dateString) => { 
+  const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
-       month: "short", 
-       day: "numeric", 
-       hour: "2-digit", 
-       minute: "2-digit", 
-      }) 
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatDateShort = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getFileIcon = (mimetype) => {
+    if (mimetype.startsWith("image/"))
+      return <Eye className="w-4 h-4 text-blue-400" />;
+    if (mimetype.startsWith("video/"))
+      return <Eye className="w-4 h-4 text-purple-400" />;
+    if (mimetype.startsWith("audio/"))
+      return <Eye className="w-4 h-4 text-green-400" />;
+    return <Download className="w-4 h-4 text-slate-400" />;
+  };
+
+  const handleStatusUpdate = () => {
+    setShowStatusModal(false);
+    fetchGrievance();
+  };
+  const handleFeedbackSubmit = () => {
+    setShowFeedbackModal(false);
+    fetchGrievance();
+  };
+
+  const handleFilePreview = (attachment) => {
+    setPreviewFile(attachment);
+    setShowFilePreview(true);
+  };
+
+  const handleAssignSuccess = () => {
+    setShowAssignModal(false);
+    fetchGrievance();
+  };
+  const handleReassignSuccess = () => {
+    setShowReassignModal(false);
+    fetchGrievance();
+  };
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
+      case "assigned":
+        return "text-blue-400 bg-blue-400/10 border-blue-400/20";
+      case "in_progress":
+        return "text-blue-400 bg-blue-400/10 border-blue-400/20";
+      case "resolved":
+        return "text-green-400 bg-green-400/10 border-green-400/20";
+      case "closed":
+        return "text-gray-400 bg-gray-400/10 border-gray-400/20";
+      case "rejected":
+        return "text-red-400 bg-red-400/10 border-red-400/20";
+      default:
+        return "text-gray-400 bg-gray-400/10 border-gray-400/20";
     }
+  };
 
-  const getFileIcon = (mimetype) => { 
-    if (mimetype.startsWith("image/")) return <Eye className="w-4 h-4 text-blue-400" /> 
-    if (mimetype.startsWith("video/")) return <Eye className="w-4 h-4 text-purple-400" /> 
-    if (mimetype.startsWith("audio/")) return <Eye className="w-4 h-4 text-green-400" /> 
-    return <Download className="w-4 h-4 text-slate-400" /> 
-  }
-
-  const GrievanceDetail = () => { 
-    const { id } = useParams() 
-    const navigate = useNavigate() 
-    const user = useSelector(selectUser) 
-    const [grievance, setGrievance] = useState(null) 
-    const [loading, setLoading] = useState(true) 
-    const [error, setError] = useState("") 
-    const [showStatusModal, setShowStatusModal] = useState(false) 
-    const [showFeedbackModal, setShowFeedbackModal] = useState(false)
-     const [showFilePreview, setShowFilePreview] = useState(false) 
-     const [previewFile, setPreviewFile] = useState(null) 
-     const [showAnalysisInsights, setShowAnalysisInsights] = useState(false) 
-     const [showAssignModal, setShowAssignModal] = useState(false) 
-     const [showReassignModal, setShowReassignModal] = useState(false) 
-     
-     useEffect(() => { 
-      if (id) { 
-        fetchGrievance() 
-      } 
-    }, [id]) 
-    
-    const fetchGrievance = async () => {
-      try {
-        setLoading(true)
-        setError("")
-    
-        const response = await api.get(`/grievances/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-    
-        console.log("Grievance data:", response.data)
-        setGrievance(response.data.data)
-    
-      } catch (error) {
-        console.error("Fetch grievance error:", error)
-    
-        if (error.response?.data?.message) {
-          setError(error.response.data.message)
-        } else {
-          setError("Network error. Please try again.")
-        }
-    
-      } finally {
-        setLoading(false)
-      }
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "pending":
+        return <Clock className="w-4 h-4" />;
+      case "assigned":
+        return <UserPlus className="w-4 h-4" />;
+      case "in_progress":
+        return <AlertTriangle className="w-4 h-4" />;
+      case "resolved":
+        return <CheckCircle className="w-4 h-4" />;
+      case "closed":
+        return <CheckCircle className="w-4 h-4" />;
+      case "rejected":
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <FileText className="w-4 h-4" />;
     }
-    
+  };
 
-    const handleStatusUpdate = () => { setShowStatusModal(false) 
-              fetchGrievance()  
-            } 
-    const handleFeedbackSubmit = () => { 
-      setShowFeedbackModal(false) 
-      fetchGrievance()
-     } 
-      
-    const handleFilePreview = (attachment) => {
-       setPreviewFile(attachment)
-        setShowFilePreview(true)
-       } 
-       
-    const handleAssignSuccess = () => { 
-      setShowAssignModal(false)
-       fetchGrievance() 
-      } 
-    const handleReassignSuccess = () => { 
-      setShowReassignModal(false)
-       fetchGrievance() 
-       } 
-    const getStatusColor = (status) => { 
-      switch (status) { 
-        case "pending": 
-        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" 
-        case "assigned": return "text-blue-400 bg-blue-400/10 border-blue-400/20" 
-        case "in_progress": return "text-blue-400 bg-blue-400/10 border-blue-400/20" 
-        case "resolved": return "text-green-400 bg-green-400/10 border-green-400/20" 
-        case "closed": return "text-gray-400 bg-gray-400/10 border-gray-400/20" 
-        case "rejected": return "text-red-400 bg-red-400/10 border-red-400/20" 
-        default: return "text-gray-400 bg-gray-400/10 border-gray-400/20" } 
-      } 
-      
-    const getStatusIcon = (status) => { 
-      switch (status) { 
-        case "pending": return <Clock className="w-4 h-4" /> 
-        case "assigned": return <UserPlus className="w-4 h-4" /> 
-        case "in_progress": return <AlertTriangle className="w-4 h-4" /> 
-        case "resolved": return <CheckCircle className="w-4 h-4" /> 
-        case "closed": return <CheckCircle className="w-4 h-4" /> 
-        case "rejected": return <XCircle className="w-4 h-4" /> 
-        default: return <FileText className="w-4 h-4" /> } 
-      }
-        
-        const getPriorityColor = (priority) => {
-           switch (priority) { 
-            case "urgent": return "text-red-400 bg-red-400/10 border-red-400/20" 
-            case "high": return "text-orange-400 bg-orange-400/10 border-orange-400/20" 
-            case "medium": return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" 
-            case "low": return "text-green-400 bg-green-400/10 border-green-400/20" 
-            default: return "text-gray-400 bg-gray-400/10 border-gray-400/20" }
-           }
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case "urgent":
+        return "text-red-400 bg-red-400/10 border-red-400/20";
+      case "high":
+        return "text-orange-400 bg-orange-400/10 border-orange-400/20";
+      case "medium":
+        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
+      case "low":
+        return "text-green-400 bg-green-400/10 border-green-400/20";
+      default:
+        return "text-gray-400 bg-gray-400/10 border-gray-400/20";
+    }
+  };
 
   // ===========================
   // Submit
   // ===========================
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
-    setSuccess("")
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    if (!formData.title || !formData.description || !formData.category || !formData.location.address) {
-      setError("Please fill all required fields")
-      return
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.category ||
+      !formData.location.address
+    ) {
+      setError("Please fill all required fields");
+      return;
     }
 
     try {
-      const fd = new FormData()
+      const fd = new FormData();
 
-      fd.append("title", formData.title)
-      fd.append("description", formData.description)
-      fd.append("category", formData.category)
-      fd.append("priority", formData.priority)
-      fd.append("isAnonymous", formData.isAnonymous)
+      fd.append("title", formData.title);
+      fd.append("description", formData.description);
+      fd.append("category", formData.category);
+      fd.append("priority", formData.priority);
+      fd.append("isAnonymous", formData.isAnonymous);
 
       fd.append(
         "location",
@@ -338,37 +332,42 @@ const SubmitComplaint = () => {
             longitude: Number(formData.location.coordinates.longitude) || 0,
           },
         })
-      )
+      );
 
       if (formData.expectedResolutionDate) {
-        fd.append("expectedResolutionDate", formData.expectedResolutionDate)
+        fd.append("expectedResolutionDate", formData.expectedResolutionDate);
       }
 
-      attachments.forEach((f) => fd.append("attachments", f))
+      attachments.forEach((f) => fd.append("attachments", f));
 
       const res = await api.post("/grievances", fd, {
         headers: { "Content-Type": "multipart/form-data" },
-      })
+      });
 
       if (res.data?.success) {
-        setSuccess("Complaint submitted successfully")
-        setTimeout(() => navigate("/my-grievances"), 1500)
+        setSuccess("Complaint submitted successfully");
+        setTimeout(() => navigate("/my-grievances"), 1500);
       } else {
-        setError(res.data?.message || "Submission failed")
+        setError(res.data?.message || "Submission failed");
       }
     } catch (err) {
-      console.error("Submit error:", err)
-      setError(err.response?.data?.message || "Network error")
+      console.error("Submit error:", err);
+      setError(err.response?.data?.message || "Network error");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 pt-20 sm:pt-24 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto pt-20">
         {/* Header */}
         <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-white mb-2">Submit Complaint</h1>
-          <p className="text-slate-400">Report your grievance with detailed information for faster resolution</p>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Submit Complaint
+          </h1>
+          <p className="text-slate-400">
+            Report your grievance with detailed information for faster
+            resolution
+          </p>
         </div>
 
         {/* Success/Error Messages */}
@@ -387,12 +386,17 @@ const SubmitComplaint = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up">
-            <h2 className="text-xl font-bold text-white mb-6">Complaint Details</h2>
+            <h2 className="text-xl font-bold text-white mb-6">
+              Complaint Details
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Title */}
               <div className="md:col-span-2">
-                <label htmlFor="title" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Complaint Title *
                 </label>
                 <input
@@ -409,7 +413,10 @@ const SubmitComplaint = () => {
 
               {/* Category */}
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Category *
                 </label>
                 {loadingDepartments ? (
@@ -438,7 +445,10 @@ const SubmitComplaint = () => {
 
               {/* Priority */}
               <div>
-                <label htmlFor="priority" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="priority"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Priority Level
                 </label>
                 <select
@@ -458,7 +468,10 @@ const SubmitComplaint = () => {
 
               {/* Description */}
               <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Detailed Description *
                 </label>
                 <textarea
@@ -476,13 +489,21 @@ const SubmitComplaint = () => {
           </div>
 
           {/* Location Information */}
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up" style={{animationDelay: '0.1s'}}>
-            <h2 className="text-xl font-bold text-white mb-6">Location Information</h2>
+          <div
+            className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <h2 className="text-xl font-bold text-white mb-6">
+              Location Information
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Address */}
               <div className="md:col-span-2">
-                <label htmlFor="address" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="address"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Address *
                 </label>
                 <input
@@ -499,7 +520,10 @@ const SubmitComplaint = () => {
 
               {/* Coordinates */}
               <div>
-                <label htmlFor="latitude" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="latitude"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Latitude
                 </label>
                 <input
@@ -515,7 +539,10 @@ const SubmitComplaint = () => {
               </div>
 
               <div>
-                <label htmlFor="longitude" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="longitude"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Longitude
                 </label>
                 <input
@@ -544,7 +571,10 @@ const SubmitComplaint = () => {
 
               {/* Landmark */}
               <div className="md:col-span-2">
-                <label htmlFor="landmark" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="landmark"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Nearby Landmark
                 </label>
                 <input
@@ -561,10 +591,14 @@ const SubmitComplaint = () => {
           </div>
 
           {/* Attachments */}
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up" style={{animationDelay: '0.2s'}}>
+          <div
+            className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up"
+            style={{ animationDelay: "0.2s" }}
+          >
             <h2 className="text-xl font-bold text-white mb-6">Attachments</h2>
             <p className="text-slate-400 text-sm mb-4">
-              Upload photos, videos, audio recordings, or documents (Max 5 files, 10MB each)
+              Upload photos, videos, audio recordings, or documents (Max 5
+              files, 10MB each)
             </p>
 
             {/* File Upload Area */}
@@ -574,8 +608,12 @@ const SubmitComplaint = () => {
             >
               <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4 group-hover:text-purple-400 group-hover:scale-110 transition-all" />
               <p className="text-slate-300 mb-2">Click to upload files</p>
-              <p className="text-slate-500 text-sm">Supports: Images, Videos, Audio, PDF, Word documents, Text files</p>
-              <p className="text-slate-600 text-xs mt-2">Maximum 5 files, 10MB each</p>
+              <p className="text-slate-500 text-sm">
+                Supports: Images, Videos, Audio, PDF, Word documents, Text files
+              </p>
+              <p className="text-slate-600 text-xs mt-2">
+                Maximum 5 files, 10MB each
+              </p>
             </div>
 
             <input
@@ -590,7 +628,9 @@ const SubmitComplaint = () => {
             {/* Attached Files */}
             {attachments.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-white font-medium mb-4">Attached Files ({attachments.length}/5)</h3>
+                <h3 className="text-white font-medium mb-4">
+                  Attached Files ({attachments.length}/5)
+                </h3>
                 <div className="space-y-3">
                   {attachments.map((file, index) => (
                     <div
@@ -600,19 +640,23 @@ const SubmitComplaint = () => {
                       <div className="flex items-center gap-3">
                         {getFileIcon(file)}
                         <div>
-                          <p className="text-white text-sm font-medium">{file.name}</p>
-                          <p className="text-slate-400 text-xs">{formatFileSize(file.size)} • {file.type}</p>
+                          <p className="text-white text-sm font-medium">
+                            {file.name}
+                          </p>
+                          <p className="text-slate-400 text-xs">
+                            {formatFileSize(file.size)} • {file.type}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {file.type.startsWith('image/') && (
+                        {file.type.startsWith("image/") && (
                           <div className="w-8 h-8 bg-slate-600/50 rounded overflow-hidden">
                             <img
                               src={URL.createObjectURL(file)}
                               alt="Preview"
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.target.style.display = 'none'
+                                e.target.style.display = "none";
                               }}
                             />
                           </div>
@@ -633,13 +677,21 @@ const SubmitComplaint = () => {
           </div>
 
           {/* Additional Options */}
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up" style={{animationDelay: '0.3s'}}>
-            <h2 className="text-xl font-bold text-white mb-6">Additional Options</h2>
+          <div
+            className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 sm:p-6 animate-slide-up"
+            style={{ animationDelay: "0.3s" }}
+          >
+            <h2 className="text-xl font-bold text-white mb-6">
+              Additional Options
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Expected Resolution Date */}
               <div>
-                <label htmlFor="expectedResolutionDate" className="block text-sm font-medium text-slate-300 mb-2">
+                <label
+                  htmlFor="expectedResolutionDate"
+                  className="block text-sm font-medium text-slate-300 mb-2"
+                >
                   Expected Resolution Date
                 </label>
                 <input
@@ -700,7 +752,7 @@ const SubmitComplaint = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SubmitComplaint
+export default SubmitComplaint;
