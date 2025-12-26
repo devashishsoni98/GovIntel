@@ -237,6 +237,18 @@ const UserManagement = () => {
     }
   }
 
+  const roleOptions = [ 
+    { value: "", label: "All Roles" },
+     { value: "citizen", label: "Citizens" },
+      { value: "officer", label: "Officers" }, 
+      { value: "admin", label: "Administrators" } 
+    ] 
+    const statusOptions = [ 
+      { value: "", label: "All Status" }, 
+      { value: "active", label: "Active Only" }, 
+      { value: "inactive", label: "Inactive Only" } 
+    ]
+
   const handleEditSubmit = async (e) => {
     e.preventDefault()
     try {
