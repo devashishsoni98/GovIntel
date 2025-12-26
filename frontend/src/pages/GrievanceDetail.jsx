@@ -63,7 +63,7 @@ const GrievanceDetail = () => {
       setLoading(true)
       setError("")
 
-      const response = await api.get(`/api/grievances/${id}`)
+      const response = await api.get(`/grievances/${id}`)
       setGrievance(response.data.data)
     } catch (error) {
       console.error("Fetch grievance error:", error)

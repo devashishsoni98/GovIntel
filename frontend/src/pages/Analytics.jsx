@@ -48,12 +48,12 @@ const Analytics = () => {
       setError("")
 
       const requests = [
-        api.get("/api/analytics/dashboard"),
-        api.get(`/api/analytics/trends?timeframe=${timeframe}`),
+        api.get("/analytics/dashboard"),
+        api.get(`/analytics/trends?timeframe=${timeframe}`),
       ]
 
       if (user.role !== "citizen") {
-        requests.push(api.get("/api/analytics/performance"))
+        requests.push(api.get("/analytics/performance"))
       }
 
       const responses = await Promise.allSettled(requests)
@@ -89,7 +89,7 @@ const Analytics = () => {
   const exportData = async (type) => {
     try {
       const response = await api.get(
-        `/api/analytics/export?type=${type}&timeframe=${timeframe}`,
+        `/analytics/export?type=${type}&timeframe=${timeframe}`,
         { responseType: "blob" }
       )
 

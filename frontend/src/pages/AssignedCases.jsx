@@ -64,7 +64,7 @@ const AssignedCases = () => {
         ...(isOfficer && { assignedOfficer: user.id }),
       })
 
-      const response = await api.get(`/api/grievances?${queryParams.toString()}`)
+      const response = await api.get(`/grievances?${queryParams.toString()}`)
 
       const data = response.data
 
@@ -86,7 +86,7 @@ const AssignedCases = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get("/api/analytics/dashboard")
+      const response = await api.get("/analytics/dashboard")
       const data = response.data
 
       if (data.success && data.data) {

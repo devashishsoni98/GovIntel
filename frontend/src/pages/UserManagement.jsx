@@ -1,74 +1,66 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  UserCheck, 
+import {
+  Users,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
+  UserCheck,
   UserX,
   Mail,
   Phone,
   Building,
   Shield,
   Calendar,
-  MoreVertical,
-  Download,
-  Upload,
   X,
   Loader,
-  Save
 } from "lucide-react"
 import { selectUser } from "../redux/slices/authSlice"
+import api from "../api"
 
-// Custom hook for debounced search
+// ==========================
+// Debounce Hook
+// ==========================
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value)
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
   }, [value, delay])
 
   return debouncedValue
 }
+
 const UserManagement = () => {
   const currentUser = useSelector(selectUser)
+
   const [users, setUsers] = useState([])
+  const [departments, setDepartments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [searchInput, setSearchInput] = useState("") // Local search input state
+
+  const [searchInput, setSearchInput] = useState("")
+  const debouncedSearch = useDebounce(searchInput, 1000)
+
   const [filters, setFilters] = useState({
     role: "",
     department: "",
-    status: "active", // Default to show only active users
-    search: "" // This will be updated by debounced value
+    status: "active",
+    search: "",
   })
+
   const [pagination, setPagination] = useState({
     current: 1,
     pages: 1,
     total: 0,
-    limit: 10
+    limit: 10,
   })
+
   const [selectedUsers, setSelectedUsers] = useState([])
-  const [departments, setDepartments] = useState([])
 
-  // Debounce search input with 500ms delay
-  const debouncedSearch = useDebounce(searchInput, 1000)
-
-  // Update filters when debounced search changes
-  useEffect(() => {
-    setFilters(prev => ({ ...prev, search: debouncedSearch }))
-    setPagination(prev => ({ ...prev, current: 1 })) // Reset to first page on search
-  }, [debouncedSearch])
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -79,7 +71,7 @@ const UserManagement = () => {
   const [deletingUser, setDeletingUser] = useState(null)
   const [modalLoading, setModalLoading] = useState(false)
 
-  // Form states
+  // Form data
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -91,56 +83,44 @@ const UserManagement = () => {
       street: "",
       city: "",
       state: "",
-      zipCode: ""
-    }
+      zipCode: "",
+    },
   })
 
-  const roleOptions = [
-    { value: "", label: "All Roles" },
-    { value: "citizen", label: "Citizens" },
-    { value: "officer", label: "Officers" },
-    { value: "admin", label: "Administrators" }
-  ]
-
-  const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "active", label: "Active Only" },
-    { value: "inactive", label: "Inactive Only" }
-  ]
+  // ==========================
+  // Effects
+  // ==========================
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: debouncedSearch }))
+    setPagination((prev) => ({ ...prev, current: 1 }))
+  }, [debouncedSearch])
 
   useEffect(() => {
     fetchUsers()
     fetchDepartments()
   }, [filters, pagination.current])
 
+  // ==========================
+  // API calls
+  // ==========================
   const fetchUsers = async () => {
     try {
       setLoading(true)
       setError("")
 
-      const queryParams = new URLSearchParams({
-        page: pagination.current.toString(),
-        limit: pagination.limit.toString(),
-        ...Object.fromEntries(Object.entries(filters).filter(([_, value]) => value))
-      })
-
-      const response = await fetch(`/api/users?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data.data.users || [])
-        setPagination(data.data.pagination || { current: 1, pages: 1, total: 0 })
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to fetch users")
+      const params = {
+        page: pagination.current,
+        limit: pagination.limit,
+        ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v)),
       }
-    } catch (error) {
-      console.error("Fetch users error:", error)
-      setError("Network error. Please try again.")
+
+      const res = await api.get("/users", { params })
+
+      setUsers(res.data?.data?.users || [])
+      setPagination(res.data?.data?.pagination || pagination)
+    } catch (err) {
+      console.error("Fetch users error:", err)
+      setError(err.response?.data?.message || "Failed to fetch users")
     } finally {
       setLoading(false)
     }
@@ -148,156 +128,72 @@ const UserManagement = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await fetch("/api/departments/active", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setDepartments(data.data || [])
-      }
-    } catch (error) {
-      console.error("Fetch departments error:", error)
+      const res = await api.get("/departments/active")
+      setDepartments(res.data?.data || [])
+    } catch (err) {
+      console.error("Fetch departments error:", err)
     }
   }
 
+  // ==========================
+  // Handlers
+  // ==========================
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
-    setPagination(prev => ({ ...prev, current: 1 }))
+    setFilters((prev) => ({ ...prev, [key]: value }))
+    setPagination((prev) => ({ ...prev, current: 1 }))
   }
 
-  const handleSearchChange = (e) => {
-    setSearchInput(e.target.value)
-  }
+  const handleSearchChange = (e) => setSearchInput(e.target.value)
 
   const clearSearch = () => {
     setSearchInput("")
-    setFilters(prev => ({ ...prev, search: "" }))
-  }
-  const handlePageChange = (page) => {
-    setPagination(prev => ({ ...prev, current: page }))
+    setFilters((prev) => ({ ...prev, search: "" }))
   }
 
-  const handleSelectUser = (userId) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+  const handlePageChange = (page) => {
+    setPagination((prev) => ({ ...prev, current: page }))
+  }
+
+  const handleSelectUser = (id) => {
+    setSelectedUsers((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
   }
 
   const handleSelectAll = () => {
-    if (selectedUsers.length === users.length) {
-      setSelectedUsers([])
-    } else {
-      setSelectedUsers(users.map(u => u._id))
-    }
+    if (selectedUsers.length === users.length) setSelectedUsers([])
+    else setSelectedUsers(users.map((u) => u._id))
   }
 
-  // Modal handlers
-  const handleCreateUser = () => {
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      role: "citizen",
-      phone: "",
-      department: "",
-      address: {
-        street: "",
-        city: "",
-        state: "",
-        zipCode: ""
-      }
-    })
-    setShowCreateModal(true)
-  }
-
-  const handleEditUser = (user) => {
-    setEditingUser(user)
-    setFormData({
-      name: user.name || "",
-      email: user.email || "",
-      password: "", // Don't populate password for security
-      role: user.role || "citizen",
-      phone: user.phone || "",
-      department: user.department || "",
-      address: {
-        street: user.address?.street || "",
-        city: user.address?.city || "",
-        state: user.address?.state || "",
-        zipCode: user.address?.zipCode || ""
-      }
-    })
-    setShowEditModal(true)
-  }
-
-  const handleViewUser = (user) => {
-    setViewingUser(user)
-    setShowViewModal(true)
-  }
-
-  const handleDeleteUser = (user) => {
-    setDeletingUser(user)
-    setShowDeleteModal(true)
-  }
-
+  // ==========================
+  // User actions (API)
+  // ==========================
   const handleToggleUserStatus = async (user) => {
     try {
-      const response = await fetch(`/api/users/${user._id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({
-          isActive: !user.isActive
-        })
+      await api.patch(`/users/${user._id}/status`, {
+        isActive: !user.isActive,
       })
 
-      if (response.ok) {
-        // Update the user in the local state
-        setUsers(prev => prev.map(u => 
+      setUsers((prev) =>
+        prev.map((u) =>
           u._id === user._id ? { ...u, isActive: !u.isActive } : u
-        ))
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to update user status")
-      }
-    } catch (error) {
-      console.error("Toggle user status error:", error)
-      setError("Network error during status update")
+        )
+      )
+    } catch (err) {
+      console.error("Toggle status error:", err)
+      setError(err.response?.data?.message || "Failed to update status")
     }
   }
 
-  // Form submission handlers
   const handleCreateSubmit = async (e) => {
     e.preventDefault()
     try {
       setModalLoading(true)
-      
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (response.ok) {
-        setShowCreateModal(false)
-        fetchUsers()
-        setError("")
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to create user")
-      }
-    } catch (error) {
-      console.error("Create user error:", error)
-      setError("Network error during user creation")
+      await api.post("/users", formData)
+      setShowCreateModal(false)
+      fetchUsers()
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to create user")
     } finally {
       setModalLoading(false)
     }
@@ -307,33 +203,16 @@ const UserManagement = () => {
     e.preventDefault()
     try {
       setModalLoading(true)
-      
-      const updateData = { ...formData }
-      if (!updateData.password) {
-        delete updateData.password // Don't send empty password
-      }
 
-      const response = await fetch(`/api/users/${editingUser._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(updateData)
-      })
+      const payload = { ...formData }
+      if (!payload.password) delete payload.password
 
-      if (response.ok) {
-        setShowEditModal(false)
-        setEditingUser(null)
-        fetchUsers()
-        setError("")
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to update user")
-      }
-    } catch (error) {
-      console.error("Update user error:", error)
-      setError("Network error during user update")
+      await api.put(`/users/${editingUser._id}`, payload)
+      setShowEditModal(false)
+      setEditingUser(null)
+      fetchUsers()
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update user")
     } finally {
       setModalLoading(false)
     }
@@ -342,26 +221,12 @@ const UserManagement = () => {
   const handleDeleteSubmit = async () => {
     try {
       setModalLoading(true)
-      
-      const response = await fetch(`/api/users/${deletingUser._id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      })
-
-      if (response.ok) {
-        setShowDeleteModal(false)
-        setDeletingUser(null)
-        fetchUsers()
-        setError("")
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Failed to delete user")
-      }
-    } catch (error) {
-      console.error("Delete user error:", error)
-      setError("Network error during user deletion")
+      await api.delete(`/users/${deletingUser._id}`)
+      setShowDeleteModal(false)
+      setDeletingUser(null)
+      fetchUsers()
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete user")
     } finally {
       setModalLoading(false)
     }
@@ -369,57 +234,40 @@ const UserManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    
-    if (name.startsWith('address.')) {
-      const addressField = name.split('.')[1]
-      setFormData(prev => ({
+
+    if (name.startsWith("address.")) {
+      const field = name.split(".")[1]
+      setFormData((prev) => ({
         ...prev,
-        address: {
-          ...prev.address,
-          [addressField]: value
-        }
+        address: { ...prev.address, [field]: value },
       }))
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }))
+      setFormData((prev) => ({ ...prev, [name]: value }))
     }
   }
 
+  // ==========================
+  // Helpers
+  // ==========================
   const getRoleColor = (role) => {
-    switch (role) {
-      case "admin":
-        return "text-red-400 bg-red-400/10 border-red-400/20"
-      case "officer":
-        return "text-blue-400 bg-blue-400/10 border-blue-400/20"
-      case "citizen":
-        return "text-green-400 bg-green-400/10 border-green-400/20"
-      default:
-        return "text-gray-400 bg-gray-400/10 border-gray-400/20"
-    }
+    if (role === "admin") return "text-red-400 bg-red-400/10 border-red-400/20"
+    if (role === "officer") return "text-blue-400 bg-blue-400/10 border-blue-400/20"
+    return "text-green-400 bg-green-400/10 border-green-400/20"
   }
 
   const getRoleIcon = (role) => {
-    switch (role) {
-      case "admin":
-        return <Shield className="w-4 h-4" />
-      case "officer":
-        return <UserCheck className="w-4 h-4" />
-      case "citizen":
-        return <Users className="w-4 h-4" />
-      default:
-        return <Users className="w-4 h-4" />
-    }
+    if (role === "admin") return <Shield className="w-4 h-4" />
+    if (role === "officer") return <UserCheck className="w-4 h-4" />
+    return <Users className="w-4 h-4" />
   }
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
-      day: "numeric"
+      day: "numeric",
     })
-  }
+
 
   // Modal Components
   const CreateUserModal = () => (

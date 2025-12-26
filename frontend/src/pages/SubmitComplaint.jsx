@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { Upload, X, MapPin, FileText, ImageIcon, Video, Mic, Send, Loader } from 'lucide-react'
+import { Upload, X, MapPin, FileText, ImageIcon, Video, Mic, Send, Loader } from "lucide-react"
 import { selectUser } from "../redux/slices/authSlice"
 import { createGrievance, reset } from "../redux/slices/grievanceSlice"
+import api from "../api"   // ✅ axios instance
 
 const SubmitComplaint = () => {
   const navigate = useNavigate()
@@ -37,7 +38,9 @@ const SubmitComplaint = () => {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  // Fetch departments on component mount
+  // ===========================
+  // Fetch departments
+  // ===========================
   useEffect(() => {
     fetchDepartments()
   }, [])
@@ -45,28 +48,21 @@ const SubmitComplaint = () => {
   const fetchDepartments = async () => {
     try {
       setLoadingDepartments(true)
-      const response = await fetch("/api/departments/active", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
 
-      if (response.ok) {
-        const data = await response.json()
-        setDepartments(data.data || [])
-      } else {
-        console.error("Failed to fetch departments")
-        setError("Failed to load departments")
-      }
-    } catch (error) {
-      console.error("Error fetching departments:", error)
-      setError("Network error while loading departments")
+      const res = await api.get("/departments/active")
+
+      setDepartments(res.data?.data || [])
+    } catch (err) {
+      console.error("Fetch departments error:", err)
+      setError("Failed to load departments")
     } finally {
       setLoadingDepartments(false)
     }
   }
 
-  // Generate categories from departments
+  // ===========================
+  // Categories
+  // ===========================
   const getCategories = () => {
     const categoryMap = {
       MUNICIPAL: [
@@ -76,39 +72,30 @@ const SubmitComplaint = () => {
         { value: "electricity", label: "Electricity", icon: "⚡" },
         { value: "other", label: "Other Municipal", icon: "🏛️" },
       ],
-      HEALTH: [
-        { value: "healthcare", label: "Healthcare", icon: "🏥" },
-      ],
-      EDUCATION: [
-        { value: "education", label: "Education", icon: "🎓" },
-      ],
-      TRANSPORT: [
-        { value: "transportation", label: "Transportation", icon: "🚌" },
-      ],
-      POLICE: [
-        { value: "police", label: "Police", icon: "👮" },
-      ],
-      REVENUE: [
-        { value: "revenue", label: "Revenue & Tax", icon: "💰" },
-      ],
+      HEALTH: [{ value: "healthcare", label: "Healthcare", icon: "🏥" }],
+      EDUCATION: [{ value: "education", label: "Education", icon: "🎓" }],
+      TRANSPORT: [{ value: "transportation", label: "Transportation", icon: "🚌" }],
+      POLICE: [{ value: "police", label: "Police", icon: "👮" }],
+      REVENUE: [{ value: "revenue", label: "Revenue & Tax", icon: "💰" }],
     }
 
-    const allCategories = []
-    departments.forEach(dept => {
-      const deptCategories = categoryMap[dept.code] || []
-      allCategories.push(...deptCategories)
+    const all = []
+    departments.forEach((d) => {
+      all.push(...(categoryMap[d.code] || []))
     })
-
-    return allCategories
+    return all
   }
 
   const priorities = [
-    { value: "low", label: "Low", color: "text-green-400" },
-    { value: "medium", label: "Medium", color: "text-yellow-400" },
-    { value: "high", label: "High", color: "text-orange-400" },
-    { value: "urgent", label: "Urgent", color: "text-red-400" },
+    { value: "low", label: "Low" },
+    { value: "medium", label: "Medium" },
+    { value: "high", label: "High" },
+    { value: "urgent", label: "Urgent" },
   ]
 
+  // ===========================
+  // Input handlers
+  // ===========================
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
 
@@ -155,223 +142,94 @@ const SubmitComplaint = () => {
     }
   }
 
+  // ===========================
+  // Files
+  // ===========================
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files)
-    setError("") // Clear any previous errors
+    setError("")
 
-    // Validate file types and sizes
-    const validFiles = files.filter((file) => {
-      const validTypes = [
-        "image/",
-        "video/",
-        "audio/",
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain"
-      ]
-      const isValidType = validTypes.some((type) => file.type.startsWith(type))
-      const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
-
-      if (!isValidType) {
-        setError(`${file.name} is not a supported file type. Supported: Images, Videos, Audio, PDF, Word documents, Text files`)
-        return false
-      }
-
-      if (!isValidSize) {
-        setError(`${file.name} is too large. Maximum size is 10MB`)
-        return false
-      }
-
-      return true
-    })
-
-    if (validFiles.length === 0 && files.length > 0) {
-      return // Error already set above
-    }
-
-    if (attachments.length + validFiles.length > 5) {
+    const valid = files.filter((f) => f.size <= 10 * 1024 * 1024)
+    if (attachments.length + valid.length > 5) {
       setError("Maximum 5 files allowed")
       return
     }
 
-    setAttachments((prev) => [...prev, ...validFiles])
-    
-    // Show success message for valid files
-    if (validFiles.length > 0) {
-      setSuccess(`${validFiles.length} file(s) added successfully`)
-      setTimeout(() => setSuccess(""), 3000)
-    }
+    setAttachments((prev) => [...prev, ...valid])
   }
 
-  const removeAttachment = (index) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  const getFileIcon = (file) => {
-    if (file.type.startsWith("image/")) return <ImageIcon className="w-4 h-4" />
-    if (file.type.startsWith("video/")) return <Video className="w-4 h-4" />
-    if (file.type.startsWith("audio/")) return <Mic className="w-4 h-4" />
-    if (file.type === "application/pdf") return <FileText className="w-4 h-4 text-red-400" />
-    if (file.type.includes("word")) return <FileText className="w-4 h-4 text-blue-400" />
-    if (file.type === "text/plain") return <FileText className="w-4 h-4 text-green-400" />
-    return <FileText className="w-4 h-4" />
-  }
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  const removeAttachment = (i) => {
+    setAttachments((prev) => prev.filter((_, idx) => idx !== i))
   }
 
   const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData((prev) => ({
-            ...prev,
-            location: {
-              ...prev.location,
-              coordinates: {
-                latitude: position.coords.latitude.toString(),
-                longitude: position.coords.longitude.toString(),
-              },
-            },
-          }))
+    navigator.geolocation?.getCurrentPosition((pos) => {
+      setFormData((prev) => ({
+        ...prev,
+        location: {
+          ...prev.location,
+          coordinates: {
+            latitude: pos.coords.latitude.toString(),
+            longitude: pos.coords.longitude.toString(),
+          },
         },
-        (error) => {
-          setError("Unable to get your location. Please enter manually.")
-        },
-      )
-    } else {
-      setError("Geolocation is not supported by this browser.")
-    }
+      }))
+    })
   }
 
+  // ===========================
+  // Submit
+  // ===========================
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
     setSuccess("")
 
-    // Validate required fields
-    if (!formData.title.trim()) {
-      setError("Title is required")
-      return
-    }
-    if (!formData.description.trim()) {
-      setError("Description is required")
-      return
-    }
-    if (!formData.category) {
-      setError("Category is required")
-      return
-    }
-    if (!formData.location.address.trim()) {
-      setError("Address is required")
+    if (!formData.title || !formData.description || !formData.category || !formData.location.address) {
+      setError("Please fill all required fields")
       return
     }
 
     try {
-      // Create FormData for file upload
-      const submitData = new FormData()
+      const fd = new FormData()
 
-      // Add form fields
-      submitData.append("title", formData.title.trim())
-      submitData.append("description", formData.description.trim())
-      submitData.append("category", formData.category)
-      submitData.append("priority", formData.priority)
-      submitData.append("isAnonymous", formData.isAnonymous.toString())
+      fd.append("title", formData.title)
+      fd.append("description", formData.description)
+      fd.append("category", formData.category)
+      fd.append("priority", formData.priority)
+      fd.append("isAnonymous", formData.isAnonymous)
 
-      // Format location to match backend expectations
-      const locationData = {
-        address: formData.location.address.trim(),
-        coordinates: {
-          latitude: parseFloat(formData.location.coordinates.latitude) || 0,
-          longitude: parseFloat(formData.location.coordinates.longitude) || 0,
-        }
-      }
-      
-      // Add landmark if provided
-      if (formData.location.landmark && formData.location.landmark.trim()) {
-        locationData.landmark = formData.location.landmark.trim()
-      }
-
-      // Convert to string for FormData
-      const locationString = JSON.stringify(locationData)
-      console.log("Location data being sent:", locationString)
-      submitData.append("location", locationString)
+      fd.append(
+        "location",
+        JSON.stringify({
+          address: formData.location.address,
+          landmark: formData.location.landmark,
+          coordinates: {
+            latitude: Number(formData.location.coordinates.latitude) || 0,
+            longitude: Number(formData.location.coordinates.longitude) || 0,
+          },
+        })
+      )
 
       if (formData.expectedResolutionDate) {
-        submitData.append("expectedResolutionDate", formData.expectedResolutionDate)
+        fd.append("expectedResolutionDate", formData.expectedResolutionDate)
       }
 
-      // Add attachments
-      attachments.forEach((file) => {
-        submitData.append("attachments", file)
+      attachments.forEach((f) => fd.append("attachments", f))
+
+      const res = await api.post("/grievances", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
 
-      // ENHANCED DEBUG: Log the FormData contents
-      console.log("=== FORM DATA DEBUG ===")
-      console.log("Form state:", formData)
-      console.log("Location data:", locationData)
-      console.log("Attachments:", attachments)
-      
-      console.log("FormData entries:")
-      for (let [key, value] of submitData.entries()) {
-        if (value instanceof File) {
-          console.log(key, `File: ${value.name} (${value.size} bytes)`)
-        } else {
-          console.log(key, value)
-        }
-      }
-      console.log("=== END DEBUG ===")
-
-      // Make direct API call instead of using Redux
-      const response = await fetch("/api/grievances", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: submitData,
-      })
-
-      const result = await response.json()
-      console.log("API Response:", result)
-
-      if (response.ok && result.success) {
-        setSuccess("Complaint submitted successfully!")
-        
-        // Reset form
-        setFormData({
-          title: "",
-          description: "",
-          category: "",
-          priority: "medium",
-          location: {
-            address: "",
-            coordinates: {
-              latitude: "",
-              longitude: "",
-            },
-            landmark: "",
-          },
-          isAnonymous: false,
-          expectedResolutionDate: "",
-        })
-        setAttachments([])
-        
-        setTimeout(() => {
-          navigate("/my-grievances")
-        }, 2000)
+      if (res.data?.success) {
+        setSuccess("Complaint submitted successfully")
+        setTimeout(() => navigate("/my-grievances"), 1500)
       } else {
-        console.error("Submission failed:", result)
-        setError(result.message || result.error || "Failed to submit complaint")
+        setError(res.data?.message || "Submission failed")
       }
-    } catch (error) {
-      console.error("Submit error:", error)
-      setError("Network error. Please try again.")
+    } catch (err) {
+      console.error("Submit error:", err)
+      setError(err.response?.data?.message || "Network error")
     }
   }
 
