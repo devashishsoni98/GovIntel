@@ -20,7 +20,7 @@ import {
   Loader,
 } from "lucide-react"
 import { selectUser } from "../redux/slices/authSlice"
-import api from "../api/api"
+import api from "../api"
 
 // -------------------- Debounce Hook --------------------
 const useDebounce = (value, delay) => {
