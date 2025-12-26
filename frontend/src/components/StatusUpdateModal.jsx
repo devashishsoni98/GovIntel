@@ -37,7 +37,7 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
       setError("")
 
       const response = await api.patch(
-        `/api/grievances/${grievance._id}/status`,
+        `/grievances/${grievance._id}/status`,
         {
           status,
           comment: comment.trim(),
@@ -65,7 +65,7 @@ const StatusUpdateModal = ({ grievance, onClose, onSuccess }) => {
 
   const currentStatusInfo = getStatusInfo(grievance.status)
   const newStatusInfo = getStatusInfo(status)
-  
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full my-8 max-h-[90vh] overflow-y-auto">

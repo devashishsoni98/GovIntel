@@ -25,7 +25,7 @@ const FilePreview = ({ attachment, onClose }) => {
       attachment.filename ||
       attachment.path.split("/").pop()
 
-    return `${baseUrl}/api/files/${filename}`
+    return `${baseUrl}/files/${filename}`
   }
 
   const handleDownload = async () => {
