@@ -134,6 +134,17 @@ const UserManagement = () => {
   }
 
   // -------------------- Handlers --------------------
+  const handleSearchChange = (e) => { 
+    setSearchInput(e.target.value) 
+  } 
+  const clearSearch = () => { 
+    setSearchInput("") 
+    setFilters(prev => ({ ...prev, search: "" }))
+   } 
+  const handlePageChange = (page) => {
+    setPagination(prev => ({ ...prev, current: page })) 
+  } 
+  
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }))
     setPagination(prev => ({ ...prev, current: 1 }))
